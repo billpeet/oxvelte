@@ -97,3 +97,33 @@ fn lint_parsing_accepts_else_without_a_test_expression() {
     let alloc = Allocator::default();
     assert!(parser::parse_for_lint(source, &alloc).errors.is_empty());
 }
+
+#[test]
+fn directive_subjects_keep_dollar_identifiers_and_exact_spans() {
+    let source =
+        "<div use:$store transition:$store in:$store out:$store animate:$store class:$store />";
+    let alloc = Allocator::default();
+    let parsed = parser::parse_for_lint(source, &alloc);
+    assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+    let TemplateNode::Element(element) = &parsed.ast.html.nodes[0] else {
+        panic!("expected an element");
+    };
+    assert_eq!(element.attributes.len(), 6);
+    for (attribute, meta) in element.attributes.iter().zip(&element.attribute_meta) {
+        let Attribute::Directive { name, span, .. } = attribute else {
+            panic!("a dollar identifier must remain one directive");
+        };
+        assert_eq!(name, "$store");
+        let subject = meta.directive_subject_span.unwrap();
+        assert_eq!(
+            &source[subject.start as usize..subject.end as usize],
+            "$store"
+        );
+        assert!(source[span.start as usize..span.end as usize].ends_with("$store"));
+    }
+    assert!(
+        parser::parse("<div use:$action class:$condition />", &alloc)
+            .errors
+            .is_empty()
+    );
+}

@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 862,
-    "gaps": 373,
+    "pass": 863,
+    "gaps": 372,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1354,21 +1354,6 @@
             "id": "valid-compile/valid/valid-custom-element-with-props-identifier-input.svelte",
             "dimensions": [
               "compiler_capability"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "parser",
-      "label": "Parser/compiler validation differences",
-      "count": 1,
-      "rules": {
-        "require-store-reactive-access": [
-          {
-            "id": "require-store-reactive-access/valid/directives-store01-input.svelte",
-            "dimensions": [
-              "parse_errors"
             ]
           }
         ]
@@ -2724,17 +2709,16 @@
         "prefer-const": 3
       }
     },
-    "parse_errors": {
-      "count": 2,
-      "rules": {
-        "require-store-reactive-access": 1,
-        "valid-compile": 1
-      }
-    },
     "executable_configuration": {
       "count": 6,
       "rules": {
         "valid-compile": 6
+      }
+    },
+    "parse_errors": {
+      "count": 1,
+      "rules": {
+        "valid-compile": 1
       }
     },
     "parser_configuration": {

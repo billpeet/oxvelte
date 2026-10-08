@@ -1094,9 +1094,6 @@
       "diagnostics": "c987c6f993aa5b766c0d546cf18982a5d1a14c9715b4164c3cf88c6e5e0b977c",
       "fix_output": "769d90aa54f4cff09a1d85e2be44106181328a7805cc7fd4faa6a5d90a97d933"
     },
-    "require-store-reactive-access/valid/directives-store01-input.svelte": {
-      "parse_errors": "fdb5f8a20a65f22aa5cd4880f8131866b17346e9c1ed19ce8ff00592fe62e07a"
-    },
     "shorthand-attribute/invalid/always/test01-input.svelte": {
       "diagnostic_count": "355eb3f45092dab35b89ed6c08bd6fa1f5f4ac6854340e48a1d1e3350d537299",
       "diagnostics": "fbc6ccf2bf31e37593fab324f5e22121fc90c55e76f87cec46af3b8318077c4f",

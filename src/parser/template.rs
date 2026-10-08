@@ -4162,6 +4162,7 @@ impl<'a> TemplateParser<'a> {
             while self.pos < self.source.len() {
                 let ch = self.source.as_bytes()[self.pos];
                 if ch.is_ascii_alphanumeric()
+                    || ch == b'$'
                     || ch == b'-'
                     || ch == b'_'
                     || ch == b':'
