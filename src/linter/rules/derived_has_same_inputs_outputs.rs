@@ -82,17 +82,13 @@ impl Rule for DerivedHasSameInputsOutputs {
             let Some(callback) = call.arguments.get(1).and_then(|arg| arg.as_expression()) else {
                 continue;
             };
-            let (parameter, body_span) = match callback {
+            let (parameter, callback_span) = match callback {
                 Expression::ArrowFunctionExpression(function) => {
-                    (function.params.items.first(), function.body.span)
+                    (function.params.items.first(), function.span)
                 }
-                Expression::FunctionExpression(function) => (
-                    function.params.items.first(),
-                    function
-                        .body
-                        .as_ref()
-                        .map_or(function.span, |body| body.span),
-                ),
+                Expression::FunctionExpression(function) => {
+                    (function.params.items.first(), function.span)
+                }
                 _ => continue,
             };
             let Some(parameter) = parameter else { continue };
@@ -140,8 +136,8 @@ impl Rule for DerivedHasSameInputsOutputs {
                             return false;
                         };
                         id.name == expected.as_str()
-                            && id.span.start >= body_span.start
-                            && id.span.end <= body_span.end
+                            && id.span.start >= callback_span.start
+                            && id.span.end <= callback_span.end
                             && !scoping
                                 .get_reference(id.reference_id())
                                 .symbol_id()
@@ -158,22 +154,36 @@ impl Rule for DerivedHasSameInputsOutputs {
                     });
                 let mut suggestions = Vec::new();
                 if !conflict {
-                    let mut spans = vec![binding.span];
-                    spans.extend(
-                        references
-                            .iter()
-                            .map(|reference| nodes.kind(reference.node_id()).span()),
-                    );
-                    spans.sort_by_key(|span| span.start);
-                    spans.dedup();
-                    let start = offset + spans[0].start;
-                    let end = offset + spans.last().unwrap().end;
+                    let mut edits = vec![(binding.span, expected.clone())];
+                    edits.extend(references.iter().map(|reference| {
+                        let node_id = reference.node_id();
+                        let span = nodes.kind(node_id).span();
+                        // Shorthand syntax uses the same token for the key
+                        // and variable. Expand it so renaming preserves keys.
+                        let shorthand = match nodes.parent_kind(node_id) {
+                            AstKind::ObjectProperty(property) => property.shorthand,
+                            AstKind::AssignmentTargetPropertyIdentifier(property) => {
+                                property.binding.span == span
+                            }
+                            _ => false,
+                        };
+                        let replacement = if shorthand {
+                            format!("{}: {}", binding.name, expected)
+                        } else {
+                            expected.clone()
+                        };
+                        (span, replacement)
+                    }));
+                    edits.sort_by_key(|(span, _)| span.start);
+                    edits.dedup_by_key(|(span, _)| *span);
+                    let start = offset + edits[0].0.start;
+                    let end = offset + edits.last().unwrap().0.end;
                     let mut replacement = String::new();
                     let mut cursor = start;
-                    for span in spans {
+                    for (span, text) in edits {
                         replacement
                             .push_str(&ctx.source[cursor as usize..(offset + span.start) as usize]);
-                        replacement.push_str(&expected);
+                        replacement.push_str(&text);
                         cursor = offset + span.end;
                     }
                     suggestions.push(Suggestion {
@@ -264,5 +274,29 @@ mod tests {
         let diagnostics = lint(source);
         assert_eq!(diagnostics.len(), 1);
         assert_eq!(diagnostics[0].suggestions.len(), 1);
+    }
+
+    #[test]
+    fn rename_preserves_object_and_assignment_shorthand_keys() {
+        let source = "<script>import { derived } from 'svelte/store'; derived(a, (x) => { ({x} = obj); ({x = 1} = obj); return {x}; });</script>";
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 1);
+        let fix = &diagnostics[0].suggestions[0].fix;
+        let mut output = source.to_string();
+        output.replace_range(
+            fix.span.start as usize..fix.span.end as usize,
+            &fix.replacement,
+        );
+        assert_eq!(output, "<script>import { derived } from 'svelte/store'; derived(a, ($a) => { ({x: $a} = obj); ({x: $a = 1} = obj); return {x: $a}; });</script>");
+    }
+
+    #[test]
+    fn default_parameter_references_are_checked_for_capture() {
+        let source = "<script>import { derived } from 'svelte/store'; derived(a, (x, y = $a) => x); derived(a, function(x, y = $a) { return x; });</script>";
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 2);
+        assert!(diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.suggestions.is_empty()));
     }
 }
