@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 689,
-    "gaps": 546,
+    "pass": 690,
+    "gaps": 545,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1589,7 +1589,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 56,
+      "count": 55,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1947,15 +1947,6 @@
               "diagnostic_count",
               "diagnostics",
               "fix_output"
-            ]
-          }
-        ],
-        "prefer-svelte-reactivity": [
-          {
-            "id": "prefer-svelte-reactivity/invalid/exports02-input.svelte.js",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
             ]
           }
         ],
@@ -3812,7 +3803,7 @@
       }
     },
     "diagnostics": {
-      "count": 279,
+      "count": 278,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3847,7 +3838,6 @@
         "prefer-class-directive": 10,
         "prefer-destructured-store-props": 9,
         "prefer-style-directive": 10,
-        "prefer-svelte-reactivity": 1,
         "require-optimized-style-attribute": 3,
         "require-store-callbacks-use-set-param": 2,
         "require-store-reactive-access": 13,
@@ -3885,7 +3875,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 92,
+      "count": 91,
       "rules": {
         "consistent-selector-style": 4,
         "derived-has-same-inputs-outputs": 1,
@@ -3902,7 +3892,6 @@
         "no-unused-svelte-ignore": 18,
         "prefer-class-directive": 2,
         "prefer-style-directive": 3,
-        "prefer-svelte-reactivity": 1,
         "require-store-reactive-access": 4,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,

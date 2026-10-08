@@ -24,7 +24,9 @@
 
 use crate::ast::{Attribute, AttributeValue, AttributeValuePart, TemplateNode};
 use crate::linter::{walk_template_nodes, LintContext, Rule};
-use oxc::ast::ast::{AssignmentTarget, BindingPattern, Expression, Statement};
+use oxc::ast::ast::{
+    AssignmentTarget, BindingPattern, ExportDefaultDeclarationKind, Expression, Statement,
+};
 use oxc::ast::AstKind;
 use oxc::semantic::{AstNodes, NodeId, Scoping, Semantic, SymbolId};
 use oxc::span::{GetSpan, Span};
@@ -172,12 +174,11 @@ fn collect_script_diagnostics<'a>(
         return Vec::new();
     }
 
-    // Pass 2: collect symbols that are re-exported via specifier
-    // (`export { a, b as default }`). For exports that include their
-    // declaration directly (`export const x = ...`, `export default x`),
-    // we walk ancestors at construction-detection time instead.
-    let exported_specifier_symbols: HashSet<SymbolId> = if is_module {
-        collect_exported_specifier_symbols(sem)
+    // Pass 2: resolve bindings referenced by exports (`export { x }` or
+    // `export default x`). Inline exported constructions are handled by
+    // walking their ancestors at construction-detection time instead.
+    let exported_reference_symbols: HashSet<SymbolId> = if is_module {
+        collect_exported_reference_symbols(sem)
     } else {
         HashSet::new()
     };
@@ -228,11 +229,11 @@ fn collect_script_diagnostics<'a>(
         }
     }
 
-    // Specifier-style export: `const v = new Date(); export { v };` →
-    // anything tracked + in `exported_specifier_symbols` reports.
+    // Binding exports: `const v = new Date(); export { v };` or
+    // `export default v;` report the originating construction.
     if is_module {
         for (sid, &(builtin, origin_span)) in &tracked {
-            if exported_specifier_symbols.contains(sid) {
+            if exported_reference_symbols.contains(sid) {
                 to_report.insert((origin_span.start, origin_span.end, builtin.name));
             }
         }
@@ -284,15 +285,22 @@ fn is_inside_export_decl(nodes: &AstNodes, node_id: NodeId) -> bool {
     false
 }
 
-/// Collect symbols referenced by *specifier-only* exports
-/// (`export { a, b as default }`) — i.e. exports whose declaration AST
-/// is an `ExportNamedDeclaration` with `declaration: None`. Inline
-/// declarations are handled by `is_inside_export_decl`.
-fn collect_exported_specifier_symbols<'a>(sem: &'a Semantic<'a>) -> HashSet<SymbolId> {
+/// Collect bindings referenced by named export specifiers or default exports.
+/// Inline declarations are handled by `is_inside_export_decl`.
+fn collect_exported_reference_symbols<'a>(sem: &'a Semantic<'a>) -> HashSet<SymbolId> {
     let scoping = sem.scoping();
     let nodes = sem.nodes();
     let mut out = HashSet::new();
     for node in nodes.iter() {
+        if let AstKind::ExportDefaultDeclaration(export) = node.kind() {
+            if let ExportDefaultDeclarationKind::Identifier(ident) = &export.declaration {
+                if let Some(rid) = ident.reference_id.get() {
+                    if let Some(sid) = scoping.get_reference(rid).symbol_id() {
+                        out.insert(sid);
+                    }
+                }
+            }
+        }
         let AstKind::ExportNamedDeclaration(end) = node.kind() else {
             continue;
         };
@@ -837,5 +845,55 @@ fn peel<'a>(expr: &'a Expression<'a>) -> &'a Expression<'a> {
     match expr {
         Expression::ParenthesizedExpression(p) => peel(&p.expression),
         _ => expr,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter, RuleConfig};
+
+    fn lint_module(source: &str, is_ts: bool) -> Vec<LintDiagnostic> {
+        Linter::all()
+            .lint_svelte_script_with_config_and_path(
+                source,
+                is_ts,
+                RuleConfig::default(),
+                if is_ts {
+                    "fixture.svelte.ts"
+                } else {
+                    "fixture.svelte.js"
+                },
+            )
+            .into_iter()
+            .filter(|diag| diag.rule_name == "svelte/prefer-svelte-reactivity")
+            .collect()
+    }
+
+    #[test]
+    fn default_exported_typescript_binding_reports_its_constructor() {
+        let source = "const value: Date = new Date(0);\nexport default value;";
+        let diags = lint_module(source, true);
+        assert_eq!(diags.len(), 1);
+        let span = diags[0].span;
+        assert_eq!(
+            &source[span.start as usize..span.end as usize],
+            "new Date(0)"
+        );
+        assert_eq!(
+            diags[0].message,
+            "Found a mutable instance of the built-in Date class. Use SvelteDate instead."
+        );
+    }
+
+    #[test]
+    fn default_export_does_not_flag_a_shadowed_builtin() {
+        let source = "class Date {}\nconst value = new Date();\nexport default value;";
+        assert!(lint_module(source, false).is_empty());
+    }
+
+    #[test]
+    fn named_and_default_exports_report_the_constructor_once() {
+        let source = "const value = new Date(0);\nexport { value };\nexport default value;";
+        assert_eq!(lint_module(source, false).len(), 1);
     }
 }

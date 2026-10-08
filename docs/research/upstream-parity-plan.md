@@ -26,7 +26,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 
 | Order | Commit subject | Targeted cases | Acceptance |
 | --- | --- | ---: | --- |
-| 1 | Fix reactivity checks for default-exported bindings | 1 | `prefer-svelte-reactivity` matches all 79 cases. |
+| 1, complete | Fix reactivity checks for default-exported bindings | 1 | `prefer-svelte-reactivity` matches all 79 cases in strict mode. |
 | 2 | Align unused-props diagnostic locations | 19 | The 19 location-only cases match; all 56 valid cases remain clean. |
 | 3 | Fix unused-props custom option combinations | 1 | The remaining invalid case reports all three expected findings, at the expected locations. |
 | 4 | Align navigation diagnostic argument locations | 29 | The 29 location-only navigation cases match, without changing which calls or links are flagged. |
@@ -35,7 +35,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 | 7 | Recognize resolved pathname types in navigation | 7 | Six valid goto/pushState/replaceState cases and one invalid unresolved-link case match. Check actual imported type identity and scope, rather than accepting a type by its spelling alone. |
 | 8 | Correct SvelteKit page, layout and error props | 4 | The four eligible invalid cases match, including children-on-page and error-page behavior. The 11 Svelte 3/4 cases remain explicit version skips. |
 
-The first reactivity case is [`exports02-input.svelte.js`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/prefer-svelte-reactivity/invalid/exports02-input.svelte.js). It constructs a Date, then exports its variable as the default. The expected finding is on the constructor. The current implementation tracks specifier exports but misses this default-exported identifier. This is a small, isolated first fix.
+The first reactivity case is [`exports02-input.svelte.js`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/prefer-svelte-reactivity/invalid/exports02-input.svelte.js). It constructs a Date, then exports its variable as the default. The expected finding is on the constructor. The implementation now resolves that exported identifier as well as named specifiers. All 79 reactivity cases pass in strict mode. TypeScript exports, shadowed constructors and duplicate named/default exports have regression coverage. This fix removes exactly one gap, bringing the suite to 690 matches, 545 gaps and 64 version skips.
 
 Unused props' last case is [`custom-config-combination-input.svelte`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/no-unused-props/invalid/custom-config-combination-input.svelte). Oxvelte reports two findings where upstream expects three. The 19 other invalid cases preserve the message multiset but use different report locations. Keep these behaviors in separate commits so a location fix does not obscure the option bug.
 

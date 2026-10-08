@@ -1540,10 +1540,6 @@
       "diagnostics": "f3e29988c25e109dfb758b0f3966716d2f23ad7d96ff21e8090f299890ce7f83",
       "fix_output": "7e76405144f853045aa8fecb584fe4c77ce2fbc71bf2014f65011ec81efa892e"
     },
-    "prefer-svelte-reactivity/invalid/exports02-input.svelte.js": {
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "c3ca076b57db31a804a047f97ef5bd7e8f354610b748edb0efcf0a0086f3942d"
-    },
     "prefer-writable-derived/invalid/basic1-input.svelte": {
       "suggestion_capability": "15d6b1450e5cd9f16b80d8bce5559b93c25a8b5664685110879e648bce9fe886"
     },
