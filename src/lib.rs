@@ -71,7 +71,7 @@ mod linter_fixture_tests {
             return RuleConfig {
                 options: None,
                 settings: Some(
-                    serde_json::json!({"compiler":{"executableConfigPath":std::fs::canonicalize(path).unwrap().to_string_lossy()}}),
+                    serde_json::json!({"compiler":{"executableConfigPath":std::fs::canonicalize(path).unwrap().to_string_lossy().trim_start_matches(r"\\?\").replace('\\',"/")}}),
                 ),
             };
         }
