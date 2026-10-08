@@ -136,6 +136,9 @@ fn check_call(call: &CallExpression<'_>, offset: i64, ctx: &mut LintContext<'_>)
                 };
                 &statement.expression
             } else {
+                if !function.body.directives.is_empty() {
+                    return;
+                }
                 let Some(expression) = single_return(&function.body.statements) else {
                     return;
                 };
@@ -145,10 +148,14 @@ fn check_call(call: &CallExpression<'_>, offset: i64, ctx: &mut LintContext<'_>)
         Expression::FunctionExpression(function)
             if !function.r#async
                 && !function.generator
+                && function.this_param.is_none()
                 && function.params.items.is_empty()
                 && function.params.rest.is_none() =>
         {
             let Some(body) = &function.body else { return };
+            if !body.directives.is_empty() {
+                return;
+            }
             let Some(expression) = single_return(&body.statements) else {
                 return;
             };
@@ -213,7 +220,7 @@ mod tests {
 
     #[test]
     fn retains_callbacks_with_effects_or_function_semantics() {
-        let source = "<script lang=\"ts\">let value = $derived.by(() => { log(); return count; }); let second = $derived.by(async () => count); let third = $derived.by(function*() { return count; }); let fourth = $derived.by((count) => count); let fifth = $derived['by'](() => count); let sixth = $derived.by((() => count) as () => number);</script>";
+        let source = "<script lang=\"ts\">let value = $derived.by(() => { log(); return count; }); let second = $derived.by(async () => count); let third = $derived.by(function*() { return count; }); let fourth = $derived.by((count) => count); let fifth = $derived['by'](() => count); let sixth = $derived.by((() => count) as () => number); let seventh = $derived.by(() => {'use strict'; return count;}); let eighth = $derived.by(function() {'use strict'; return count;}); let ninth = $derived.by(function(this: {value: number}) {return this.value;});</script>";
         let alloc = Allocator::default();
         let parsed = parser::parse_for_lint(source, &alloc);
         assert!(parsed.errors.is_empty());
