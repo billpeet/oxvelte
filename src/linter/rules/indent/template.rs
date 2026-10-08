@@ -1,5 +1,5 @@
 //! Svelte markup and control-block offsets, matching the upstream indent visitor.
-use super::{Layout, Region, RegionKind};
+use super::layout::{Layout, Region, RegionKind};
 use crate::ast::{Attribute, Fragment, TemplateNode};
 use crate::linter::LintContext;
 use oxc::span::Span;
@@ -160,14 +160,10 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 }
             }
             TemplateNode::EachBlock(n) => {
-                for s in [
-                    Some(n.expression_span),
-                    Some(n.context_span),
-                    n.index_span,
-                    n.key_span,
-                ]
-                .into_iter()
-                .flatten()
+                region(layout, n.context_span, RegionKind::Binding);
+                for s in [Some(n.expression_span), n.index_span, n.key_span]
+                    .into_iter()
+                    .flatten()
                 {
                     region(layout, s, RegionKind::Expression);
                 }
@@ -177,15 +173,12 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 }
             }
             TemplateNode::AwaitBlock(n) => {
-                for s in [
-                    Some(n.expression_span),
-                    n.then_binding_span,
-                    n.catch_binding_span,
-                ]
-                .into_iter()
-                .flatten()
+                region(layout, n.expression_span, RegionKind::Expression);
+                for s in [n.then_binding_span, n.catch_binding_span]
+                    .into_iter()
+                    .flatten()
                 {
-                    region(layout, s, RegionKind::Expression);
+                    region(layout, s, RegionKind::Binding);
                 }
                 for f in [&n.pending, &n.then, &n.catch].into_iter().flatten() {
                     collect_nodes(&f.nodes, layout);
@@ -196,8 +189,7 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 collect_nodes(&n.body.nodes, layout);
             }
             TemplateNode::SnippetBlock(n) => {
-                // Parameters are lexed with the header; the shared expression visitor
-                // handles their initializer expressions when applicable.
+                region(layout, n.params_span, RegionKind::Parameters);
                 collect_nodes(&n.body.nodes, layout);
             }
         }
@@ -636,9 +628,16 @@ fn branch(layout: &mut Layout<'_>, f: &Fragment<'_>, parent: usize, binding: Opt
         .map(|(i, _)| i)
     {
         let mut cursor = last;
+        let mut depth = 0;
         loop {
+            if layout.text(cursor) == "}" {
+                depth += 1;
+            }
             if layout.text(cursor) == "{" {
-                break Some(cursor);
+                depth -= 1;
+                if depth == 0 {
+                    break Some(cursor);
+                }
             }
             if let Some(prev) = layout.before(cursor) {
                 cursor = prev;
