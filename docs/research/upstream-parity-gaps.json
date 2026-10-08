@@ -1627,7 +1627,7 @@
             "dimensions": [
               "diagnostic_count",
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -2023,14 +2023,14 @@
             "id": "no-add-event-listener/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-add-event-listener/invalid/typescript01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -2309,28 +2309,28 @@
             "id": "no-unnecessary-state-wrap/invalid/additional-class-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-unnecessary-state-wrap/invalid/allow-reassign-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-unnecessary-state-wrap/invalid/basic-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-unnecessary-state-wrap/invalid/import-alias-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -2443,28 +2443,28 @@
             "id": "prefer-destructured-store-props/invalid/fixer-test01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-destructured-store-props/invalid/member01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-destructured-store-props/invalid/member02-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-destructured-store-props/invalid/member03-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
@@ -2477,14 +2477,14 @@
             "id": "prefer-destructured-store-props/invalid/runes-with-store01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-destructured-store-props/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
@@ -2497,7 +2497,7 @@
             "id": "prefer-destructured-store-props/invalid/test03-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -2577,14 +2577,14 @@
             "id": "require-store-callbacks-use-set-param/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "require-store-callbacks-use-set-param/invalid/test02-input.svelte",
             "dimensions": [
               "diagnostics",
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -2736,343 +2736,343 @@
           {
             "id": "block-lang/invalid/script/javascript/javascript-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/javascript/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/javascript/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/javascript/ts01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/javascript/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/js/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/js/js-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/js/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/js/ts01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/js/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/module-context/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/module-context/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/module-context/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/module-context/ts-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/module-context/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/multiple/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/multiple/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/multiple/null-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/multiple/ts-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/multiple/typescript-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/null/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/null/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/null/null-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/null/ts01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/null/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/shorthand/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/shorthand/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/shorthand/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/shorthand/ts-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/shorthand/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/ts/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/ts/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/ts/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/ts/ts-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/ts/typescript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/typescript/javascript01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/typescript/js01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/typescript/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/typescript/ts01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/script/typescript/typescript-as-style-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/null/null-as-script-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/null/sass01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/null/scss01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/sass/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/sass/sass-as-script-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/sass/scss01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/scss/null01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/scss/sass01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           },
           {
             "id": "block-lang/invalid/style/scss/scss-as-script-lang01-input.svelte",
             "dimensions": [
-              "suggestion_capability",
+              "suggestions",
               "unexpected_fix"
             ]
           }
@@ -3178,13 +3178,13 @@
           {
             "id": "no-at-debug-tags/invalid/debug01-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-at-debug-tags/invalid/debug02-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -3192,13 +3192,13 @@
           {
             "id": "no-extra-reactive-curlies/invalid/test01-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "no-extra-reactive-curlies/invalid/test02-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -3206,7 +3206,7 @@
           {
             "id": "no-reactive-functions/invalid/test01-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -3214,7 +3214,7 @@
           {
             "id": "no-reactive-literals/invalid/test01-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ],
@@ -3222,43 +3222,43 @@
           {
             "id": "prefer-writable-derived/invalid/basic1-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/basic2-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/effect-pre1-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/effect-pre2-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/multiple-reassign1-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/multiple-reassign2-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           },
           {
             "id": "prefer-writable-derived/invalid/multiple-reassign3-input.svelte",
             "dimensions": [
-              "suggestion_capability"
+              "suggestions"
             ]
           }
         ]
@@ -3321,7 +3321,7 @@
         "valid-style-parse": 2
       }
     },
-    "suggestion_capability": {
+    "suggestions": {
       "count": 78,
       "rules": {
         "block-lang": 49,

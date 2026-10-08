@@ -94,6 +94,7 @@ struct FileDiagnostic {
     message: String,
     rule_name: &'static str,
     severity: DiagnosticSeverity,
+    suggestions: Vec<linter::Suggestion>,
 }
 
 struct FileResult {
@@ -255,6 +256,7 @@ fn cmd_lint(
                         message: d.message.clone(),
                         rule_name: d.rule_name,
                         severity: diagnostic_severity(&config, d.rule_name),
+                        suggestions: d.suggestions.clone(),
                     }
                 })
                 .collect();
@@ -279,18 +281,7 @@ fn cmd_lint(
     if json_output {
         let json_results: Vec<serde_json::Value> = visible_file_diagnostics(&file_results, quiet)
             .into_iter()
-            .map(|(f, d)| {
-                serde_json::json!({
-                    "file": &f.path,
-                    "rule": d.rule_name,
-                    "severity": d.severity.as_str(),
-                    "message": &d.message,
-                    "line": d.line,
-                    "column": d.col,
-                    "endLine": d.end_line,
-                    "endColumn": d.end_col,
-                })
-            })
+            .map(|(f, d)| diagnostic_json(&f.path, d))
             .collect();
         println!(
             "{}",
@@ -730,6 +721,64 @@ fn extract_rules_from_js(content: &str) -> String {
     }
     let obj = serde_json::json!({ "rules": rules });
     serde_json::to_string(&obj).unwrap_or_default()
+}
+
+fn diagnostic_json(path: &str, diagnostic: &FileDiagnostic) -> serde_json::Value {
+    let mut value = serde_json::json!({
+        "file": path,
+        "rule": diagnostic.rule_name,
+        "severity": diagnostic.severity.as_str(),
+        "message": diagnostic.message,
+        "line": diagnostic.line,
+        "column": diagnostic.col,
+        "endLine": diagnostic.end_line,
+        "endColumn": diagnostic.end_col,
+    });
+    if !diagnostic.suggestions.is_empty() {
+        // Replacement ranges are byte offsets into the UTF-8 source, like Fix::span.
+        value["suggestions"] =
+            serde_json::json!(diagnostic.suggestions.iter().map(|s| {
+            serde_json::json!({
+                "desc": s.description,
+                "fix": {"range": [s.fix.span.start, s.fix.span.end], "text": s.fix.replacement}
+            })
+        }).collect::<Vec<_>>());
+    }
+    value
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn json_preserves_existing_fields_and_exposes_optional_alternatives() {
+        let mut diagnostic = FileDiagnostic {
+            line: 1,
+            col: 2,
+            end_line: 1,
+            end_col: 3,
+            message: "message".into(),
+            rule_name: "svelte/test",
+            severity: DiagnosticSeverity::Error,
+            suggestions: Vec::new(),
+        };
+        let original = serde_json::json!({"file":"test.svelte", "rule":"svelte/test",
+            "severity":"error", "message":"message", "line":1, "column":2,
+            "endLine":1, "endColumn":3});
+        assert_eq!(diagnostic_json("test.svelte", &diagnostic), original);
+        diagnostic.suggestions.push(linter::Suggestion {
+            description: "replace".into(),
+            fix: linter::Fix {
+                span: oxc::span::Span::new(1, 2),
+                replacement: "text".into(),
+            },
+        });
+        let mut expected = original;
+        expected["suggestions"] = serde_json::json!([{ "desc":"replace",
+            "fix":{"range":[1,2],"text":"text"}}]);
+        assert_eq!(diagnostic_json("test.svelte", &diagnostic), expected);
+    }
 }
 
 fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {

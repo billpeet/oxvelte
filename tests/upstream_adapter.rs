@@ -3,7 +3,7 @@
 mod parity;
 
 use oxc::span::Span;
-use oxvelte::linter::{Fix, LintDiagnostic};
+use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion};
 use serde_json::json;
 
 #[test]
@@ -30,6 +30,7 @@ fn diagnostics_preserve_multiple_properties_at_the_same_location() {
         message: message.into(),
         span: Span::new(0, 1),
         fix: None,
+        suggestions: Vec::new(),
     });
     assert_eq!(
         parity::diagnostics("x", &diags).unwrap(),
@@ -120,4 +121,127 @@ fn baseline_rejects_new_and_changed_gaps_but_allows_improvements() {
         "gate",
         true
     ));
+}
+
+fn alternative(description: &str, start: u32, end: u32, replacement: &str) -> Suggestion {
+    Suggestion {
+        description: description.into(),
+        fix: Fix {
+            span: Span::new(start, end),
+            replacement: replacement.into(),
+        },
+    }
+}
+
+#[test]
+fn suggestions_keep_diagnostic_association_and_apply_alternatives_independently() {
+    let source = "abc";
+    let diags = vec![
+        LintDiagnostic {
+            rule_name: "test",
+            message: "later".into(),
+            span: Span::new(2, 3),
+            fix: Some(Fix {
+                span: Span::new(0, 3),
+                replacement: "automatic".into(),
+            }),
+            suggestions: vec![
+                alternative("first", 0, 2, "X"),
+                alternative("second", 1, 3, "Y"),
+            ],
+        },
+        LintDiagnostic {
+            rule_name: "test",
+            message: "earlier".into(),
+            span: Span::new(0, 1),
+            fix: None,
+            suggestions: vec![],
+        },
+        LintDiagnostic {
+            rule_name: "test",
+            message: "same location".into(),
+            span: Span::new(2, 3),
+            fix: None,
+            suggestions: vec![alternative("third", 0, 3, "Z")],
+        },
+    ];
+    assert_eq!(
+        parity::suggestions(source, &diags).unwrap(),
+        vec![
+            json!([]),
+            json!([{"desc":"first", "output":"Xc"}, {"desc":"second", "output":"aY"}]),
+            json!([{"desc":"third", "output":"Z"}])
+        ]
+    );
+    assert_eq!(
+        parity::apply_fixes(
+            source,
+            &diags
+                .iter()
+                .filter_map(|d| d.fix.clone())
+                .collect::<Vec<_>>()
+        )
+        .unwrap(),
+        "automatic"
+    );
+}
+
+#[test]
+fn suggestion_spans_validate_utf8_boundaries_and_bounds() {
+    let mut diag = LintDiagnostic {
+        rule_name: "test",
+        message: "test".into(),
+        span: Span::new(0, 4),
+        fix: None,
+        suggestions: vec![alternative("bad", 1, 2, "x")],
+    };
+    assert!(parity::suggestions("😀", &[diag.clone()]).is_err());
+    diag.suggestions[0].fix.span = Span::new(0, 5);
+    assert!(parity::suggestions("😀", &[diag.clone()]).is_err());
+    diag.suggestions[0].fix.span = Span::new(4, 0);
+    assert!(parity::suggestions("😀", &[diag]).is_err());
+}
+
+struct SuggestingRule;
+impl Rule for SuggestingRule {
+    fn name(&self) -> &'static str {
+        "svelte/test-suggestions"
+    }
+    fn run(&self, ctx: &mut LintContext) {
+        let start = ctx.source.find("<p>").unwrap() as u32;
+        ctx.diagnostic_with_suggestions(
+            "optional",
+            Span::new(start, start + 3),
+            vec![alternative("replace", start, start + 3, "<div>")],
+        );
+    }
+}
+
+#[test]
+fn suggestion_only_diagnostics_follow_ignore_filtering_without_becoming_fixes() {
+    let mut linter = Linter::all();
+    let disabled = json!({"rules": linter.rules().iter()
+        .map(|rule| (rule.name().to_string(), json!("off")))
+        .collect::<serde_json::Map<_, _>>()});
+    linter.remove_disabled_rules(
+        &oxvelte::config::OxvelteConfig::parse(&disabled.to_string()).unwrap(),
+    );
+    let linter = linter.with_custom_rules(vec![Box::new(SuggestingRule)]);
+    for (source, expected) in [
+        ("<p>x</p>", 1),
+        (
+            "<!-- eslint-disable-next-line svelte/test-suggestions -->\n<p>x</p>",
+            0,
+        ),
+    ] {
+        let allocator = oxc::allocator::Allocator::default();
+        let result = oxvelte::parser::parse(source, &allocator);
+        let diags = linter.lint(&result.ast, source);
+        assert_eq!(diags.len(), expected);
+        if let Some(diag) = diags.first() {
+            assert!(diag.fix.is_none());
+            assert_eq!(diag.suggestions[0].description, "replace");
+            assert_eq!(diag.rule_name, "svelte/test-suggestions");
+        }
+    }
 }

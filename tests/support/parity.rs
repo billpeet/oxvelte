@@ -69,6 +69,30 @@ pub fn diagnostics(source: &str, diags: &[LintDiagnostic]) -> Result<Vec<Value>,
     Ok(located)
 }
 
+/// Keep one suggestions array per diagnostic, including empty arrays, so that
+/// alternatives cannot accidentally migrate to another finding at the same location.
+pub fn suggestions(source: &str, diags: &[LintDiagnostic]) -> Result<Vec<Value>, String> {
+    let mut ordered = diags
+        .iter()
+        .map(|diag| Ok((location(source, diag.span.start)?, diag)))
+        .collect::<Result<Vec<_>, String>>()?;
+    // Use the same stable location ordering as diagnostics().
+    ordered.sort_by_key(|(location, _)| *location);
+    ordered
+        .into_iter()
+        .map(|(_, diag)| {
+            diag.suggestions
+                .iter()
+                .map(|suggestion| {
+                    let output = apply_fixes(source, std::slice::from_ref(&suggestion.fix))?;
+                    Ok(json!({"desc": suggestion.description, "output": output}))
+                })
+                .collect::<Result<Vec<_>, String>>()
+                .map(|suggestions| json!(suggestions))
+        })
+        .collect()
+}
+
 /// Apply one pass, matching the upstream fixture generator's overlap policy.
 pub fn apply_fixes(source: &str, fixes: &[Fix]) -> Result<String, String> {
     let mut ordered: Vec<_> = fixes.iter().collect();

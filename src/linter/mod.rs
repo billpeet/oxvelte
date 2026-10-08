@@ -13,6 +13,15 @@ pub struct LintDiagnostic {
     pub message: String,
     pub span: Span,
     pub fix: Option<Fix>,
+    /// Optional alternatives, in rule-defined order. Never applied automatically.
+    pub suggestions: Vec<Suggestion>,
+}
+
+/// A user-selected replacement, independent of automatic fixes and other suggestions.
+#[derive(Debug, Clone)]
+pub struct Suggestion {
+    pub description: String,
+    pub fix: Fix,
 }
 
 /// An auto-fix: replace a span of source text.
@@ -147,6 +156,7 @@ impl<'a> LintContext<'a> {
             message: message.into(),
             span,
             fix: None,
+            suggestions: Vec::new(),
         });
     }
 
@@ -156,6 +166,34 @@ impl<'a> LintContext<'a> {
             message: message.into(),
             span,
             fix: Some(fix),
+            suggestions: Vec::new(),
+        });
+    }
+
+    /// Report optional alternatives without offering an automatic fix.
+    pub fn diagnostic_with_suggestions(
+        &mut self,
+        message: impl Into<String>,
+        span: Span,
+        suggestions: Vec<Suggestion>,
+    ) {
+        self.diagnostic_with_fix_and_suggestions(message, span, None, suggestions);
+    }
+
+    /// Report an automatic fix and independent, user-selected alternatives.
+    pub fn diagnostic_with_fix_and_suggestions(
+        &mut self,
+        message: impl Into<String>,
+        span: Span,
+        fix: Option<Fix>,
+        suggestions: Vec<Suggestion>,
+    ) {
+        self.diagnostics.push(LintDiagnostic {
+            rule_name: self.current_rule,
+            message: message.into(),
+            span,
+            fix,
+            suggestions,
         });
     }
 
@@ -1255,6 +1293,7 @@ fn filter_suppressed(
                 message: "svelte-ignore comment is used, but not warned".to_string(),
                 span: *span,
                 fix: None,
+                suggestions: Vec::new(),
             });
         }
     }

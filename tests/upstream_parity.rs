@@ -355,16 +355,38 @@ fn evaluate(root: &Path, case: &Case) -> Result<Issues, String> {
             json!("Upstream rule is not fixable"),
         );
     }
-    let suggestions: Vec<_> = case
+    let expected_suggestions: Vec<_> = case
         .errors
         .iter()
-        .filter_map(|d| {
-            d.get("suggestions")
-                .filter(|s| s.as_array().is_some_and(|a| !a.is_empty()))
+        .map(|d| {
+            json!(d
+                .get("suggestions")
+                .and_then(Value::as_array)
+                .map(|suggestions| suggestions
+                    .iter()
+                    .map(|s| json!({"desc": s["desc"], "output": s["output"]}))
+                    .collect::<Vec<_>>())
+                .unwrap_or_default())
         })
         .collect();
-    if !suggestions.is_empty() {
-        issues.insert("suggestion_capability".into(), json!(suggestions));
+    match parity::suggestions(&source, &diags) {
+        Ok(actual) => {
+            // Diagnostic mismatches already describe different lengths when neither
+            // side offers suggestions. Still reject unexpected alternatives.
+            let has_suggestions = expected_suggestions
+                .iter()
+                .chain(&actual)
+                .any(|s| s.as_array().is_some_and(|a| !a.is_empty()));
+            if has_suggestions && expected_suggestions != actual {
+                issues.insert(
+                    "suggestions".into(),
+                    parity::mismatch(&json!(expected_suggestions), &json!(actual)),
+                );
+            }
+        }
+        Err(error) => {
+            issues.insert("suggestion_spans".into(), json!(error));
+        }
     }
     Ok(issues)
 }

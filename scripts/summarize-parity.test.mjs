@@ -30,3 +30,11 @@ test('version skips stay separate, and missing/duplicated inventory fails', () =
   assert.throws(() => summarize({ ...report, totals: { pass: 0, gaps: 1, versionSkip: 0 } }), /totals/);
   assert.throws(() => classify({ new_unknown_dimension: true }), /Unclassified/);
 });
+
+test('suggestion comparisons and invalid suggestion spans retain their categories', () => {
+  const issues = { suggestions: { expected: [[{ desc: 'replace', output: 'a' }]], actual: [[]] } };
+  assert.equal(classify(issues), 'suggestions');
+  assert.equal(classify({ ...issues, suggestion_spans: 'Invalid fix span' }), 'invalid-spans');
+  const summary = summarize({ cases: [{ id: 'rule/invalid/suggestion', rule: 'rule', status: 'gap', issues }], totals: { pass: 0, gaps: 1, versionSkip: 0 } });
+  assert.equal(summary.dimensions.suggestions.count, 1);
+});

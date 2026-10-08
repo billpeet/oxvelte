@@ -22,7 +22,7 @@ export function classify(issues) {
   if (issues.unsupported_rule) return 'missing-rule';
   if (issues.executable_configuration) return 'executable-config';
   if (issues.compiler_capability) return 'compiler';
-  if (issues.diagnostic_spans || issues.fix_spans) return 'invalid-spans';
+  if (issues.diagnostic_spans || issues.fix_spans || issues.suggestion_spans) return 'invalid-spans';
   if (issues.parse_errors) return 'parser';
   if (issues.diagnostics) {
     const { expected, actual } = issues.diagnostics;
@@ -32,7 +32,7 @@ export function classify(issues) {
   }
   if (issues.diagnostic_count) return 'diagnostic-count';
   if (issues.fix_output || issues.unexpected_fix) return 'fix';
-  if (issues.suggestion_capability) return 'suggestions';
+  if (issues.suggestions || issues.suggestion_capability) return 'suggestions';
   if (issues.parser_configuration || issues.language_configuration) return 'configuration';
   throw new Error(`Unclassified issues: ${JSON.stringify(issues)}`);
 }

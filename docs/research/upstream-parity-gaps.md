@@ -30,7 +30,7 @@ These counts overlap. A case can have several issues, so this table does not sum
 | `unsupported_rule` | 118 |
 | `compiler_capability` | 84 |
 | `fix_output` | 83 |
-| `suggestion_capability` | 78 |
+| `suggestions` | 78 |
 | `diagnostic_count` | 69 |
 | `unexpected_fix` | 54 |
 | `parse_errors` | 29 |
