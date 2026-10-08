@@ -972,12 +972,6 @@
     "valid-compile/valid/valid-custom-element-with-props-identifier-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
-    "valid-each-key/invalid/const-key01-input.svelte": {
-      "diagnostics": "ea64b7e48ed9f81f94f5b52eeeca567e1e827dbb2ae3d823464cef52434b722f"
-    },
-    "valid-each-key/invalid/out-vars-key01-input.svelte": {
-      "diagnostics": "dd1e5921a8a12d9a482fe04c9c141e7c4202be471ffeed1eab7fcb3a39fcab1b"
-    },
     "valid-prop-names-in-kit-pages/invalid/+page.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
