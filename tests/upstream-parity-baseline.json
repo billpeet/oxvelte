@@ -1,26 +1,5 @@
 {
   "cases": {
-    "@typescript-eslint/no-unnecessary-condition/invalid/binary-expression01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/invalid/example-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/invalid/nullish-coalescing01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/invalid/optional-chaining01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/invalid/test01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/valid/reactive-statement01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
-    "@typescript-eslint/no-unnecessary-condition/valid/template01-input.svelte": {
-      "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
-    },
     "experimental-require-strict-events/invalid/no-strict-events01-input.svelte": {
       "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
     },
