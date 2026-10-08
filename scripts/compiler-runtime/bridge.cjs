@@ -186,9 +186,3 @@ rl.on('line', async line => {
   try { const request = JSON.parse(line); const result = request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
   catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });
-
-
-
-
-
-

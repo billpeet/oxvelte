@@ -44,43 +44,56 @@ impl Rule for ValidCompile {
                 if ignore_warnings && result.kind == "warn" {
                     return;
                 }
-                result
+                let warnings: Vec<_> = result
                     .warnings
                     .iter()
-                    .filter_map(|warning| {
-                        if warning.code.as_deref() == Some("missing-declaration") {
-                            return None;
-                        }
-                        if matches!(
-                            warning.code.as_deref(),
-                            Some("css_unused_selector" | "css-unused-selector")
-                        ) && global_style.zip(warning.span).is_some_and(|(style, span)| {
-                            style.start <= span.start && span.end <= style.end
-                        }) {
-                            return None;
-                        }
-                        let transformed = if result.kind == "warn" {
+                    .filter(|warning| {
+                        warning.code.as_deref() != Some("missing-declaration")
+                            && !(matches!(
+                                warning.code.as_deref(),
+                                Some("css_unused_selector" | "css-unused-selector")
+                            ) && global_style.zip(warning.span).is_some_and(
+                                |(style, span)| style.start <= span.start && span.end <= style.end,
+                            ))
+                    })
+                    .cloned()
+                    .collect();
+                let warnings = if result.kind == "warn" {
+                    crate::compiler::apply_warning_callbacks(
+                        ctx.source,
+                        ctx.file_path.as_deref(),
+                        ctx.config.settings.as_ref(),
+                        &warnings,
+                    )
+                } else {
+                    Ok(warnings)
+                };
+                match warnings {
+                    Err(error) => vec![(
+                        format!("Unable to run Svelte compiler: {error}"),
+                        Span::new(0, 0),
+                    )],
+                    Ok(warnings) => warnings
+                        .iter()
+                        .filter_map(|warning| {
                             if warning.filtered {
                                 return None;
                             }
-                            warning.report.as_ref()
-                        } else {
-                            None
-                        };
-                        let (message, code, span) = if let Some(w) = transformed {
-                            (&w.message, w.code.as_deref(), w.span)
-                        } else {
-                            (&warning.message, warning.code.as_deref(), warning.span)
-                        };
-                        Some((
-                            format!(
-                                "{message}{}",
-                                code.map(|c| format!("({c})")).unwrap_or_default()
-                            ),
-                            span.unwrap_or_else(|| Span::new(0, 0)),
-                        ))
-                    })
-                    .collect()
+                            let (message, code, span) = if let Some(w) = &warning.report {
+                                (&w.message, w.code.as_deref(), w.span)
+                            } else {
+                                (&warning.message, warning.code.as_deref(), warning.span)
+                            };
+                            Some((
+                                format!(
+                                    "{message}{}",
+                                    code.map(|c| format!("({c})")).unwrap_or_default()
+                                ),
+                                span.unwrap_or_else(|| Span::new(0, 0)),
+                            ))
+                        })
+                        .collect(),
+                }
             }
         };
         for (message, span) in diagnostics {

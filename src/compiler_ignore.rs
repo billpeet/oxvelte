@@ -366,6 +366,7 @@ mod tests {
                     span: Some(Span::new(start, start + 7)),
                     filtered: false,
                     report: None,
+                    metadata: serde_json::Value::Null,
                 }],
                 ignore_items: items(&ctx),
                 unused_ignores: vec![],
