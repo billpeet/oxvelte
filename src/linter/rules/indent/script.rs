@@ -164,6 +164,7 @@ fn chain(kind: AstKind<'_>) -> bool {
             | AstKind::AssignmentPattern(_)
             | AstKind::AssignmentTargetWithDefault(_)
             | AstKind::BinaryExpression(_)
+            | AstKind::PrivateInExpression(_)
             | AstKind::LogicalExpression(_)
     )
 }
@@ -355,6 +356,14 @@ pub(super) fn apply_node(
             l,
             span,
             s(n.left.span()),
+            s(n.right.span()),
+            chain_span,
+            assignment_chain,
+        ),
+        AstKind::PrivateInExpression(n) => binary(
+            l,
+            span,
+            s(n.left.span),
             s(n.right.span()),
             chain_span,
             assignment_chain,
@@ -956,6 +965,12 @@ pub(super) fn apply_node(
 }
 
 fn is_expression(kind: AstKind<'_>) -> bool {
+    if let AstKind::Function(n) = kind {
+        return !n.is_function_declaration();
+    }
+    if let AstKind::Class(n) = kind {
+        return !n.is_declaration();
+    }
     matches!(
         kind,
         AstKind::IdentifierReference(_)
@@ -973,6 +988,7 @@ fn is_expression(kind: AstKind<'_>) -> bool {
             | AstKind::UpdateExpression(_)
             | AstKind::UnaryExpression(_)
             | AstKind::BinaryExpression(_)
+            | AstKind::PrivateInExpression(_)
             | AstKind::LogicalExpression(_)
             | AstKind::ConditionalExpression(_)
             | AstKind::AssignmentExpression(_)
@@ -1194,5 +1210,13 @@ mod tests {
         let options = serde_json::json!([{"indent": "tab", "indentScript": false}]);
         assert_eq!(fixed(source, options.clone()), expected);
         assert_eq!(fixed(expected, options), expected);
+    }
+
+    #[test]
+    fn private_in_uses_the_binary_expression_offsets() {
+        let source = "<script>\nclass Box {\n#value;\nhas(object) {\nreturn #value\nin object;\n}\n}\n</script>";
+        let expected = "<script>\n  class Box {\n    #value;\n    has(object) {\n      return #value\n        in object;\n    }\n  }\n</script>";
+        assert_eq!(fixed(source, serde_json::json!([])), expected);
+        assert_eq!(fixed(expected, serde_json::json!([])), expected);
     }
 }
