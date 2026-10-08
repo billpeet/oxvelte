@@ -1,6 +1,6 @@
 # Upstream parity progress
 
-The [fourth parallel wave](upstream-parity-fourth-wave.md) is complete and integrated. Current results are 1,044 matches, 188 gaps and 67 version skips. Of the 101 native cases, 98 now match and three const-tag cases are correctly gated by Svelte 5.56. The remaining work concerns indentation, compiler integration and TypeScript integration. The [third wave](upstream-parity-third-wave.md), [second wave](upstream-parity-second-wave.md), [first wave](upstream-parity-first-wave.md) and batch below record earlier work.
+The [fifth parallel wave](upstream-parity-fifth-wave.md) is complete and integrated. All 91 eligible indentation cases now match, bringing the full suite to 1,135 matches, 97 gaps and 67 version skips. Remaining work is compiler integration/configuration (90) and TypeScript unnecessary-condition integration (7). The [fourth](upstream-parity-fourth-wave.md), [third](upstream-parity-third-wave.md), [second](upstream-parity-second-wave.md), [first](upstream-parity-first-wave.md) waves and batch below record earlier work.
 
 Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
 
