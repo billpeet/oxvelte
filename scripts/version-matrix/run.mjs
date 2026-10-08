@@ -72,12 +72,17 @@ export function summarizeMatrix(original, reports) {
 }
 
 function install(name) {
-  // npm's Windows launcher needs a shell. The profile is validated above;
-  // quoting the absolute prefix also supports workspace paths with spaces.
   const args = ['ci', '--prefix', path.join(profilesRoot, name), '--ignore-scripts', '--no-audit', '--no-fund'];
-  const result = process.platform === 'win32'
-    ? spawnSync('npm.cmd', args.map((arg) => `"${arg}"`), { cwd: root, stdio: 'inherit', shell: true })
-    : spawnSync('npm', args, { cwd: root, stdio: 'inherit' });
+  let result;
+  if (process.platform === 'win32') {
+    // Invoke npm's JS entry point directly. This avoids shell interpolation
+    // and supports spaces and shell metacharacters in workspace paths.
+    const candidates = [process.env.npm_execpath, ...[path.dirname(process.execPath), ...(process.env.PATH ?? '').split(path.delimiter)]
+      .map((directory) => path.join(directory, 'node_modules/npm/bin/npm-cli.js'))];
+    const cli = candidates.find((candidate) => candidate && existsSync(candidate));
+    if (!cli) throw new Error('Cannot locate npm-cli.js; install each profile with npm ci and use --no-install');
+    result = spawnSync(process.execPath, [cli, ...args], { cwd: root, stdio: 'inherit' });
+  } else result = spawnSync('npm', args, { cwd: root, stdio: 'inherit' });
   if (result.error || result.status !== 0) throw new Error(`npm ci failed for ${name}: ${result.error?.message ?? result.status}`);
 }
 
