@@ -3,6 +3,7 @@
 const { createRequire } = require('node:module');
 const path = require('node:path');
 const readline = require('node:readline');
+const { pathToFileURL } = require('node:url');
 // The binary embeds this implementation dependency; consumers only supply their compiler packages.
 const sourceMapCodec = typeof embeddedSourceMapCodec === 'undefined'
   ? require('./vendor/sourcemap-codec.cjs') : embeddedSourceMapCodec;
@@ -47,10 +48,45 @@ function sourceMapRemap(output, input, mappings, decode) {
   };
 }
 function byteToIndex(source, byte) { return Buffer.from(source).subarray(0, byte).toString('utf8').length; }
+// Preserve stateful hooks while their module graph is unchanged. Hash contents,
+// rather than mtimes, so rapid same-size edits and preserved timestamps reload.
+const configGraphs = new Map();
+const { readFileSync } = require('node:fs');
+const { createHash } = require('node:crypto');
+function contentHash(filename) {
+  try { return createHash('sha256').update(readFileSync(filename)).digest('hex'); }
+  catch { return null; }
+}
+function refreshConfigGraphs() {
+  if ([...configGraphs.values()].some(graph => [...graph].some(([file, hash]) => contentHash(file) !== hash))) {
+    // Compiler/preprocessor libraries may keep their own config caches. Reload
+    // their modules as well when a tracked config or imported helper changes.
+    for (const file of Object.keys(require.cache)) delete require.cache[file];
+    configGraphs.clear();
+  }
+}
+function requireCurrentConfig(req, filename) {
+  const resolved = req.resolve(filename);
+  const exported = req(resolved);
+  snapshotConfigGraph(resolved);
+  return exported;
+}
+function snapshotConfigGraph(resolved) {
+  const graph = new Map([[resolved, contentHash(resolved)]]);
+  const visited = new Set();
+  function visit(module) {
+    if (!module || visited.has(module.filename)) return;
+    visited.add(module.filename);
+    graph.set(module.filename, contentHash(module.filename));
+    for (const child of module.children) visit(child);
+  }
+  visit(require.cache[resolved]);
+  configGraphs.set(resolved, graph);
+}
 function loadConfig(req, cfg) {
   let config = cfg.svelteConfig || {};
   if (cfg.executableConfigPath) {
-    const exported = req(path.resolve(cfg.executableConfigPath));
+    const exported = requireCurrentConfig(req, path.resolve(cfg.executableConfigPath));
     const entry = Array.isArray(exported) ? exported.find(x => x.languageOptions?.parserOptions?.svelteConfig) : exported;
     config = entry?.languageOptions?.parserOptions?.svelteConfig || {};
   }
@@ -101,7 +137,7 @@ async function run(request) {
     const input = source.slice(start, end); let output, mappings;
     try {
       if (lang === 'scss' || lang === 'sass') {
-        const result = req('sass').compileString(input, { sourceMap: true, syntax: lang === 'sass' ? 'indented' : undefined });
+        const result = req('sass').compileString(input, { sourceMap: true, url: pathToFileURL(path.resolve(filename || '__oxvelte__.svelte')), syntax: lang === 'sass' ? 'indented' : undefined });
         output = result.css; mappings = result.sourceMap.mappings;
       } else if (lang === 'less') {
         const result = await req('less').render(input, { sourceMap: {}, syncImport: true, filename: (filename || '__oxvelte__') + '.less', lint: false });
@@ -115,6 +151,7 @@ async function run(request) {
         if (setting === false) throw new Error('PostCSS disabled');
         const configPath = setting?.configFilePath || process.env.OXVELTE_COMPILER_RUNTIME || process.cwd();
         const config = await req('postcss-load-config')({ cwd: process.cwd(), from: (filename || '__oxvelte__') + '.css' }, configPath);
+        if (config.file) snapshotConfigGraph(config.file);
         const result = req('postcss')(config.plugins).process(input, { ...config.options, map: { inline: false } });
         output = result.content; mappings = result.map.toJSON().mappings;
       }
@@ -144,7 +181,10 @@ async function run(request) {
       output = result.outputText; mappings = JSON.parse(result.sourceMapText).mappings;
     } else {
       const babel = req('@babel/core');
-      const result = babel.transformSync(input, { sourceType: 'module', sourceMaps: true, minified: false, ast: false, code: true, cwd: process.env.OXVELTE_COMPILER_RUNTIME || process.cwd() });
+      const options = { sourceType: 'module', sourceMaps: true, minified: false, ast: false, code: true, cwd: process.env.OXVELTE_COMPILER_RUNTIME || process.cwd() };
+      const config = babel.loadPartialConfig(options);
+      for (const file of config?.files || []) snapshotConfigGraph(file);
+      const result = babel.transformSync(input, { ...options, ...config?.options, configFile: false, babelrc: false });
       output = result.code; mappings = result.map.mappings;
     }
     const decode = sourceMapCodec.decode;
@@ -186,6 +226,6 @@ async function run(request) {
 }
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on('line', async line => {
-  try { const request = JSON.parse(line); const result = request.operation === 'typescript-conditions' ? typescriptConditions.analyze(typescriptService.createSession(request), request.options || {}) : request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
+  try { refreshConfigGraphs(); const request = JSON.parse(line); const result = request.operation === 'typescript-conditions' ? typescriptConditions.analyze(typescriptService.createSession(request), request.options || {}) : request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); for (const resolved of configGraphs.keys()) snapshotConfigGraph(resolved); protocolWrite(JSON.stringify({ result }) + '\n'); }
   catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });

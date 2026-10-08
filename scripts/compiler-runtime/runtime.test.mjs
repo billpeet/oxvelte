@@ -194,3 +194,95 @@ test('consumer with only Svelte and TypeScript needs no source-map codec depende
     assert.equal(response.result.warnings.find(warning => warning.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
   } finally { rmSync(project, {recursive:true, force:true}); }
 });
+
+
+test('live callbacks reload edited configuration dependencies without losing unchanged state', async () => {
+  const { spawn } = await import('node:child_process');
+  const { createInterface } = await import('node:readline');
+  const { once } = await import('node:events');
+  const { statSync, utimesSync } = await import('node:fs');
+  const directory = mkdtempSync(join(tmpdir(), 'oxvelte-live-config-'));
+  const configPath = join(directory, '_config.cjs');
+  const dependency = join(directory, 'message.cjs');
+  writeFileSync(dependency, "module.exports='before';");
+  writeFileSync(configPath, `let calls=0;module.exports={languageOptions:{parserOptions:{svelteConfig:{onwarn(warning,report){report({...warning,message:require('./message.cjs')+':'+(++calls)})}}}}}`);
+  const child = spawn(process.execPath, [join(runtime, 'bridge.cjs')], {env:{...process.env,OXVELTE_COMPILER_RUNTIME:runtime}});
+  const lines = createInterface({input:child.stdout})[Symbol.asyncIterator]();
+  let stderr = ''; child.stderr.on('data', data => {stderr += data;});
+  const source = '<img src="x">';
+  const request = {operation:'callbacks', source, settings:{compiler:{executableConfigPath:configPath}},warnings:compile(source).warnings};
+  async function next() {
+    child.stdin.write(JSON.stringify(request)+'\n');
+    const response = await lines.next();
+    assert.equal(response.done, false, stderr);
+    const decoded = JSON.parse(response.value);
+    assert.equal(decoded.error, undefined);
+    return decoded.result.warnings[0].report.message;
+  }
+  try {
+    assert.equal(await next(), 'before:1');
+    assert.equal(await next(), 'before:2');
+    const previous = statSync(dependency);
+    writeFileSync(dependency, "module.exports='after!';");
+    utimesSync(dependency, previous.atime, previous.mtime);
+    assert.equal(await next(), 'after!:1');
+    writeFileSync(configPath, `module.exports={languageOptions:{parserOptions:{svelteConfig:{onwarn(warning,report){report({...warning,message:'new config'})}}}}}`);
+    assert.equal(await next(), 'new config');
+    child.stdin.end();
+    await once(child, 'exit');
+  } finally {
+    child.kill(); rmSync(directory, {recursive:true,force:true});
+  }
+});
+
+
+async function liveRequests(env, action) {
+  const { spawn } = await import('node:child_process');
+  const { createInterface } = await import('node:readline');
+  const { once } = await import('node:events');
+  const child = spawn(process.execPath, [join(runtime, 'bridge.cjs')], {env:{...process.env,...env}});
+  const lines = createInterface({input:child.stdout})[Symbol.asyncIterator]();
+  let stderr = ''; child.stderr.on('data', data => {stderr += data;});
+  try {
+    await action(async request => {
+      child.stdin.write(JSON.stringify(request)+'\n');
+      const response = await lines.next();
+      assert.equal(response.done, false, stderr);
+      const decoded = JSON.parse(response.value);
+      assert.equal(decoded.error, undefined);
+      return decoded.result;
+    });
+    child.stdin.end(); await once(child, 'exit');
+  } finally { child.kill(); }
+}
+
+test('live Babel and PostCSS configs reload imported helpers', async () => {
+  const { mkdirSync, symlinkSync } = await import('node:fs');
+  const directory = mkdtempSync(join(tmpdir(), 'oxvelte-live-preprocessors-'));
+  try {
+    mkdirSync(join(directory, 'node_modules', '@babel'), {recursive:true});
+    for (const name of ['svelte','@babel/core','postcss','postcss-load-config']) {
+      symlinkSync(join(runtime,'node_modules',name),join(directory,'node_modules',name),'junction');
+    }
+    const helper = join(directory,'mode.cjs');
+    writeFileSync(helper, 'module.exports=true;');
+    writeFileSync(join(directory,'babel.config.cjs'), `const enabled=require('./mode.cjs');module.exports={plugins:[function({types:t}){return{visitor:{Program(path){if(enabled)path.node.body=[t.expressionStatement(t.awaitExpression(t.numericLiteral(1)))]}}}}]};`);
+    const prefix = '<script>', body = 'let value = 1;';
+    const source = prefix + body + '</script>';
+    const request = {source,filename:join(directory,'Component.svelte'),settings:{compiler:{parser:'@babel/eslint-parser'},_oxvelteScripts:[{start:prefix.length,end:prefix.length+body.length,lang:'js'}]}};
+    await liveRequests({OXVELTE_COMPILER_RUNTIME:directory}, async next => {
+      assert.equal((await next(request)).kind, 'error');
+      writeFileSync(helper, 'module.exports=false;');
+      assert.equal((await next(request)).kind, 'warn');
+    });
+    writeFileSync(helper, "module.exports='unused';");
+    writeFileSync(join(directory,'postcss.config.cjs'), `const selector=require('./mode.cjs');module.exports={plugins:[{postcssPlugin:'selector',Rule(rule){rule.selector='.'+selector}}]};`);
+    const styleSource = "<div class='used'></div><style lang='postcss'>.original {color:red}</style>";
+    const styleRequest = {source:styleSource,filename:join(directory,'Component.svelte'),settings:{svelte:{compileOptions:{postcss:{configFilePath:directory}}},_oxvelteStyles:[{start:styleSource.indexOf('.original'),end:styleSource.indexOf('</style>'),lang:'postcss'}]}};
+    await liveRequests({OXVELTE_COMPILER_RUNTIME:directory}, async next => {
+      assert.ok((await next(styleRequest)).warnings.some(warning=>warning.code==='css_unused_selector'));
+      writeFileSync(helper, "module.exports='used';");
+      assert.ok(!(await next(styleRequest)).warnings.some(warning=>warning.code==='css_unused_selector'));
+    });
+  } finally {rmSync(directory,{recursive:true,force:true});}
+});

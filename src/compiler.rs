@@ -3,7 +3,6 @@
 use oxc::span::Span;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::{Mutex, OnceLock};
@@ -90,7 +89,6 @@ struct Runtime {
     child: Child,
     input: ChildStdin,
     output: BufReader<ChildStdout>,
-    cache: HashMap<String, CompileResult>,
 }
 impl Drop for Runtime {
     fn drop(&mut self) {
@@ -128,7 +126,6 @@ impl Runtime {
             child,
             input,
             output,
-            cache: HashMap::new(),
         })
     }
     fn compile(
@@ -143,9 +140,6 @@ impl Runtime {
             settings,
         })
         .map_err(|e| e.to_string())?;
-        if let Some(result) = self.cache.get(&key) {
-            return Ok(result.clone());
-        }
         let wire: WireResult = self.exchange(&key)?;
         let result = CompileResult {
             compiler_version: wire.compiler_version,
@@ -160,11 +154,6 @@ impl Runtime {
                 .map(|[start, end]| Span::new(start, end))
                 .collect(),
         };
-        // Keep memory bounded in long-running editor integrations.
-        if self.cache.len() >= 256 {
-            self.cache.clear();
-        }
-        self.cache.insert(key, result.clone());
         Ok(result)
     }
     fn exchange<T: DeserializeOwned>(&mut self, key: &str) -> Result<T, String> {
@@ -313,6 +302,91 @@ fn with_runtime<T>(action: impl FnOnce(&mut Runtime) -> Result<T, String>) -> Re
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn identical_component_requests_refresh_config_and_imported_styles() {
+        let directory = std::env::current_dir()
+            .unwrap()
+            .join("scripts/compiler-runtime/node_modules/.cache")
+            .join(format!(
+                "oxvelte-runtime-refresh-{}-{}",
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+        std::fs::create_dir_all(&directory).unwrap();
+        let config = directory.join("_config.cjs");
+        let dependency = directory.join("options.cjs");
+        std::fs::write(&config, "module.exports={languageOptions:{parserOptions:{svelteConfig:require('./options.cjs')}}};").unwrap();
+        std::fs::write(
+            &dependency,
+            "module.exports={compilerOptions:{experimental:{async:false}}};",
+        )
+        .unwrap();
+        let settings = serde_json::json!({"compiler":{"executableConfigPath":config}});
+        let filename = directory
+            .join("Refresh.svelte")
+            .to_string_lossy()
+            .into_owned();
+        let mut runtime = Runtime::start().unwrap();
+        let source = "<script>await new Promise(() => {});</script>";
+        assert_eq!(
+            runtime
+                .compile(source, Some(&filename), Some(&settings))
+                .unwrap()
+                .kind,
+            "error"
+        );
+        std::fs::write(
+            &dependency,
+            "module.exports={compilerOptions:{experimental:{async:true}}};",
+        )
+        .unwrap();
+        assert_eq!(
+            runtime
+                .compile(source, Some(&filename), Some(&settings))
+                .unwrap()
+                .kind,
+            "warn"
+        );
+        std::fs::write(&config, "module.exports={languageOptions:{parserOptions:{svelteConfig:{compilerOptions:{experimental:{async:false}}}}}};").unwrap();
+        assert_eq!(
+            runtime
+                .compile(source, Some(&filename), Some(&settings))
+                .unwrap()
+                .kind,
+            "error"
+        );
+
+        let imported = directory.join("_selectors.scss");
+        std::fs::write(&imported, ".unused {color: red}").unwrap();
+        let source =
+            "<div class='used'></div><style lang='scss'>@use 'selectors';</style>".to_string();
+        let start = source.find("@use").unwrap();
+        let end = source.find("</style>").unwrap();
+        let settings = serde_json::json!({"_oxvelteStyles":[{"start":start,"end":end,"element_start":source.find("<style").unwrap(),"element_end":source.len(),"lang":"scss"}]});
+        let first = runtime
+            .compile(&source, Some(&filename), Some(&settings))
+            .unwrap();
+        assert!(
+            first
+                .warnings
+                .iter()
+                .any(|warning| warning.code.as_deref() == Some("css_unused_selector")),
+            "{first:?}"
+        );
+        std::fs::write(&imported, ".used {color: red}").unwrap();
+        let second = runtime
+            .compile(&source, Some(&filename), Some(&settings))
+            .unwrap();
+        assert!(!second
+            .warnings
+            .iter()
+            .any(|warning| warning.code.as_deref() == Some("css_unused_selector")));
+        drop(runtime);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
     #[test]
     fn utf16_positions_map_to_utf8_boundaries() {
         assert_eq!(utf16_byte("a🦀é", 1), 1);
