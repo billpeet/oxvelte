@@ -77,10 +77,16 @@ impl Rule for Indent {
             let parsed = Parser::new(&allocator, &text, SourceType::ts()).parse();
             let base = span.start as i64 - prefix.len() as i64;
             if is_script {
-                if let Some(anchor) = layout.tokens.iter().rposition(|t| {
-                    t.span.end <= span.start
-                        && &layout.source[t.span.start as usize..t.span.end as usize] == "<"
-                }) {
+                if let Some(anchor) = ctx
+                    .ast
+                    .instance
+                    .iter()
+                    .chain(ctx.ast.module.iter())
+                    .find(|script| script.content_span == span)
+                    .and_then(|script| {
+                        layout.first(Span::new(script.span.start, script.content_span.start))
+                    })
+                {
                     for statement in &parsed.program.body {
                         let s = statement.span();
                         if let Some(first) = layout.first(Span::new(
@@ -151,6 +157,17 @@ mod tests {
             .into_iter()
             .filter(|d| d.rule_name == "svelte/indent")
             .collect()
+    }
+    #[test]
+    fn script_anchor_ignores_angle_brackets_in_attributes() {
+        let source = "<!-- 😀 -->\r\n<script data-note=\"<\">\r\nlet x = 1;\r\n</script>";
+        let d = lint(source, serde_json::json!([]));
+        assert_eq!(d.len(), 1);
+        assert_eq!(
+            d[0].message,
+            "Expected indentation of 2 spaces but found 0 spaces."
+        );
+        assert_eq!(d[0].span.start, source.find("let x").unwrap() as u32);
     }
     #[test]
     fn mixed_whitespace_reports_characters_when_width_matches() {

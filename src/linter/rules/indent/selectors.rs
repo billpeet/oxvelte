@@ -32,6 +32,7 @@ fn node_type(kind: AstKind<'_>) -> String {
             "ClassExpression"
         }
         .into(),
+        AstKind::FunctionBody(_) => "BlockStatement".into(),
         AstKind::BooleanLiteral(_)
         | AstKind::NullLiteral(_)
         | AstKind::NumericLiteral(_)
@@ -45,8 +46,22 @@ fn node_type(kind: AstKind<'_>) -> String {
 /// More complex esquery selectors are retained as compatibility debt.
 pub(super) fn matches(selector: &str, kind: AstKind<'_>, ancestors: &[AstKind<'_>]) -> bool {
     let name = node_type(kind);
+    let ancestors = ancestors
+        .iter()
+        .copied()
+        .filter(|kind| {
+            !matches!(
+                kind,
+                AstKind::FormalParameters(_)
+                    | AstKind::FormalParameter(_)
+                    | AstKind::CatchParameter(_)
+                    | AstKind::ParenthesizedExpression(_)
+            )
+        })
+        .collect::<Vec<_>>();
     selector.split(',').any(|s| {
-        let parts = s.split_whitespace().collect::<Vec<_>>();
+        let spaced = s.replace('>', " > ");
+        let parts = spaced.split_whitespace().collect::<Vec<_>>();
         let Some(last) = parts.last() else {
             return false;
         };
@@ -115,8 +130,31 @@ mod tests {
             n.kind(),
             &ancestors
         ));
+        assert!(matches(
+            "CallExpression>CallExpression",
+            n.kind(),
+            &ancestors
+        ));
         assert!(!matches(
             "VariableDeclarator > CallExpression",
+            n.kind(),
+            &ancestors
+        ));
+        let a = Allocator::default();
+        let p = Parser::new(&a, "function f(x) {}", SourceType::ts()).parse();
+        let s = SemanticBuilder::new().build(&p.program).semantic;
+        let n = s
+            .nodes()
+            .iter()
+            .find(|n| matches!(n.kind(), AstKind::BindingIdentifier(id) if id.name == "x"))
+            .unwrap();
+        let ancestors = s
+            .nodes()
+            .ancestors(n.id())
+            .map(|n| n.kind())
+            .collect::<Vec<_>>();
+        assert!(matches(
+            "FunctionDeclaration>Identifier",
             n.kind(),
             &ancestors
         ));
