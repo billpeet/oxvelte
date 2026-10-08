@@ -171,6 +171,48 @@ mod tests {
             format!("{source}<style lang=\"scss\">\n</style>\n\n")
         );
     }
+
+    #[test]
+    fn missing_block_reports_and_suggestions_use_valid_utf8_boundaries() {
+        for source in ["", "é", "😀"] {
+            let allocator = Allocator::default();
+            let parsed = parser::parse(source, &allocator);
+            let mut ctx = LintContext::with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(serde_json::json!([{
+                        "enforceScriptPresent": true, "enforceStylePresent": true,
+                        "script": "ts", "style": "scss"
+                    }])),
+                    settings: None,
+                },
+            );
+            BlockLang.run(&mut ctx);
+            assert_eq!(ctx.diagnostics.len(), 2);
+            for diagnostic in &ctx.diagnostics {
+                assert_eq!(diagnostic.span.start, diagnostic.span.end);
+                assert!(source.is_char_boundary(diagnostic.span.start as usize));
+                assert!(diagnostic.span.end as usize <= source.len());
+                assert_eq!(diagnostic.suggestions.len(), 1);
+                for suggestion in &diagnostic.suggestions {
+                    assert!(source.is_char_boundary(suggestion.fix.span.start as usize));
+                    assert!(source.is_char_boundary(suggestion.fix.span.end as usize));
+                    assert!(suggestion.fix.span.end as usize <= source.len());
+                    assert!(apply(source, suggestion).contains(source));
+                }
+            }
+            assert_eq!(ctx.diagnostics[0].span.start as usize, source.len());
+        }
+    }
+}
+
+/// Upstream reports a synthetic column 2, even when it lies outside the source.
+/// Keep byte spans valid: empty source uses column 1; an initial astral character
+/// uses the next UTF-8 boundary, which represents UTF-16 column 3 instead of 2.
+fn missing_block_span(source: &str) -> Span {
+    let position = source.chars().next().map_or(0, char::len_utf8) as u32;
+    Span::new(position, position)
 }
 
 fn parse_langs(opts: Option<&serde_json::Value>, key: &str) -> Option<Vec<Option<String>>> {
@@ -387,7 +429,7 @@ impl Rule for BlockLang {
                     "The <script> block should be present and its lang attribute should be {}.",
                     desc
                 ),
-                Span::new(1, 1),
+                missing_block_span(ctx.source),
                 missing_block_suggestions("script", script_langs.as_ref().unwrap(), ctx.source),
             );
         }
@@ -416,7 +458,7 @@ impl Rule for BlockLang {
                     "The <style> block should be present and its lang attribute should be {}.",
                     desc
                 ),
-                Span::new(1, 1),
+                missing_block_span(ctx.source),
                 missing_block_suggestions("style", style_langs.as_ref().unwrap(), ctx.source),
             );
         }
