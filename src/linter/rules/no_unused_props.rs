@@ -48,21 +48,26 @@ impl Rule for NoUnusedProps {
         };
 
         let before_props = &content[..props_call];
-        let destructured = extract_destructured_props(before_props);
-        let has_rest = before_props.contains("...");
-
+        let Some(binding) = props_declarator(ctx, props_call as u32) else {
+            return;
+        };
+        let (destructured, has_rest, uses_destructuring) = match &binding.id {
+            oxc::ast::ast::BindingPattern::ObjectPattern(object) => (
+                object
+                    .properties
+                    .iter()
+                    .filter_map(|p| p.key.static_name().map(|s| s.to_string()))
+                    .collect::<HashSet<_>>(),
+                object.rest.is_some(),
+                true,
+            ),
+            _ => (HashSet::new(), false, false),
+        };
         let decl_start = [before_props.rfind("let "), before_props.rfind("const ")]
             .into_iter()
             .flatten()
             .max()
             .unwrap_or(0);
-        let decl = &before_props[decl_start..];
-        let after_kw = decl.find('{');
-        let uses_destructuring = after_kw.is_some() && {
-            let brace_pos = after_kw.unwrap();
-            let colon_pos = decl.find(':').unwrap_or(decl.len());
-            brace_pos < colon_pos
-        };
 
         if has_rest {
             return;
@@ -276,107 +281,35 @@ fn nested_type_properties(
         .unwrap_or_default()
 }
 
-fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
-    let semantic = ctx.instance_semantic?;
-    let content_offset = ctx.ast.instance.as_ref()?.content_span.start;
-    semantic.nodes().iter().find_map(|node| {
-        let AstKind::VariableDeclarator(decl) = node.kind() else {
-            return None;
-        };
-        let Some(Expression::CallExpression(call)) = &decl.init else {
-            return None;
-        };
-        if !matches!(&call.callee, Expression::Identifier(id) if id.name == "$props" && id.span.start == call_start) {
-            return None;
-        }
-        let binding = decl.id.span();
-        let end = decl.type_annotation.as_ref().map_or(binding.end, |annotation| annotation.span.end);
-        Some(Span::new(content_offset + binding.start, content_offset + end))
+fn props_declarator<'a>(
+    ctx: &LintContext<'a>,
+    call_start: u32,
+) -> Option<&'a oxc::ast::ast::VariableDeclarator<'a>> {
+    ctx.instance_semantic?.nodes().iter().find_map(|node| {
+        let AstKind::VariableDeclarator(decl) = node.kind() else { return None };
+        let Some(Expression::CallExpression(call)) = &decl.init else { return None };
+        matches!(&call.callee, Expression::Identifier(id) if id.name == "$props" && id.span.start == call_start).then_some(decl)
     })
+}
+
+fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
+    let decl = props_declarator(ctx, call_start)?;
+    let content_offset = ctx.ast.instance.as_ref()?.content_span.start;
+    let binding = decl.id.span();
+    let end = decl
+        .type_annotation
+        .as_ref()
+        .map_or(binding.end, |annotation| annotation.span.end);
+    Some(Span::new(
+        content_offset + binding.start,
+        content_offset + end,
+    ))
 }
 
 fn has_prop_access(source: &str, base: &str, prop: &str) -> bool {
     source.contains(&format!("{}.{}", base, prop))
         || source.contains(&format!("{}['{}']", base, prop))
         || source.contains(&format!("{}[\"{}\"]", base, prop))
-}
-
-fn extract_destructured_props(before_props: &str) -> HashSet<String> {
-    let mut props = HashSet::new();
-    let decl_start = [before_props.rfind("let "), before_props.rfind("const ")]
-        .into_iter()
-        .flatten()
-        .max()
-        .unwrap_or(0);
-    let after_decl = &before_props[decl_start..];
-    let open = match after_decl.find('{') {
-        Some(p) => decl_start + p,
-        None => return props,
-    };
-    let mut depth = 0;
-    let mut close = None;
-    for (i, b) in before_props[open..].bytes().enumerate() {
-        match b {
-            b'{' => depth += 1,
-            b'}' => {
-                depth -= 1;
-                if depth == 0 {
-                    close = Some(open + i);
-                    break;
-                }
-            }
-            _ => {}
-        }
-    }
-    if let Some(close) = close {
-        if open < close {
-            let inner = &before_props[open + 1..close];
-            let parts = split_at_depth0(inner, ',');
-            for part in &parts {
-                let part = part
-                    .lines()
-                    .filter(|l| !l.trim().starts_with("//"))
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                let part = part.trim();
-                if part.starts_with("...") {
-                    continue;
-                }
-                let mut name_end = part.len();
-                let mut d = 0i32;
-                let pbytes = part.as_bytes();
-                for (i, c) in part.char_indices() {
-                    match c {
-                        '{' | '(' | '[' | '<' => d += 1,
-                        '}' | ')' | ']' => {
-                            d -= 1;
-                            if d < 0 {
-                                d = 0;
-                            }
-                        }
-                        '>' => {
-                            if !(i > 0 && pbytes[i - 1] == b'=') {
-                                d -= 1;
-                                if d < 0 {
-                                    d = 0;
-                                }
-                            }
-                        }
-                        ':' | '=' if d == 0 => {
-                            name_end = i;
-                            break;
-                        }
-                        _ => {}
-                    }
-                }
-                let name = part[..name_end].trim().trim_matches('\'').trim_matches('"');
-                if !name.is_empty() {
-                    props.insert(name.to_string());
-                }
-            }
-        }
-    }
-    props
 }
 
 fn split_at_depth0(s: &str, sep: char) -> Vec<&str> {
