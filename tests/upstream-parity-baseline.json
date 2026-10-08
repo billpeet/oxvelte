@@ -403,21 +403,6 @@
     "no-dupe-style-properties/invalid/test01-input.svelte": {
       "diagnostics": "19bc98152226f7c3cdc9ecc77a1cce435329c625d53db200f75c1ee33f186721"
     },
-    "no-dynamic-slot-name/invalid/literal-slot01-input.svelte": {
-      "diagnostics": "00a2f695b6399ae213ee869a1f21e14433e93e0bc1ce4f96c7a72cdded888a3b",
-      "fix_output": "c56bdcd873fa238749329537341934f55b69b0b675c25b8e3b9c38742256c62c"
-    },
-    "no-dynamic-slot-name/invalid/multi-report01-input.svelte": {
-      "diagnostics": "73baa5b68f8c16272a3bfda885a8a5768f28f08d0e249aee581c237f647494fd",
-      "fix_output": "5b1b14ae14d69248dd99865dd205cb501c975b03193f74797e342b00f7fe9cee"
-    },
-    "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte": {
-      "diagnostics": "9ce328dee3f460642caef81d93fbab6817a21a15dbf156be51c05cb019114760"
-    },
-    "no-dynamic-slot-name/invalid/var-slot01-input.svelte": {
-      "diagnostics": "4c19804e1fc4daa28665b00b79944a804879c5de3d39cb1f161ed295187e66b3",
-      "fix_output": "2d20105568df6c33925575e9c00f034c46e25fce42db26c34eb1905fb897f829"
-    },
     "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte": {
       "diagnostics": "ba29e2fcdd66ca3dedef84f1c2dc5ca22b062727704b265278bd26438fcbbd02"
     },

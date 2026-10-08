@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 910,
-    "gaps": 325,
+    "pass": 914,
+    "gaps": 321,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1643,7 +1643,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 70,
+      "count": 66,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1682,35 +1682,6 @@
             "id": "no-dupe-style-properties/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics"
-            ]
-          }
-        ],
-        "no-dynamic-slot-name": [
-          {
-            "id": "no-dynamic-slot-name/invalid/literal-slot01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/multi-report01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/var-slot01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
             ]
           }
         ],
@@ -2259,7 +2230,7 @@
       }
     },
     "diagnostics": {
-      "count": 129,
+      "count": 125,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2269,7 +2240,6 @@
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
-        "no-dynamic-slot-name": 4,
         "no-export-load-in-svelte-module-in-kit-pages": 4,
         "no-object-in-text-mustaches": 4,
         "no-reactive-reassign": 4,
@@ -2312,10 +2282,9 @@
       }
     },
     "fix_output": {
-      "count": 55,
+      "count": 52,
       "rules": {
         "mustache-spacing": 1,
-        "no-dynamic-slot-name": 3,
         "no-useless-mustaches": 7,
         "prefer-class-directive": 10,
         "prefer-style-directive": 10,
