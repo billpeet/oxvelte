@@ -977,14 +977,6 @@
     "require-optimized-style-attribute/invalid/test01-input.svelte": {
       "diagnostics": "4906d5c922733e8573e7ac1380d3180f6ecdbb2a1f372a4decf4dcfe39447688"
     },
-    "require-store-callbacks-use-set-param/invalid/test01-input.svelte": {
-      "diagnostics": "bde6078dc2605b2b98bcd7adc0ba2c603501d401a3e53a72e2140fce13710214",
-      "suggestions": "5d0836f18e50aadffd5b277e06c975feb8b621c704f46c4f3bd956d64e39aec6"
-    },
-    "require-store-callbacks-use-set-param/invalid/test02-input.svelte": {
-      "diagnostics": "bd34e5e387095b0624223ad96e134be068e3ce6c19459b3c994c51d2b6c10da2",
-      "suggestions": "36f8acf2d835680202a5fa38a75c5949cc413202dcf47b81e5124c668be49b93"
-    },
     "require-store-reactive-access/invalid/attrs-store01-input.svelte": {
       "diagnostics": "1228e1e9e0c5d485470104827eded4fe27ba61e34bd211c972cb9a9305a72c02",
       "fix_output": "6ac1543be3e61f1a7454c6269886856b3c8e2091092c819ccdb481dd74d5f783"

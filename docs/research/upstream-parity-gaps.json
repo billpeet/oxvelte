@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 896,
-    "gaps": 339,
+    "pass": 898,
+    "gaps": 337,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1643,7 +1643,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 84,
+      "count": 82,
       "rules": {
         "consistent-selector-style": [
           {
@@ -2144,22 +2144,6 @@
             ]
           }
         ],
-        "require-store-callbacks-use-set-param": [
-          {
-            "id": "require-store-callbacks-use-set-param/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "require-store-callbacks-use-set-param/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          }
-        ],
         "require-store-reactive-access": [
           {
             "id": "require-store-reactive-access/invalid/attrs-store01-input.svelte",
@@ -2353,7 +2337,7 @@
       }
     },
     "diagnostics": {
-      "count": 143,
+      "count": 141,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2379,7 +2363,6 @@
         "prefer-destructured-store-props": 9,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
-        "require-store-callbacks-use-set-param": 2,
         "require-store-reactive-access": 13,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
@@ -2422,11 +2405,10 @@
       }
     },
     "suggestions": {
-      "count": 11,
+      "count": 9,
       "rules": {
         "no-add-event-listener": 2,
-        "prefer-destructured-store-props": 7,
-        "require-store-callbacks-use-set-param": 2
+        "prefer-destructured-store-props": 7
       }
     },
     "compiler_capability": {
