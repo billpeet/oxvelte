@@ -48,6 +48,7 @@ jobs:
       - run: node --test tests/compiler-configuration.test.mjs
       - run: node --test scripts/summarize-parity.test.mjs
       - run: cargo test --locked --test upstream_adapter
+      - run: cargo test --locked --test jobsys_regressions
       - run: cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
       - uses: actions/upload-artifact@v4
         if: always()

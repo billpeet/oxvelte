@@ -196,6 +196,7 @@ impl Rule for NoUnusedProps {
                 // Passing or spreading the object consumes all its properties.
                 if ctx.source.contains(&format!("{{{}}}", prop_name))
                     || ctx.source.contains(&format!("...{}", prop_name))
+                    || property_is_consumed_whole(ctx, prop_name)
                 {
                     continue;
                 }
@@ -318,8 +319,77 @@ fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
 
 fn has_prop_access(source: &str, base: &str, prop: &str) -> bool {
     source.contains(&format!("{}.{}", base, prop))
+        || source.contains(&format!("{}?.{}", base, prop))
         || source.contains(&format!("{}['{}']", base, prop))
         || source.contains(&format!("{}[\"{}\"]", base, prop))
+        || source.contains(&format!("{}?.['{}']", base, prop))
+        || source.contains(&format!("{}?.[\"{}\"]", base, prop))
+}
+
+/// Like upstream's empty property path, a bare reference consumes the whole
+/// object: passing it, aliasing it, or using it in a conditional is sufficient.
+fn property_is_consumed_whole(ctx: &LintContext<'_>, property: &str) -> bool {
+    use crate::ast::{Attribute, AttributeValue, DirectiveKind, TemplateNode};
+    let mut bound = false;
+    crate::linter::walk_template_nodes(&ctx.ast.html, &mut |node| {
+        if let TemplateNode::Element(element) = node {
+            bound |= element.attributes.iter().any(|a| matches!(a,
+                Attribute::Directive {kind: DirectiveKind::Binding, name, value: AttributeValue::True, ..}
+                if name == property));
+        }
+    });
+    if bound {
+        return true;
+    }
+    let Some(semantic) = ctx.instance_semantic else {
+        return false;
+    };
+    let Some(call) = ctx
+        .ast
+        .instance
+        .as_ref()
+        .and_then(|s| s.content.find("$props()"))
+    else {
+        return false;
+    };
+    let Some(decl) = props_declarator(ctx, call as u32) else {
+        return false;
+    };
+    let oxc::ast::ast::BindingPattern::ObjectPattern(object) = &decl.id else {
+        return false;
+    };
+    let Some(binding) = object
+        .properties
+        .iter()
+        .find(|p| p.key.static_name().as_deref() == Some(property))
+    else {
+        return false;
+    };
+    let mut pattern = &binding.value;
+    while let oxc::ast::ast::BindingPattern::AssignmentPattern(assignment) = pattern {
+        pattern = &assignment.left;
+    }
+    let oxc::ast::ast::BindingPattern::BindingIdentifier(identifier) = pattern else {
+        return false;
+    };
+    let Some(symbol) = identifier.symbol_id.get() else {
+        return false;
+    };
+    let nodes = semantic.nodes();
+    semantic
+        .scoping()
+        .get_resolved_references(symbol)
+        .any(|reference| {
+            if !reference.is_read() {
+                return false;
+            }
+            let span = nodes.kind(reference.node_id()).span();
+            match nodes.parent_kind(reference.node_id()) {
+                AstKind::StaticMemberExpression(member) if member.object.span() == span => false,
+                AstKind::ComputedMemberExpression(member) if member.object.span() == span => false,
+                _ => true,
+            }
+        })
 }
 
 fn split_at_depth0(s: &str, sep: char) -> Vec<&str> {
@@ -465,6 +535,9 @@ fn extract_type_properties_with_file(
 fn find_type_end(s: &str) -> usize {
     let mut depth = 0i32;
     for (i, c) in s.char_indices() {
+        if c == '>' && i > 0 && s.as_bytes()[i - 1] == b'=' {
+            continue;
+        }
         match c {
             '{' | '(' | '<' => depth += 1,
             '}' | ')' | '>' => {

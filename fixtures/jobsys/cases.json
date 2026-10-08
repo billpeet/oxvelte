@@ -91,5 +91,31 @@
       "Found a mutable instance of the built-in Set class. Use SvelteSet instead."
     ],
     "spanText": "new Set<T>()"
+  },
+  {
+    "name": "nested_optional",
+    "file": "nested-optional.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "nested_alias",
+    "file": "nested-alias.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "nested_bind",
+    "file": "nested-bind.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "intersection_callback",
+    "file": "intersection-callback.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": [
+      "'missing' is an unused Props property."
+    ]
   }
 ]

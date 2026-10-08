@@ -73,3 +73,7 @@ fixture!(destructuring_default, "destructuring-default_svelte");
 fixture!(index_signature_boundary, "index-signature-boundary_svelte");
 fixture!(nested_array_consumption, "nested-array-consumption_svelte");
 fixture!(exported_mutable_set, "exported_mutable_set");
+fixture!(nested_optional, "nested_optional");
+fixture!(nested_alias, "nested_alias");
+fixture!(nested_bind, "nested_bind");
+fixture!(intersection_callback, "intersection_callback");
