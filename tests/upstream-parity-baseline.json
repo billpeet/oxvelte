@@ -21,25 +21,6 @@
     "@typescript-eslint/no-unnecessary-condition/valid/template01-input.svelte": {
       "unsupported_rule": "09af6ecde1c19ac9a214278a72238e65856065627151a19d9d2fa55f99decab5"
     },
-    "consistent-selector-style/invalid/id-class-type/should-be-id-combination01-input.svelte": {
-      "diagnostics": "59d865268918fb39feadc3bb7e8cce1a3d9b937bd685e10ce86515b1a2d9e787"
-    },
-    "consistent-selector-style/invalid/type-id-class/should-be-id-with-components01-input.svelte": {
-      "diagnostic_count": "1ce07802b353885f3d2ef49c13ed59f611de91dd6c6b45908ad7ba7471dda5db",
-      "diagnostics": "ae8c29d80221ca79cffedc3e38c08cc4231b9b90c220c04803a05a8a6d3046fc"
-    },
-    "consistent-selector-style/invalid/type-id-class/should-be-id01-input.svelte": {
-      "diagnostic_count": "1ce07802b353885f3d2ef49c13ed59f611de91dd6c6b45908ad7ba7471dda5db",
-      "diagnostics": "5e4dc9cc1ea507d0fe45b7e06e42d98edb1f082e31e9bffa6aa6898e5f73353e"
-    },
-    "consistent-selector-style/invalid/type-id-class/should-be-type-with-components01-input.svelte": {
-      "diagnostic_count": "d1487e8cc0d4155ffca386dd92f6c27909f907dc649ccdc069d74629db8dad77",
-      "diagnostics": "1c846ffbbb259de00185d666e5038b684ba4133fdbb5f97a38658658106eae4e"
-    },
-    "consistent-selector-style/invalid/type-id-class/should-be-type01-input.svelte": {
-      "diagnostic_count": "d1487e8cc0d4155ffca386dd92f6c27909f907dc649ccdc069d74629db8dad77",
-      "diagnostics": "d31f437e4e97151a16b2e8f37f7fea6a92ffaf6715a26c5ec1cea8156d90e8fd"
-    },
     "experimental-require-strict-events/invalid/no-strict-events01-input.svelte": {
       "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
     },

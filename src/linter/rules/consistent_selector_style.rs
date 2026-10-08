@@ -30,6 +30,9 @@ fn collect_template_info(
     let mut element_usage: HashMap<String, usize> = HashMap::new();
     walk_template_nodes(html, &mut |node| {
         if let TemplateNode::Element(el) = node {
+            if el.kind().is_component() {
+                return;
+            }
             *element_usage.entry(el.name.clone()).or_insert(0) += 1;
             let is_component = el.kind().is_component();
             for attr in &el.attributes {
@@ -129,7 +132,7 @@ impl Rule for ConsistentSelectorStyle {
                     .filter_map(|v| v.as_str().map(String::from))
                     .collect()
             })
-            .unwrap_or_default();
+            .unwrap_or_else(|| vec!["type".into(), "id".into(), "class".into()]);
 
         let check_global = opts
             .and_then(|o| o.get("checkGlobal"))
@@ -232,12 +235,7 @@ impl Rule for ConsistentSelectorStyle {
         // `walk_components(visit_global=check_global)` additionally descends
         // into `:global(...)` inline pseudo-class bodies.
         let mut diagnostics: Vec<(String, Span)> = Vec::new();
-        let style_span_start = style.span.start;
-        let css_start_in_source = style_span_start
-            + (ctx.source[style_span_start as usize..style.span.end as usize]
-                .find('>')
-                .map(|p| p + 1)
-                .unwrap_or(0)) as u32;
+        let css_start_in_source = style.content_span.start;
 
         for_each_rule_prelude(
             &style.content,
@@ -251,6 +249,7 @@ impl Rule for ConsistentSelectorStyle {
                 let Some(list) = parse_selector_list(prelude_text) else {
                     return;
                 };
+                let mut occurrences = HashMap::<String, usize>::new();
                 walk_components(&list, check_global, &mut |comp, in_global_body| {
                     // `in_global_body` marks components that live inside
                     // `:global(...)` inline pseudo — skip when not opted in.
@@ -266,6 +265,7 @@ impl Rule for ConsistentSelectorStyle {
                                     '.',
                                     name,
                                     start_in_source as usize,
+                                    &mut occurrences,
                                 );
                                 diagnostics.push((
                                     format!(
@@ -284,6 +284,7 @@ impl Rule for ConsistentSelectorStyle {
                                     '#',
                                     name,
                                     start_in_source as usize,
+                                    &mut occurrences,
                                 );
                                 diagnostics.push((
                                     format!(
@@ -297,8 +298,12 @@ impl Rule for ConsistentSelectorStyle {
                         Component::LocalName(local) => {
                             let name = local.name.as_str();
                             if let Some(suggested) = check_type_selector(name) {
-                                let (sp, end) =
-                                    locate_tag(prelude_text, name, start_in_source as usize);
+                                let (sp, end) = locate_tag(
+                                    prelude_text,
+                                    name,
+                                    start_in_source as usize,
+                                    &mut occurrences,
+                                );
                                 diagnostics.push((
                                     format!(
                                         "Selector should select by {} instead of element type",
@@ -323,19 +328,38 @@ impl Rule for ConsistentSelectorStyle {
 /// Find `.name` / `#name` in `text` and return its absolute (start, end) in
 /// the source. Falls back to the prelude start if the prefix isn't found
 /// (shouldn't happen for a selector the parser accepted).
-fn locate_prefixed(text: &str, prefix: char, name: &str, base_offset: usize) -> (usize, usize) {
+fn locate_prefixed(
+    text: &str,
+    prefix: char,
+    name: &str,
+    base_offset: usize,
+    occurrences: &mut HashMap<String, usize>,
+) -> (usize, usize) {
     let needle = format!("{}{}", prefix, name);
-    let rel = text.find(&needle).unwrap_or(0);
+    let occurrence = occurrences.entry(needle.clone()).or_default();
+    let rel = text
+        .match_indices(&needle)
+        .nth(*occurrence)
+        .map(|(i, _)| i)
+        .unwrap_or(0);
+    *occurrence += 1;
     let start = base_offset + rel;
     (start, start + needle.len())
 }
 
 /// Find a bare tag name in a selector (not preceded/followed by another
 /// identifier character) and return its absolute (start, end) in source.
-fn locate_tag(text: &str, name: &str, base_offset: usize) -> (usize, usize) {
+fn locate_tag(
+    text: &str,
+    name: &str,
+    base_offset: usize,
+    occurrences: &mut HashMap<String, usize>,
+) -> (usize, usize) {
     let bytes = text.as_bytes();
     let name_len = name.len();
     let mut search = 0;
+    let occurrence = occurrences.entry(name.into()).or_default();
+    let mut seen = 0;
     while let Some(rel) = text[search..].find(name) {
         let abs_rel = search + rel;
         let before = if abs_rel == 0 {
@@ -353,10 +377,39 @@ fn locate_tag(text: &str, name: &str, base_offset: usize) -> (usize, usize) {
             || matches!(before, b'_' | b'-' | b'.' | b'#' | b':' | b'[');
         let bad_after = after.is_ascii_alphanumeric() || matches!(after, b'_' | b'-');
         if !bad_before && !bad_after {
-            let start = base_offset + abs_rel;
-            return (start, start + name_len);
+            if seen == *occurrence {
+                *occurrence += 1;
+                let start = base_offset + abs_rel;
+                return (start, start + name_len);
+            }
+            seen += 1;
         }
         search = abs_rel + name_len;
     }
     (base_offset, base_offset + name_len)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn defaults_ignore_component_props_and_locate_each_selector_occurrence() {
+        let source = "<!-- é -->\n<i id=italic/><Widget id=italic/><style data-label='>'>#italic, #italic {color:red}</style>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let mut ctx = LintContext::new(&parsed.ast, source);
+        ConsistentSelectorStyle.run(&mut ctx);
+        let diagnostics = ctx.into_diagnostics();
+        let offsets: Vec<_> = source
+            .match_indices("#italic")
+            .map(|(i, _)| i as u32)
+            .collect();
+        assert_eq!(
+            diagnostics.iter().map(|d| d.span.start).collect::<Vec<_>>(),
+            offsets
+        );
+        assert!(diagnostics
+            .iter()
+            .all(|d| d.message == "Selector should select by element type instead of ID"));
+    }
 }

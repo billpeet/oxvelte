@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 951,
-    "gaps": 284,
+    "pass": 956,
+    "gaps": 279,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,38 +1362,8 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 20,
+      "count": 16,
       "rules": {
-        "consistent-selector-style": [
-          {
-            "id": "consistent-selector-style/invalid/type-id-class/should-be-id-with-components01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "consistent-selector-style/invalid/type-id-class/should-be-id01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "consistent-selector-style/invalid/type-id-class/should-be-type-with-components01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "consistent-selector-style/invalid/type-id-class/should-be-type01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
         "html-closing-bracket-new-line": [
           {
             "id": "html-closing-bracket-new-line/invalid/singleline-always/test01-input.svelte",
@@ -1584,16 +1554,8 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 47,
+      "count": 46,
       "rules": {
-        "consistent-selector-style": [
-          {
-            "id": "consistent-selector-style/invalid/id-class-type/should-be-id-combination01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
         "no-dom-manipulating": [
           {
             "id": "no-dom-manipulating/invalid/chain01-input.svelte",
@@ -1972,10 +1934,27 @@
         "prefer-derived-over-derived-by": 9
       }
     },
-    "diagnostics": {
-      "count": 98,
+    "diagnostic_count": {
+      "count": 42,
       "rules": {
-        "consistent-selector-style": 5,
+        "html-closing-bracket-new-line": 1,
+        "mustache-spacing": 1,
+        "no-dupe-else-if-blocks": 2,
+        "no-dupe-style-properties": 1,
+        "no-reactive-reassign": 1,
+        "no-shorthand-style-property-overrides": 1,
+        "no-top-level-browser-globals": 2,
+        "no-unused-svelte-ignore": 18,
+        "prefer-class-directive": 2,
+        "prefer-style-directive": 3,
+        "shorthand-attribute": 1,
+        "shorthand-directive": 1,
+        "valid-compile": 8
+      }
+    },
+    "diagnostics": {
+      "count": 93,
+      "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
         "mustache-spacing": 1,
@@ -1998,25 +1977,6 @@
         "valid-compile": 8,
         "valid-each-key": 2,
         "valid-style-parse": 2
-      }
-    },
-    "diagnostic_count": {
-      "count": 46,
-      "rules": {
-        "consistent-selector-style": 4,
-        "html-closing-bracket-new-line": 1,
-        "mustache-spacing": 1,
-        "no-dupe-else-if-blocks": 2,
-        "no-dupe-style-properties": 1,
-        "no-reactive-reassign": 1,
-        "no-shorthand-style-property-overrides": 1,
-        "no-top-level-browser-globals": 2,
-        "no-unused-svelte-ignore": 18,
-        "prefer-class-directive": 2,
-        "prefer-style-directive": 3,
-        "shorthand-attribute": 1,
-        "shorthand-directive": 1,
-        "valid-compile": 8
       }
     },
     "fix_output": {
