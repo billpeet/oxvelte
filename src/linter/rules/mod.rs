@@ -10,6 +10,7 @@ mod html_self_closing;
 mod infinite_reactive_loop;
 mod max_lines_per_block;
 mod no_add_event_listener;
+mod no_at_const_tags;
 mod no_at_debug_tags;
 mod no_at_html_tags;
 mod no_bind_value_on_checkable_inputs;
@@ -202,6 +203,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
     vec![
         Box::new(no_at_html_tags::NoAtHtmlTags),
         Box::new(no_at_debug_tags::NoAtDebugTags),
+        Box::new(no_at_const_tags::NoAtConstTags),
         Box::new(no_dupe_else_if_blocks::NoDupeElseIfBlocks),
         Box::new(no_dupe_style_properties::NoDupeStyleProperties),
         Box::new(no_dupe_use_directives::NoDupeUseDirectives),
