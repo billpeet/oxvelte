@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 937,
-    "gaps": 298,
+    "pass": 946,
+    "gaps": 289,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1610,7 +1610,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 57,
+      "count": 48,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1870,69 +1870,6 @@
             ]
           }
         ],
-        "prefer-destructured-store-props": [
-          {
-            "id": "prefer-destructured-store-props/invalid/fixer-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/member01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/member02-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/member03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/module-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/runes-with-store01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "prefer-destructured-store-props/invalid/test03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          }
-        ],
         "prefer-style-directive": [
           {
             "id": "prefer-style-directive/invalid/complex-test01-input.svelte",
@@ -2070,7 +2007,7 @@
       }
     },
     "diagnostics": {
-      "count": 112,
+      "count": 103,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2090,7 +2027,6 @@
         "no-unused-svelte-ignore": 18,
         "no-useless-mustaches": 6,
         "prefer-class-directive": 10,
-        "prefer-destructured-store-props": 9,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
         "shorthand-attribute": 1,
@@ -2142,12 +2078,6 @@
       "rules": {
         "no-useless-mustaches": 2,
         "prefer-const": 3
-      }
-    },
-    "suggestions": {
-      "count": 7,
-      "rules": {
-        "prefer-destructured-store-props": 7
       }
     },
     "executable_configuration": {

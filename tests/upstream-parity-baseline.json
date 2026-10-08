@@ -823,40 +823,6 @@
     "prefer-derived-over-derived-by/valid/plain-derived-input.svelte": {
       "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
     },
-    "prefer-destructured-store-props/invalid/fixer-test01-input.svelte": {
-      "diagnostics": "8fd21ccf020c6c1cd0d78b737135fe28ddac79e7b2f9fa16462d759e1bdb1c17",
-      "suggestions": "1185990426b34f3017172b7e476af56fe6f71941d156bdbe8a13b682a805e1f8"
-    },
-    "prefer-destructured-store-props/invalid/member01-input.svelte": {
-      "diagnostics": "a17eb607de24fed9351f75d0b739929f79cfb4e511bd07873c47daa77d9b9ae3",
-      "suggestions": "b0a34f17899f5242ce3905f374326d2b1d4d705a52eee23c8dc3eab60c9f61b5"
-    },
-    "prefer-destructured-store-props/invalid/member02-input.svelte": {
-      "diagnostics": "59be57ebe96ad57f3f69d6053a8188fc797d910fc16008d254f06c48f3aa5f42",
-      "suggestions": "49776c1b590d81d3ae6ca3bb46ff14df56f3988ed23c78dae5a274896eda1b8f"
-    },
-    "prefer-destructured-store-props/invalid/member03-input.svelte": {
-      "diagnostics": "38fc9b3cc6618dc8954058e6dc306ea830beda2d6c3b5346b1e910358e71aaec",
-      "suggestions": "60dc7413d6f1e181618d000cc060f21ebaf00a99e79c1a509e6f4d7c3a67f1d0"
-    },
-    "prefer-destructured-store-props/invalid/module-input.svelte": {
-      "diagnostics": "27f94380d695e33a2825c1ad7ba3e399e36aefe5ad70df45607968f92ef00ff9"
-    },
-    "prefer-destructured-store-props/invalid/runes-with-store01-input.svelte": {
-      "diagnostics": "097785c09fe484104b0f4acf8d00dd46a7a1bc422407bb5d89649d27277e54c7",
-      "suggestions": "679d02853bc0c243459b6cd45adcda662932754b56d0f45a30d7672d35421d9d"
-    },
-    "prefer-destructured-store-props/invalid/test01-input.svelte": {
-      "diagnostics": "3d4c80aea157ae06cc48bae395f7cce83b7bedd47b9551236fb30977d25acfe8",
-      "suggestions": "6849d3611a45a6ada2e4357eda729dc299526315b3d6146cb31266a8b7484cfa"
-    },
-    "prefer-destructured-store-props/invalid/test02-input.svelte": {
-      "diagnostics": "c7ee29aef6ae6608777376879c66f38d06dba8a26cdcbd976b95b9f2ea293d90"
-    },
-    "prefer-destructured-store-props/invalid/test03-input.svelte": {
-      "diagnostics": "7f8fb0cbfb2cc5c18d3c397afcb513625e20077211fd03fcf665b55838b37b93",
-      "suggestions": "73eb5df3b2a83499b9a027f5a66ea8aabe05cbf20bf9eb1c2ca35a399b71b497"
-    },
     "prefer-style-directive/invalid/complex-test01-input.svelte": {
       "diagnostics": "f6f9aec524a0c11c09be39cab062b07463503b23b7bf71b2912e46f1be30480d",
       "fix_output": "49ea450164ae912d9e657f4be6faea24345956cacca63117d1f71463e7c8e564"
