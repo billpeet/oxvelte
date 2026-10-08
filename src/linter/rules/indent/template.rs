@@ -189,7 +189,7 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 collect_nodes(&n.body.nodes, layout);
             }
             TemplateNode::SnippetBlock(n) => {
-                region(layout, n.params_span, RegionKind::Parameters);
+                if let Some(params) = n.params_span { region(layout, params, RegionKind::Parameters); }
                 collect_nodes(&n.body.nodes, layout);
             }
         }
@@ -419,7 +419,7 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                                 .iter()
                                 .enumerate()
                                 .find(|(_, t)| {
-                                    t.span.start >= n.params_span.end
+                                    t.span.start >= n.params_span.map_or(layout.tokens[left].span.end, |s|s.end)
                                         && t.span.end <= header.end
                                         && &layout.source
                                             [t.span.start as usize..t.span.end as usize]
@@ -428,7 +428,7 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                                 .map(|(i, _)| i);
                             if let Some(right) = right {
                                 layout.list(
-                                    &[n.params_span],
+                                    &n.params_span.into_iter().collect::<Vec<_>>(),
                                     layout.tokens[left].span,
                                     Some(layout.tokens[right].span),
                                     1,
