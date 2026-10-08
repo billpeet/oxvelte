@@ -8,14 +8,22 @@ function resolver(filename) {
   const anchor = root ? path.join(path.resolve(root), 'package.json') : path.resolve(filename || path.join(process.cwd(), '__oxvelte__.svelte'));
   return createRequire(anchor);
 }
+function lineStarts(text) {
+  const starts = [0];
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '\r') { if (text[i + 1] === '\n') i++; starts.push(i + 1); }
+    else if (text[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
 function indexAt(text, line, column) {
-  let index = 0;
-  for (let i = 1; i < line; i++) { const n = text.indexOf('\n', index); if (n < 0) return text.length; index = n + 1; }
-  return Math.min(text.length, index + column);
+  const starts = lineStarts(text);
+  return Math.min(text.length, (starts[line - 1] ?? text.length) + column);
 }
 function positionAt(text, index) {
-  const before = text.slice(0, index); const line = before.split('\n').length;
-  return { line, column: index - (before.lastIndexOf('\n') + 1), character: index };
+  const starts = lineStarts(text); let line = 1;
+  while (line < starts.length && starts[line] <= index) line++;
+  return { line, column: index - starts[line - 1], character: index };
 }
 function sourceMapRemap(output, input, mappings, decode) {
   const lines = decode(mappings);

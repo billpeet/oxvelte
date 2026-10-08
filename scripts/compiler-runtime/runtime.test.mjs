@@ -80,3 +80,11 @@ test('Babel parser mode transforms function-bind syntax using runtime config', (
   assert.equal(result.warnings.find(w => w.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
 });
 
+test('remaps transpiled scripts across CR and CRLF line endings', () => {
+  for (const newline of ['\r', '\r\n']) {
+    const body = newline + 'let value: number = 1;' + newline;
+    const prefix = '<script lang="ts">', source = prefix + body + '</script>' + newline + '<img src="x">';
+    const result = compile(source, { _oxvelteScripts: [{ start:prefix.length, end:prefix.length+body.length, lang:'ts' }] });
+    assert.equal(result.warnings.find(w => w.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
+  }
+});
