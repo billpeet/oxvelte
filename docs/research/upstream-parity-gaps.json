@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1025,
-    "gaps": 210,
+    "pass": 1035,
+    "gaps": 200,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1276,39 +1276,6 @@
       }
     },
     {
-      "id": "diagnostic-count",
-      "label": "Diagnostic count differences",
-      "count": 3,
-      "rules": {
-        "prefer-style-directive": [
-          {
-            "id": "prefer-style-directive/invalid/ternary01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/ternary02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ]
-      }
-    },
-    {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
       "count": 2,
@@ -1324,64 +1291,6 @@
             "id": "valid-style-parse/invalid/invalid-scss01-input.svelte",
             "dimensions": [
               "diagnostics"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "diagnostic-location",
-      "label": "Same messages, different locations/order",
-      "count": 7,
-      "rules": {
-        "prefer-style-directive": [
-          {
-            "id": "prefer-style-directive/invalid/complex-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/svelte-element01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/ternary03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/ternary04-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/test03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-style-directive/invalid/test04-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
             ]
           }
         ]
@@ -1433,18 +1342,16 @@
       }
     },
     "diagnostic_count": {
-      "count": 29,
+      "count": 26,
       "rules": {
         "no-unused-svelte-ignore": 18,
-        "prefer-style-directive": 3,
         "valid-compile": 8
       }
     },
     "diagnostics": {
-      "count": 38,
+      "count": 28,
       "rules": {
         "no-unused-svelte-ignore": 18,
-        "prefer-style-directive": 10,
         "valid-compile": 8,
         "valid-style-parse": 2
       }
@@ -1453,12 +1360,6 @@
       "count": 3,
       "rules": {
         "prefer-const": 3
-      }
-    },
-    "fix_output": {
-      "count": 10,
-      "rules": {
-        "prefer-style-directive": 10
       }
     },
     "executable_configuration": {
