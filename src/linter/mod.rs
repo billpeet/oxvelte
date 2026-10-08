@@ -912,7 +912,7 @@ enum RangeOp {
     LessThanOrEqual,
 }
 
-fn npm_range_may_include_major(range: &str, major: u8) -> bool {
+pub(crate) fn npm_range_may_include_major(range: &str, major: u8) -> bool {
     range
         .split("||")
         .any(|segment| npm_range_segment_may_include_major(segment, major))

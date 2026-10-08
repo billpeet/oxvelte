@@ -142,6 +142,9 @@ mod linter_fixture_tests {
         let lint = Linter::all();
         let files = collect_fixture_files(&valid_dir);
         for path in files {
+            if !compiler_fixture_major_is_eligible(rule_name, &path) {
+                continue;
+            }
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             let source = std::fs::read_to_string(&path).unwrap();
             let parent_dir = path.parent().unwrap().to_string_lossy().to_string();
@@ -167,6 +170,9 @@ mod linter_fixture_tests {
         let lint = Linter::all();
         let files = collect_fixture_files(&invalid_dir);
         for path in files {
+            if !compiler_fixture_major_is_eligible(rule_name, &path) {
+                continue;
+            }
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             let source = std::fs::read_to_string(&path).unwrap();
             let parent_dir = path.parent().unwrap().to_string_lossy().to_string();
@@ -211,6 +217,33 @@ mod linter_fixture_tests {
             rule_name,
             path
         );
+    }
+
+    // Older local copies retain fixtures for Svelte 3/4. Compiler behavior
+    // follows the installed version, so respect their declared major ranges.
+    fn compiler_fixture_major_is_eligible(rule_name: &str, path: &std::path::Path) -> bool {
+        if !matches!(rule_name, "valid-compile" | "no-unused-svelte-ignore") {
+            return true;
+        }
+        let Some(name) = path
+            .file_name()
+            .and_then(|p| p.to_str())
+            .and_then(|p| p.strip_suffix("-input.svelte"))
+        else {
+            return true;
+        };
+        let requirements = path.with_file_name(format!("{name}-requirements.json"));
+        let Ok(text) = std::fs::read_to_string(requirements) else {
+            return true;
+        };
+        let requirements: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let Some(range) = requirements.get("svelte").and_then(|v| v.as_str()) else {
+            return true;
+        };
+        let version = crate::compiler::compile("", path.to_str(), None)
+            .expect("Compiler fixtures require Node and an installed Svelte compiler")
+            .svelte_major;
+        crate::linter::npm_range_may_include_major(range, version as u8)
     }
 
     #[test]
