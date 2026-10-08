@@ -297,3 +297,4 @@ pub fn recommended_rules() -> Vec<Box<dyn Rule>> {
         .filter(|r| r.is_recommended())
         .collect()
 }
+mod indent;
