@@ -444,9 +444,6 @@
     "no-extra-reactive-curlies/invalid/test02-input.svelte": {
       "suggestions": "5e78fd22299b60470dbefd9f08ae3c5dcca4cf50b7abcf4b6dd5812156d71b7f"
     },
-    "no-ignored-unsubscribe/invalid/test01-input.svelte": {
-      "diagnostics": "7f6f5a7f9b146e0191b97b281ec1242939ff95b4cc3da279b167cd77bb075444"
-    },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
     },

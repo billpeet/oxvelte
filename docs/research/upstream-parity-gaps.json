@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 865,
-    "gaps": 370,
+    "pass": 866,
+    "gaps": 369,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1770,7 +1770,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 95,
+      "count": 94,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1854,14 +1854,6 @@
             "dimensions": [
               "diagnostics",
               "fix_output"
-            ]
-          }
-        ],
-        "no-ignored-unsubscribe": [
-          {
-            "id": "no-ignored-unsubscribe/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
             ]
           }
         ],
@@ -2597,7 +2589,7 @@
       }
     },
     "diagnostics": {
-      "count": 170,
+      "count": 169,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2610,7 +2602,6 @@
         "no-dupe-style-properties": 2,
         "no-dynamic-slot-name": 4,
         "no-export-load-in-svelte-module-in-kit-pages": 4,
-        "no-ignored-unsubscribe": 1,
         "no-not-function-handler": 10,
         "no-object-in-text-mustaches": 4,
         "no-reactive-reassign": 4,
