@@ -1,4 +1,6 @@
 pub mod ast;
+pub mod compiler;
+mod compiler_ignore;
 pub mod config;
 pub mod linter;
 pub mod parser;

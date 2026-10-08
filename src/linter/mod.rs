@@ -72,6 +72,8 @@ impl SvelteVersionInfo {
 
 /// Context provided to lint rules during execution.
 pub struct LintContext<'a> {
+    compiler: std::cell::OnceCell<Result<crate::compiler::CompileResult, String>>,
+    pub(crate) native_rule_names: Vec<&'static str>,
     pub ast: &'a SvelteAst<'a>,
     pub source: &'a str,
     pub config: RuleConfig,
@@ -112,6 +114,8 @@ pub struct LintContext<'a> {
 impl<'a> LintContext<'a> {
     pub fn new(ast: &'a SvelteAst<'a>, source: &'a str) -> Self {
         Self {
+            compiler: std::cell::OnceCell::new(),
+            native_rule_names: Vec::new(),
             ast,
             source,
             config: RuleConfig::default(),
@@ -131,6 +135,8 @@ impl<'a> LintContext<'a> {
 
     pub fn with_config(ast: &'a SvelteAst<'a>, source: &'a str, config: RuleConfig) -> Self {
         Self {
+            compiler: std::cell::OnceCell::new(),
+            native_rule_names: Vec::new(),
             ast,
             source,
             config,
@@ -154,6 +160,31 @@ impl<'a> LintContext<'a> {
     /// script's semantic (we stash the file's content in `instance` for module lints).
     pub fn primary_semantic(&self) -> Option<&'a oxc::semantic::Semantic<'a>> {
         self.instance_semantic
+    }
+
+    /// Compile once for both compiler rules. Comments are removed before
+    /// compilation, then their warning suppression is resolved against the
+    /// native template and script trees.
+    pub(crate) fn compiler_result(&self) -> Result<&crate::compiler::CompileResult, &str> {
+        self.compiler.get_or_init(|| {
+            let items = crate::compiler_ignore::items(self);
+            let mut settings = self.config.settings.clone().unwrap_or_else(|| serde_json::json!({}));
+            if !settings.is_object() { settings = serde_json::json!({}); }
+            settings["_oxvelteStripRanges"] = serde_json::json!(items.iter().map(|i| [i.token_span.start, i.token_span.end]).collect::<Vec<_>>());
+            settings["_oxvelteScripts"] = serde_json::json!(self.ast.instance.iter().chain(self.ast.module.iter()).map(|s| serde_json::json!({"start":s.content_span.start,"end":s.content_span.end,"lang":s.lang})).collect::<Vec<_>>());
+            settings["_oxvelteStyles"] = serde_json::json!(self.ast.css.iter().map(|s| serde_json::json!({"start":s.content_span.start,"end":s.content_span.end,"element_start":s.span.start,"element_end":s.span.end,"lang":s.lang})).collect::<Vec<_>>());
+            let mut custom_element = false;
+            walk_template_nodes(&self.ast.html, &mut |node| {
+                if let TemplateNode::Element(element) = node {
+                    if element.name == "svelte:options" && element.attributes.iter().any(|attr| matches!(attr, Attribute::NormalAttribute { name, .. } if name == "tag" || name == "customElement")) { custom_element = true; }
+                }
+            });
+            settings["_oxvelteCustomElement"] = serde_json::json!(custom_element);
+            let mut result = crate::compiler::compile(self.source, self.file_path.as_deref(), Some(&settings))?;
+            result.ignore_items = items.into_iter().filter(|item| item.code.as_ref().is_none_or(|code| !self.native_rule_names.iter().any(|name| rule_matches(name, std::slice::from_ref(code))))).collect();
+            crate::compiler_ignore::resolve(self, &mut result);
+            Ok(result)
+        }).as_ref().map_err(String::as_str)
     }
 
     /// Content offset paired with `primary_semantic`.
@@ -635,6 +666,7 @@ impl Linter {
 
         let mut report_unused_svelte_ignore = false;
         let mut active_rule_names = Vec::new();
+        ctx.native_rule_names = self.rules.iter().map(|r| r.name()).collect();
         for rule in &self.rules {
             let include = match script_mode {
                 ScriptMode::Full => true,
