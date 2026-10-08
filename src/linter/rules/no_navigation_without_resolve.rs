@@ -52,21 +52,15 @@ impl Rule for NoNavigationWithoutResolve {
         // Resolve import locals.
         let mut nav_locals: Vec<(String, &'static str)> = Vec::new(); // (local-callable, original)
         let mut resolve_locals: Vec<String> = Vec::new();
-        let mut has_sveltekit_paths = false;
-        let mut has_any_imports = false;
 
         if let Some(sem) = ctx.instance_semantic {
             for stmt in &sem.nodes().program().body {
                 let Statement::ImportDeclaration(imp) = stmt else {
                     continue;
                 };
-                has_any_imports = true;
                 let src = imp.source.value.as_str();
                 let is_nav_mod = src == "$app/navigation";
                 let is_paths_mod = src == "$app/paths";
-                if is_paths_mod {
-                    has_sveltekit_paths = true;
-                }
                 let Some(specifiers) = &imp.specifiers else {
                     continue;
                 };
@@ -163,13 +157,7 @@ impl Rule for NoNavigationWithoutResolve {
             return;
         }
 
-        // Template anchor href checks.
-        // Skip entirely for non-SvelteKit files (fast bail).
-        if has_any_imports && !has_sveltekit_paths && nav_locals.is_empty() {
-            // No `$app/*` imports at all — definitely not a SvelteKit routing context.
-            return;
-        }
-
+        // Link checks also apply when a file imports only types or components.
         walk_template_nodes(&ctx.ast.html, &mut |node| {
             if let TemplateNode::Element(el) = node {
                 if el.name != "a" {
@@ -295,6 +283,50 @@ nav.replaceState(url, {});
                 .count(),
             2
         );
+    }
+
+    #[test]
+    fn pathname_types_follow_import_identity_and_scope() {
+        let source = r#"<script lang="ts">
+            import { goto, pushState } from '$app/navigation';
+            import type { ResolvedPathname as Resolved, Pathname } from '$app/types';
+            import type { ResolvedPathname as Other } from './other';
+            type Alias = Resolved;
+            function accepted(href: Alias) { goto(href); }
+            function wrong(href: Other) { goto(href); }
+            function unresolved(href: Pathname) { goto(href); }
+            function shadowed() {
+                type Resolved = string;
+                function local(href: Resolved) { goto(href); }
+            }
+            interface Props { good: Resolved; maybe?: Resolved; }
+            const { good, maybe }: Props = $props();
+            goto(good);
+            goto(maybe);
+            pushState(maybe, {});
+        </script>
+        <a href={good}>safe</a><a href={maybe}>safe</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 5);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .filter(|d| d.message.contains("pushState"))
+                .count(),
+            1
+        );
+        assert!(diagnostics.iter().all(|d| !d.message.contains("href")));
+    }
+
+    #[test]
+    fn nullable_pathname_types_are_allowed_only_for_links() {
+        let source = r#"<script lang="ts">
+            import { goto } from '$app/navigation';
+            import type { ResolvedPathname } from '$app/types';
+            let href: ResolvedPathname | null = null;
+            goto(href);
+        </script><a {href}>safe</a>"#;
+        assert_eq!(lint(source).len(), 1);
     }
 }
 
@@ -499,6 +531,9 @@ fn is_safe_nav_arg<'a>(
             if !seen.insert(sid) {
                 return false; // recursion guard
             }
+            if symbol_has_allowed_type(semantic, sid, false) {
+                return true;
+            }
             // Find the symbol's initializer.
             let decl_node_id = semantic.scoping().symbol_declaration(sid);
             let init = std::iter::once(decl_node_id)
@@ -579,7 +614,7 @@ fn is_safe_template_root<'a>(
             let Some(sid) = scoping.find_binding(scoping.root_scope_id(), name.into()) else {
                 return false;
             };
-            if symbol_type(sem, sid).is_some_and(is_nullish_type) {
+            if symbol_has_allowed_type(sem, sid, true) {
                 return true;
             }
             let decl_node_id = scoping.symbol_declaration(sid);
@@ -605,20 +640,23 @@ fn is_nullish_type(ty: &TSType<'_>) -> bool {
 
 /// Get the annotation on a binding, including a property destructured from a
 /// typed object. Type references are resolved through their semantic symbols.
-fn symbol_type<'a>(sem: &'a Semantic<'a>, sid: oxc::semantic::SymbolId) -> Option<&'a TSType<'a>> {
+fn symbol_type<'a>(
+    sem: &'a Semantic<'a>,
+    sid: oxc::semantic::SymbolId,
+) -> Option<(&'a TSType<'a>, bool)> {
     let declaration = sem.scoping().symbol_declaration(sid);
-    let variable = std::iter::once(declaration)
+    let (pattern, annotation, optional) = std::iter::once(declaration)
         .chain(sem.nodes().ancestor_ids(declaration))
-        .find_map(|id| {
-            if let AstKind::VariableDeclarator(v) = sem.nodes().kind(id) {
-                Some(v)
-            } else {
-                None
+        .find_map(|id| match sem.nodes().kind(id) {
+            AstKind::VariableDeclarator(v) => Some((&v.id, v.type_annotation.as_ref(), false)),
+            AstKind::FormalParameter(p) => {
+                Some((&p.pattern, p.type_annotation.as_ref(), p.optional))
             }
+            _ => None,
         })?;
-    let ty = &variable.type_annotation.as_ref()?.type_annotation;
-    let BindingPattern::ObjectPattern(pattern) = &variable.id else {
-        return Some(ty);
+    let ty = &annotation?.type_annotation;
+    let BindingPattern::ObjectPattern(pattern) = pattern else {
+        return Some((ty, optional));
     };
     let property = pattern.properties.iter().find(|p| matches!(&p.value, BindingPattern::BindingIdentifier(id) if id.symbol_id.get() == Some(sid)))?;
     let name = property.key.static_name()?;
@@ -645,8 +683,63 @@ fn symbol_type<'a>(sem: &'a Semantic<'a>, sid: oxc::semantic::SymbolId) -> Optio
         if p.key.static_name().as_deref() != Some(name.as_ref()) {
             return None;
         }
-        Some(&p.type_annotation.as_ref()?.type_annotation)
+        Some((&p.type_annotation.as_ref()?.type_annotation, p.optional))
     })
+}
+
+fn symbol_has_allowed_type(
+    sem: &Semantic<'_>,
+    sid: oxc::semantic::SymbolId,
+    allow_nullish: bool,
+) -> bool {
+    symbol_type(sem, sid).is_some_and(|(ty, optional)| {
+        (!optional || allow_nullish)
+            && is_allowed_type(ty, sem, allow_nullish, &mut FxHashSet::default())
+    })
+}
+
+fn is_allowed_type(
+    ty: &TSType<'_>,
+    sem: &Semantic<'_>,
+    allow_nullish: bool,
+    seen: &mut FxHashSet<oxc::semantic::SymbolId>,
+) -> bool {
+    if allow_nullish && is_nullish_type(ty) {
+        return true;
+    }
+    match ty {
+        TSType::TSUnionType(union) => union
+            .types
+            .iter()
+            .all(|ty| is_allowed_type(ty, sem, allow_nullish, &mut seen.clone())),
+        TSType::TSTypeReference(reference) => {
+            let TSTypeName::IdentifierReference(id) = &reference.type_name else {
+                return false;
+            };
+            let Some(sid) = sem.scoping().get_reference(id.reference_id()).symbol_id() else {
+                return false;
+            };
+            if !seen.insert(sid) {
+                return false;
+            }
+            let declaration = sem.scoping().symbol_declaration(sid);
+            for node in std::iter::once(declaration).chain(sem.nodes().ancestor_ids(declaration)) {
+                match sem.nodes().kind(node) {
+                    AstKind::TSTypeAliasDeclaration(alias) => {
+                        return is_allowed_type(&alias.type_annotation, sem, allow_nullish, seen)
+                    }
+                    AstKind::ImportDeclaration(import) if import.source.value == "$app/types" => {
+                        return import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|specifier| {
+                            matches!(specifier, ImportDeclarationSpecifier::ImportSpecifier(s) if s.local.symbol_id.get() == Some(sid) && s.imported.name() == "ResolvedPathname")
+                        }));
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+        _ => false,
+    }
 }
 
 /// Safety check for an expression in the instance script (uses instance semantic
@@ -679,6 +772,9 @@ fn is_safe_instance_expr<'a>(
             let Some(sid) = reference.symbol_id() else {
                 return false;
             };
+            if symbol_has_allowed_type(sem, sid, true) {
+                return true;
+            }
             let decl_node_id = sem.scoping().symbol_declaration(sid);
             let init = std::iter::once(decl_node_id)
                 .chain(sem.nodes().ancestor_ids(decl_node_id))

@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 751,
-    "gaps": 484,
+    "pass": 758,
+    "gaps": 477,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1589,7 +1589,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 42,
+      "count": 35,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1722,57 +1722,6 @@
           },
           {
             "id": "no-navigation-without-base/invalid/replaceState-no-base01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-navigation-without-resolve": [
-          {
-            "id": "no-navigation-without-resolve/invalid/link-unresolved-pathname01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/goto-resolved-pathname01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/goto-resolved-pathname02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/pushState-resolved-pathname01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/pushState-resolved-pathname02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/replaceState-resolved-pathname01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-navigation-without-resolve/valid/replaceState-resolved-pathname02-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
@@ -3418,7 +3367,7 @@
       }
     },
     "diagnostics": {
-      "count": 217,
+      "count": 210,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3438,7 +3387,6 @@
         "no-goto-without-base": 3,
         "no-ignored-unsubscribe": 1,
         "no-navigation-without-base": 15,
-        "no-navigation-without-resolve": 7,
         "no-not-function-handler": 10,
         "no-object-in-text-mustaches": 4,
         "no-reactive-reassign": 4,
@@ -3489,7 +3437,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 78,
+      "count": 71,
       "rules": {
         "consistent-selector-style": 4,
         "derived-has-same-inputs-outputs": 1,
@@ -3498,7 +3446,6 @@
         "no-dupe-else-if-blocks": 2,
         "no-dupe-style-properties": 1,
         "no-navigation-without-base": 5,
-        "no-navigation-without-resolve": 7,
         "no-reactive-reassign": 1,
         "no-shorthand-style-property-overrides": 1,
         "no-top-level-browser-globals": 2,
