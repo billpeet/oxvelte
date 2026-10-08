@@ -380,19 +380,6 @@
     "no-nested-style-tag/valid/top-level-style-input.svelte": {
       "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
     },
-    "no-reactive-reassign/invalid/delete01-input.svelte": {
-      "diagnostics": "ee33ada15abd00801737f3280769b47ce9601a621f989c1c130146cad18d1ba6"
-    },
-    "no-reactive-reassign/invalid/destructure01-input.svelte": {
-      "diagnostics": "b47d5f84f2c80fe9d90bd6dbbe9f78f2a0b85fcac07818aa02b18e552c070318"
-    },
-    "no-reactive-reassign/invalid/member01-input.svelte": {
-      "diagnostic_count": "1860b55bbecf2e254298689fbac3eb7ccfe79bfa21fd48bd51f58bc1afd9d5f9",
-      "diagnostics": "cba3120ad6a22ce01c1be563c04f53b95f2cd62e62bb3a8fab827334eeb8c15c"
-    },
-    "no-reactive-reassign/invalid/props-true01-input.svelte": {
-      "diagnostics": "3a757636f0910aefd31b297698bbc02328b944771b6450d00b5fa469bda9be32"
-    },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
       "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",

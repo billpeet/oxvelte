@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1005,
-    "gaps": 230,
+    "pass": 1009,
+    "gaps": 226,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 6,
+      "count": 5,
       "rules": {
         "no-dupe-else-if-blocks": [
           {
@@ -1374,15 +1374,6 @@
           },
           {
             "id": "no-dupe-else-if-blocks/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-reactive-reassign": [
-          {
-            "id": "no-reactive-reassign/invalid/member01-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
@@ -1420,16 +1411,8 @@
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 3,
+      "count": 2,
       "rules": {
-        "no-reactive-reassign": [
-          {
-            "id": "no-reactive-reassign/invalid/props-true01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
         "valid-style-parse": [
           {
             "id": "valid-style-parse/invalid/invalid-css01-input.svelte",
@@ -1449,25 +1432,11 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 10,
+      "count": 8,
       "rules": {
         "no-dupe-else-if-blocks": [
           {
             "id": "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-reactive-reassign": [
-          {
-            "id": "no-reactive-reassign/invalid/delete01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-reactive-reassign/invalid/destructure01-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -1568,10 +1537,9 @@
       }
     },
     "diagnostics": {
-      "count": 45,
+      "count": 41,
       "rules": {
         "no-dupe-else-if-blocks": 3,
-        "no-reactive-reassign": 4,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 10,
         "valid-compile": 8,
@@ -1579,10 +1547,9 @@
       }
     },
     "diagnostic_count": {
-      "count": 32,
+      "count": 31,
       "rules": {
         "no-dupe-else-if-blocks": 2,
-        "no-reactive-reassign": 1,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 3,
         "valid-compile": 8
