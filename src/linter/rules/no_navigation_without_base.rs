@@ -1,307 +1,510 @@
-//! `svelte/no-navigation-without-base` — require navigation functions to use base path.
-
-use crate::ast::{Attribute, TemplateNode};
-use crate::linter::{walk_template_nodes, LintContext, Rule};
-use oxc::ast::ast::{Expression, ImportDeclarationSpecifier, ModuleExportName, Statement};
-use oxc::ast::AstKind;
-use oxc::span::{GetSpan, Span};
-
-const NAV_FUNCTIONS: &[&str] = &["goto", "pushState", "replaceState"];
-
+//! `svelte/no-navigation-without-base` — require imported base-path prefixes.
+use crate::ast::{Attribute, AttributeValue, AttributeValuePart, Fragment, TemplateNode};
+use crate::linter::{LintContext, Rule};
+use oxc::ast::{ast::Expression, AstKind};
+use oxc::semantic::{Semantic, SymbolId};
+use oxc::span::{GetSpan, SourceType, Span};
+use std::collections::HashSet;
 pub struct NoNavigationWithoutBase;
-
-fn is_nav_ignored(
-    name: &str,
-    ignore_goto: bool,
-    ignore_push_state: bool,
-    ignore_replace_state: bool,
-) -> bool {
-    match name {
-        "goto" => ignore_goto,
-        "pushState" => ignore_push_state,
-        "replaceState" => ignore_replace_state,
-        _ => false,
-    }
-}
-
-fn is_exempt_href(s: &str) -> bool {
-    s.starts_with("http://")
-        || s.starts_with("https://")
-        || s.starts_with("mailto:")
-        || s.starts_with("tel:")
-        || s.starts_with("//")
-        || s.starts_with('#')
-        || s.is_empty()
-}
-
 impl Rule for NoNavigationWithoutBase {
     fn name(&self) -> &'static str {
         "svelte/no-navigation-without-base"
     }
-
     fn applies_to_scripts(&self) -> bool {
         true
     }
-
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
-        let opts = ctx
+        let options = ctx
             .config
             .options
             .as_ref()
             .and_then(|v| v.as_array())
-            .and_then(|arr| arr.first());
-        let get_bool = |key: &str| {
-            opts.and_then(|v| v.get(key))
+            .and_then(|v| v.first())
+            .cloned();
+        let ignored = |key: &str| {
+            options
+                .as_ref()
+                .and_then(|v| v.get(key))
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false)
         };
-        let ignore_goto = get_bool("ignoreGoto");
-        let ignore_push_state = get_bool("ignorePushState");
-        let ignore_replace_state = get_bool("ignoreReplaceState");
-        let ignore_links = get_bool("ignoreLinks");
-
-        // Resolve local names for base + nav functions from the instance script.
-        let mut base_name: Option<String> = None;
-        let mut nav_locals: Vec<(String, &'static str)> = Vec::new(); // (local-call-text, original-name)
-        if let Some(semantic) = ctx.instance_semantic {
-            let program = semantic.nodes().program();
-            for stmt in &program.body {
-                let Statement::ImportDeclaration(imp) = stmt else {
+        for (semantic, offset) in [
+            (ctx.instance_semantic, ctx.instance_content_offset),
+            (ctx.module_semantic, ctx.module_content_offset),
+        ] {
+            let Some(semantic) = semantic else { continue };
+            for node in semantic.nodes().iter() {
+                let AstKind::CallExpression(call) = node.kind() else {
                     continue;
                 };
-                let src = imp.source.value.as_str();
-                let Some(specifiers) = &imp.specifiers else {
+                let Some(name) = [
+                    ("goto", "ignoreGoto"),
+                    ("pushState", "ignorePushState"),
+                    ("replaceState", "ignoreReplaceState"),
+                ]
+                .iter()
+                .find_map(|(name, option)| {
+                    (!ignored(option)
+                        && import_reference(
+                            &call.callee,
+                            semantic,
+                            "$app/navigation",
+                            name,
+                            &mut Vec::new(),
+                        ))
+                    .then_some(*name)
+                }) else {
                     continue;
                 };
-                for spec in specifiers {
-                    match spec {
-                        ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                            let imported_name = match &s.imported {
-                                ModuleExportName::IdentifierName(n) => n.name.as_str(),
-                                ModuleExportName::IdentifierReference(n) => n.name.as_str(),
-                                ModuleExportName::StringLiteral(l) => l.value.as_str(),
-                            };
-                            if src == "$app/paths" && imported_name == "base" {
-                                base_name = Some(s.local.name.to_string());
-                            }
-                            if src == "$app/navigation" {
-                                if let Some(nav) =
-                                    NAV_FUNCTIONS.iter().find(|f| **f == imported_name)
-                                {
-                                    if !is_nav_ignored(
-                                        nav,
-                                        ignore_goto,
-                                        ignore_push_state,
-                                        ignore_replace_state,
-                                    ) {
-                                        nav_locals.push((s.local.name.to_string(), nav));
-                                    }
-                                }
-                            }
-                        }
-                        ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
-                            if src == "$app/paths" {
-                                base_name = Some(format!("{}.base", s.local.name));
-                            }
-                            if src == "$app/navigation" {
-                                for nav in NAV_FUNCTIONS {
-                                    if is_nav_ignored(
-                                        nav,
-                                        ignore_goto,
-                                        ignore_push_state,
-                                        ignore_replace_state,
-                                    ) {
-                                        continue;
-                                    }
-                                    nav_locals.push((format!("{}.{}", s.local.name, nav), nav));
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
+                let Some(argument) = call.arguments.first() else {
+                    continue;
+                };
+                let safe = argument.as_expression().is_some_and(|expression| {
+                    (name != "goto" && expression_is_empty(expression))
+                        || prefixed(
+                            expression,
+                            semantic,
+                            false,
+                            &HashSet::new(),
+                            &mut Vec::new(),
+                        )
+                });
+                if !safe {
+                    let span = argument.span();
+                    ctx.diagnostic(format!("Found a {name}() call with a url that isn't prefixed with the base path."), Span::new(offset + span.start, offset + span.end));
                 }
             }
         }
-
-        // Walk call expressions in the instance script.
-        if let Some(semantic) = ctx.instance_semantic {
-            if !nav_locals.is_empty() {
-                let content_offset = ctx.instance_content_offset;
-                for node in semantic.nodes().iter() {
-                    let AstKind::CallExpression(ce) = node.kind() else {
-                        continue;
-                    };
-                    let Some(callee_text) = callee_static_name(&ce.callee) else {
-                        continue;
-                    };
-                    let Some((_, orig_name)) = nav_locals.iter().find(|(l, _)| l == &callee_text)
-                    else {
-                        continue;
-                    };
-
-                    let Some(first_arg) = ce.arguments.first().and_then(|a| a.as_expression())
-                    else {
-                        continue;
-                    };
-                    if let Some(bn) = &base_name {
-                        if arg_uses_base(first_arg, bn) {
+        if !ignored("ignoreLinks") {
+            check_fragment(&ctx.ast.html, ctx, &HashSet::new());
+        }
+    }
+}
+fn expression_is_empty(expression: &Expression<'_>) -> bool {
+    match expression.get_inner_expression() {
+        Expression::StringLiteral(l) => l.value.is_empty(),
+        Expression::TemplateLiteral(t) => {
+            t.expressions.is_empty() && t.quasis.len() == 1 && t.quasis[0].value.raw.is_empty()
+        }
+        _ => false,
+    }
+}
+fn absolute_uri(value: &str) -> bool {
+    value.find(':').is_some_and(|colon| {
+        value[..colon]
+            .bytes()
+            .all(|b| b == b'+' || b.is_ascii_alphabetic())
+    })
+}
+fn link_exempt(expression: &Expression<'_>, fragment: bool) -> bool {
+    let check = |value: &str| {
+        if fragment {
+            value.starts_with('#')
+        } else {
+            absolute_uri(value)
+        }
+    };
+    match expression.get_inner_expression() {
+        Expression::StringLiteral(l) => check(l.value.as_str()),
+        Expression::BinaryExpression(b) => {
+            link_exempt(&b.left, fragment) || (!fragment && link_exempt(&b.right, false))
+        }
+        Expression::TemplateLiteral(t) if fragment => {
+            t.quasis
+                .first()
+                .is_some_and(|q| check(q.value.raw.as_str()))
+                || t.expressions.first().is_some_and(|e| link_exempt(e, true))
+        }
+        Expression::TemplateLiteral(t) => {
+            t.quasis.iter().any(|q| check(q.value.raw.as_str()))
+                || t.expressions.iter().any(|e| link_exempt(e, false))
+        }
+        _ => false,
+    }
+}
+fn prefixed(
+    expression: &Expression<'_>,
+    semantic: &Semantic<'_>,
+    template: bool,
+    shadows: &HashSet<String>,
+    seen: &mut Vec<SymbolId>,
+) -> bool {
+    match expression.get_inner_expression() {
+        Expression::Identifier(id) => {
+            let symbol = if template {
+                if shadows.contains(id.name.as_str()) {
+                    return false;
+                }
+                semantic
+                    .scoping()
+                    .find_binding(semantic.scoping().root_scope_id(), id.name)
+            } else {
+                semantic
+                    .scoping()
+                    .get_reference(id.reference_id())
+                    .symbol_id()
+            };
+            let Some(symbol) = symbol else { return false };
+            prefix_symbol(symbol, semantic, seen)
+        }
+        Expression::StaticMemberExpression(member) if member.property.name == "base" => {
+            let Expression::Identifier(id) = member.object.get_inner_expression() else {
+                return false;
+            };
+            let symbol = if template {
+                if shadows.contains(id.name.as_str()) {
+                    return false;
+                }
+                semantic
+                    .scoping()
+                    .find_binding(semantic.scoping().root_scope_id(), id.name)
+            } else {
+                semantic
+                    .scoping()
+                    .get_reference(id.reference_id())
+                    .symbol_id()
+            };
+            symbol.is_some_and(|symbol| namespace_symbol(symbol, semantic, "$app/paths"))
+        }
+        Expression::BinaryExpression(binary)
+            if binary.operator == oxc::syntax::operator::BinaryOperator::Addition =>
+        {
+            prefixed(&binary.left, semantic, template, shadows, seen)
+        }
+        Expression::TemplateLiteral(literal) => {
+            literal
+                .quasis
+                .first()
+                .is_some_and(|q| q.value.raw.is_empty())
+                && literal
+                    .expressions
+                    .first()
+                    .is_some_and(|e| prefixed(e, semantic, template, shadows, seen))
+        }
+        _ => false,
+    }
+}
+fn prefix_symbol(symbol: SymbolId, semantic: &Semantic<'_>, seen: &mut Vec<SymbolId>) -> bool {
+    if seen.contains(&symbol) {
+        return false;
+    }
+    seen.push(symbol);
+    let declaration = semantic.scoping().symbol_declaration(symbol);
+    for node in std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration)) {
+        match semantic.nodes().kind(node) {
+            AstKind::ImportDeclaration(import) => return import.source.value == "$app/paths" && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|specifier| matches!(specifier, oxc::ast::ast::ImportDeclarationSpecifier::ImportSpecifier(s) if s.local.symbol_id.get() == Some(symbol) && s.imported.name() == "base"))),
+            AstKind::VariableDeclarator(variable) => return variable.init.as_ref().is_some_and(|init| prefixed(init, semantic, false, &HashSet::new(), seen)),
+            _ => {}
+        }
+    }
+    false
+}
+fn namespace_symbol(symbol: SymbolId, semantic: &Semantic<'_>, source: &str) -> bool {
+    let declaration = semantic.scoping().symbol_declaration(symbol);
+    std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration)).any(|node| matches!(semantic.nodes().kind(node), AstKind::ImportDeclaration(import) if import.source.value == source && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|s| matches!(s, oxc::ast::ast::ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) if s.local.symbol_id.get() == Some(symbol))))))
+}
+fn binding_names(pattern: &str) -> HashSet<String> {
+    let allocator = oxc::allocator::Allocator::default();
+    let source = format!("({pattern}) => {{}}");
+    let parsed = oxc::parser::Parser::new(&allocator, &source, SourceType::ts()).parse();
+    let semantic = oxc::semantic::SemanticBuilder::new()
+        .build(&parsed.program)
+        .semantic;
+    semantic
+        .nodes()
+        .iter()
+        .filter_map(|node| match node.kind() {
+            AstKind::BindingIdentifier(id) => Some(id.name.to_string()),
+            _ => None,
+        })
+        .collect()
+}
+fn check_fragment<'a>(
+    fragment: &'a Fragment<'a>,
+    ctx: &mut LintContext<'a>,
+    inherited: &HashSet<String>,
+) {
+    check_nodes(&fragment.nodes, ctx, inherited);
+}
+fn check_nodes<'a>(
+    nodes: &'a [TemplateNode<'a>],
+    ctx: &mut LintContext<'a>,
+    inherited: &HashSet<String>,
+) {
+    let mut shadows = inherited.clone();
+    for node in nodes {
+        if let TemplateNode::ConstTag(tag) = node {
+            if let Some((pattern, _)) = tag.declaration.split_once('=') {
+                shadows.extend(binding_names(pattern));
+            }
+        }
+    }
+    for node in nodes {
+        match node {
+            TemplateNode::Element(element) => {
+                if element.name == "a" {
+                    for (index, attribute) in element.attributes.iter().enumerate() {
+                        let Attribute::NormalAttribute { name, value, .. } = attribute else {
                             continue;
-                        }
-                    }
-                    let Some(leading) = leading_string_prefix(first_arg) else {
-                        continue;
-                    };
-                    if is_exempt_href(&leading) {
-                        continue;
-                    }
-                    let callee_span = ce.callee.span();
-                    let s = content_offset + callee_span.start;
-                    let e = content_offset + callee_span.end + 1; // include `(`
-                    ctx.diagnostic(
-                        format!(
-                            "Found a {}() call with a url that isn't prefixed with the base path.",
-                            orig_name
-                        ),
-                        Span::new(s, e),
-                    );
-                }
-            }
-        }
-
-        if ignore_links {
-            return;
-        }
-
-        // Anchor href checks — template-based (still uses the template AST + raw
-        // string extraction for attribute values because template expressions
-        // aren't in the semantic model).
-        walk_template_nodes(&ctx.ast.html, &mut |node| {
-            if let TemplateNode::Element(el) = node {
-                if el.name != "a" {
-                    return;
-                }
-                for attr in &el.attributes {
-                    if let Attribute::NormalAttribute { name, span, .. } = attr {
+                        };
                         if name != "href" {
                             continue;
                         }
-                        let region = &ctx.source[span.start as usize..span.end as usize];
-                        if let Some(eq_pos) = region.find('=') {
-                            let val = region[eq_pos + 1..].trim();
-                            if matches!(
-                                (val.as_bytes().first(), val.as_bytes().last()),
-                                (Some(b'"'), Some(b'"')) | (Some(b'\''), Some(b'\''))
-                            ) {
-                                let inner = &val[1..val.len() - 1];
-                                if inner.starts_with('/') && !is_exempt_href(inner) {
-                                    ctx.diagnostic("Found a link with a url that isn't prefixed with the base path.", *span);
-                                }
-                            } else if val.starts_with('{') && val.ends_with('}') {
-                                let expr = val[1..val.len() - 1].trim();
-
-                                let uses_base = if let Some(ref bname) = base_name {
-                                    expr.starts_with(&format!("{} +", bname))
-                                        || expr.starts_with(&format!("{}+", bname))
-                                        || expr.starts_with(&format!("${{{}}}", bname))
-                                        || expr.starts_with(&format!("`${{{}}}", bname))
-                                } else {
-                                    false
-                                };
-
-                                if uses_base {
-                                    continue;
-                                }
-
-                                let is_path_literal =
-                                    matches!(expr.as_bytes().first(), Some(b'\'' | b'"' | b'`'))
-                                        && expr[1..]
-                                            .find(expr.as_bytes()[0] as char)
-                                            .map_or(false, |e| expr[1..e + 1].starts_with('/'));
-
-                                let has_path_concat =
-                                    expr.contains("'/'") || expr.contains("\"/\"");
-
-                                if is_path_literal || has_path_concat {
-                                    ctx.diagnostic("Found a link with a url that isn't prefixed with the base path.", *span);
-                                }
+                        let meta = &element.attribute_meta[index];
+                        let semantic = ctx.instance_semantic.or(ctx.module_semantic);
+                        let safe_expr = |expression| {
+                            link_exempt(expression, false)
+                                || link_exempt(expression, true)
+                                || semantic.is_some_and(|semantic| {
+                                    prefixed(expression, semantic, true, &shadows, &mut Vec::new())
+                                })
+                        };
+                        let (safe, span) = match value {
+                            AttributeValue::Static(value) => (
+                                absolute_uri(value) || value.starts_with('#'),
+                                meta.value_span,
+                            ),
+                            AttributeValue::Expression(_) => (
+                                element
+                                    .attribute_expression_ast(index)
+                                    .is_some_and(safe_expr),
+                                meta.mustache_span,
+                            ),
+                            AttributeValue::Concat(parts) => match parts.first() {
+                                Some(AttributeValuePart::Static(value)) => (
+                                    absolute_uri(value) || value.starts_with('#'),
+                                    meta.parts.first().map(|p| p.span),
+                                ),
+                                Some(AttributeValuePart::Expression(_)) => (
+                                    element
+                                        .attribute_part_expression_ast(index, 0)
+                                        .is_some_and(safe_expr),
+                                    meta.parts.first().map(|p| p.span),
+                                ),
+                                None => (false, meta.value_span),
+                            },
+                            AttributeValue::True => continue,
+                        };
+                        if !safe {
+                            if let Some(span) = span {
+                                ctx.diagnostic("Found a link with a url that isn't prefixed with the base path.", span);
                             }
                         }
                     }
                 }
+                let mut children_shadows = shadows.clone();
+                for attribute in &element.attributes {
+                    if let Attribute::Directive {
+                        kind: crate::ast::DirectiveKind::Let,
+                        name,
+                        value,
+                        ..
+                    } = attribute
+                    {
+                        children_shadows.extend(binding_names(match value {
+                            AttributeValue::Expression(value) => value,
+                            _ => name,
+                        }));
+                    }
+                }
+                check_nodes(&element.children, ctx, &children_shadows);
             }
-        });
-    }
-}
-
-fn callee_static_name(callee: &Expression<'_>) -> Option<String> {
-    match callee {
-        Expression::Identifier(id) => Some(id.name.to_string()),
-        Expression::StaticMemberExpression(mem) => {
-            if let Expression::Identifier(id) = &mem.object {
-                Some(format!("{}.{}", id.name, mem.property.name))
-            } else {
-                None
+            TemplateNode::IfBlock(block) => {
+                check_fragment(&block.consequent, ctx, &shadows);
+                if let Some(alternate) = &block.alternate {
+                    check_nodes(std::slice::from_ref(alternate.as_ref()), ctx, &shadows);
+                }
             }
+            TemplateNode::EachBlock(block) => {
+                let mut nested = shadows.clone();
+                nested.extend(binding_names(&block.context));
+                nested.extend(block.index.iter().cloned());
+                check_fragment(&block.body, ctx, &nested);
+                if let Some(fallback) = &block.fallback {
+                    check_fragment(fallback, ctx, &shadows);
+                }
+            }
+            TemplateNode::AwaitBlock(block) => {
+                if let Some(pending) = &block.pending {
+                    check_fragment(pending, ctx, &shadows);
+                }
+                for (body, binding) in [
+                    (&block.then, &block.then_binding),
+                    (&block.catch, &block.catch_binding),
+                ] {
+                    if let Some(body) = body {
+                        let mut nested = shadows.clone();
+                        if let Some(binding) = binding {
+                            nested.extend(binding_names(binding));
+                        }
+                        check_fragment(body, ctx, &nested);
+                    }
+                }
+            }
+            TemplateNode::KeyBlock(block) => check_fragment(&block.body, ctx, &shadows),
+            TemplateNode::SnippetBlock(block) => {
+                let mut nested = shadows.clone();
+                nested.extend(binding_names(&block.params));
+                check_fragment(&block.body, ctx, &nested);
+            }
+            _ => {}
         }
-        _ => None,
     }
 }
-
-fn arg_uses_base(expr: &Expression<'_>, base_name: &str) -> bool {
-    match expr {
-        Expression::TemplateLiteral(t) => {
-            if let (Some(first_quasi), Some(first_expr)) = (t.quasis.first(), t.expressions.first())
+fn import_reference(
+    expression: &Expression<'_>,
+    semantic: &Semantic<'_>,
+    source: &str,
+    exported: &str,
+    seen: &mut Vec<SymbolId>,
+) -> bool {
+    match expression.get_inner_expression() {
+        Expression::Identifier(id) => {
+            let Some(symbol) = semantic
+                .scoping()
+                .get_reference(id.reference_id())
+                .symbol_id()
+            else {
+                return false;
+            };
+            if seen.contains(&symbol) {
+                return false;
+            }
+            seen.push(symbol);
+            let declaration = semantic.scoping().symbol_declaration(symbol);
+            for node in
+                std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration))
             {
-                let first_text = first_quasi
-                    .value
-                    .cooked
-                    .as_deref()
-                    .unwrap_or(first_quasi.value.raw.as_str());
-                if first_text.is_empty() && is_base_ref(first_expr, base_name) {
-                    return true;
+                match semantic.nodes().kind(node) {
+                    AstKind::ImportDeclaration(import) => return import.source.value == source && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|specifier| matches!(specifier, oxc::ast::ast::ImportDeclarationSpecifier::ImportSpecifier(s) if s.local.symbol_id.get() == Some(symbol) && s.imported.name() == exported))),
+                    AstKind::VariableDeclarator(variable) => return variable.init.as_ref().is_some_and(|init| import_reference(init, semantic, source, exported, seen)),
+                    _ => {}
                 }
             }
             false
         }
-        Expression::BinaryExpression(b)
-            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
-        {
-            arg_uses_base(&b.left, base_name) || is_base_ref(&b.left, base_name)
-        }
-        _ => is_base_ref(expr, base_name),
-    }
-}
-
-fn is_base_ref(expr: &Expression<'_>, base_name: &str) -> bool {
-    match expr {
-        Expression::Identifier(id) => id.name == base_name,
-        Expression::StaticMemberExpression(mem) => {
-            if let Expression::Identifier(id) = &mem.object {
-                let composed = format!("{}.{}", id.name, mem.property.name);
-                composed == base_name
-            } else {
-                false
-            }
+        Expression::StaticMemberExpression(member) if member.property.name == exported => {
+            let Expression::Identifier(id) = member.object.get_inner_expression() else {
+                return false;
+            };
+            let Some(symbol) = semantic
+                .scoping()
+                .get_reference(id.reference_id())
+                .symbol_id()
+            else {
+                return false;
+            };
+            let declaration = semantic.scoping().symbol_declaration(symbol);
+            std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration)).any(|node| matches!(semantic.nodes().kind(node), AstKind::ImportDeclaration(import) if import.source.value == source && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|s| matches!(s, oxc::ast::ast::ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) if s.local.symbol_id.get() == Some(symbol))))))
         }
         _ => false,
     }
 }
 
-fn leading_string_prefix(expr: &Expression<'_>) -> Option<String> {
-    match expr {
-        Expression::StringLiteral(l) => Some(l.value.to_string()),
-        Expression::TemplateLiteral(t) => t.quasis.first().map(|q| {
-            q.value
-                .cooked
-                .as_deref()
-                .unwrap_or(q.value.raw.as_str())
-                .to_string()
-        }),
-        Expression::BinaryExpression(b)
-            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
-        {
-            leading_string_prefix(&b.left)
-        }
-        _ => None,
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn findings(source: &str, options: serde_json::Value) -> Vec<String> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    ..Default::default()
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-navigation-without-base")
+            .map(|d| source[d.span.start as usize..d.span.end as usize].to_owned())
+            .collect()
+    }
+    #[test]
+    fn imported_prefixes_dynamic_arguments_and_scopes() {
+        let source = r#"<script>
+import { goto as navigate, pushState, replaceState } from '$app/navigation';
+import { base } from '$app/paths';
+import * as paths from '$app/paths';
+const first = base + '/one';
+const second = `${first}/two`;
+const cycle = cycle;
+navigate(second);
+navigate(paths.base + '/ok');
+navigate(dynamic);
+navigate(...args);
+navigate('https://example.com');
+navigate(cycle);
+function shadow(navigate) { navigate('/ignored'); }
+function shadowBase(base) { navigate(base + '/invalid'); }
+function shadowPaths(paths) { navigate(paths.base + '/invalid'); }
+pushState('');
+replaceState(``);
+pushState(dynamic);
+</script>"#;
+        assert_eq!(
+            findings(source, serde_json::json!([])),
+            [
+                "dynamic",
+                "...args",
+                "'https://example.com'",
+                "cycle",
+                "base + '/invalid'",
+                "paths.base + '/invalid'",
+                "dynamic"
+            ]
+        );
+        assert!(findings(source, serde_json::json!([{ "ignoreGoto": true, "ignorePushState": true, "ignoreReplaceState": true }])).is_empty());
+    }
+    #[test]
+    fn hrefs_use_value_spans_and_template_binding_scopes() {
+        let source = r#"<script>
+import { base } from '$app/paths';
+const route = base + '/route';
+const raw = '/raw';
+</script>
+<a href="relative">relative</a>
+<a href={raw}>dynamic</a>
+<a href={route}>prefixed</a>
+<a href={'custom+protocol:target'}>external</a>
+<a href={'part' + '://external'}>external</a>
+<a href={'#' + raw}>fragment</a>
+{#each [1] as base}
+<a href={base + '/bad'}>shadowed</a>
+{:else}
+<a href={base + '/ok'}>outer</a>
+{/each}
+{#if true}
+{@const base = '/local'}
+<a href={base + '/bad'}>local const</a>
+{/if}
+<a href={base + '/ok'}>outer</a>"#;
+        assert_eq!(
+            findings(source, serde_json::json!([])),
+            ["relative", "{raw}", "{base + '/bad'}", "{base + '/bad'}"]
+        );
+        assert!(findings(source, serde_json::json!([{ "ignoreLinks": true }])).is_empty());
+    }
+    #[test]
+    fn unrelated_modules_do_not_provide_navigation_or_base_imports() {
+        let source = r#"<script>
+import { goto as unrelated } from './other';
+import { goto } from '$app/navigation';
+import { base } from './other';
+unrelated('/ignored');
+goto(base + '/bad');
+</script>
+<a href={base + '/bad'}>wrong import</a>"#;
+        assert_eq!(
+            findings(source, serde_json::json!([])),
+            ["base + '/bad'", "{base + '/bad'}"]
+        );
     }
 }
