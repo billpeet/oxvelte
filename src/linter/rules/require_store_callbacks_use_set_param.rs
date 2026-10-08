@@ -1,4 +1,4 @@
-//! `svelte/require-store-callbacks-use-set-param` names callback parameters after stores.
+//! `svelte/require-store-callbacks-use-set-param` requires store callbacks to name their first parameter `set`.
 
 use crate::linter::{Fix, LintContext, Rule, Suggestion};
 use oxc::ast::ast::{
@@ -98,13 +98,15 @@ impl Rule for RequireStoreCallbacksUseSetParam {
                 else {
                     continue;
                 };
-                let (params, callback_span, _body_span) = match callback {
+                let (params, callback_span) = match callback {
                     Expression::ArrowFunctionExpression(function) => {
-                        (&function.params, function.span, function.body.span)
+                        (&function.params, function.span)
                     }
                     Expression::FunctionExpression(function) => {
-                        let Some(body) = &function.body else { continue };
-                        (&function.params, function.span, body.span)
+                        if function.body.is_none() {
+                            continue;
+                        }
+                        (&function.params, function.span)
                     }
                     _ => continue,
                 };
