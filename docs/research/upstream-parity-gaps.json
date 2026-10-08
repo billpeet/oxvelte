@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 994,
-    "gaps": 241,
+    "pass": 1001,
+    "gaps": 234,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1465,7 +1465,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 19,
+      "count": 12,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1492,50 +1492,6 @@
           },
           {
             "id": "no-reactive-reassign/invalid/destructure01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-svelte-internal": [
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal02-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal03-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal04-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal05-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal06-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-svelte-internal/invalid/no-svelte-internal07-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -1644,12 +1600,11 @@
       }
     },
     "diagnostics": {
-      "count": 56,
+      "count": 49,
       "rules": {
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-reactive-reassign": 4,
-        "no-svelte-internal": 7,
         "no-top-level-browser-globals": 3,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 10,

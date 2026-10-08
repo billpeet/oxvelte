@@ -19,8 +19,20 @@ impl Rule for NoSvelteInternal {
 
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
         for (sem, offset) in [
-            (ctx.instance_semantic, ctx.instance_content_offset),
-            (ctx.module_semantic, ctx.module_content_offset),
+            (
+                ctx.instance_semantic,
+                ctx.ast
+                    .instance
+                    .as_ref()
+                    .map_or(ctx.instance_content_offset, |s| s.content_span.start),
+            ),
+            (
+                ctx.module_semantic,
+                ctx.ast
+                    .module
+                    .as_ref()
+                    .map_or(ctx.module_content_offset, |s| s.content_span.start),
+            ),
         ]
         .into_iter()
         .filter_map(|(s, o)| s.map(|s| (s, o)))
@@ -29,21 +41,21 @@ impl Rule for NoSvelteInternal {
                 let source_span = match stmt {
                     Statement::ImportDeclaration(imp) => {
                         if is_svelte_internal(imp.source.value.as_str()) {
-                            Some(imp.source.span)
+                            Some(imp.span)
                         } else {
                             None
                         }
                     }
                     Statement::ExportAllDeclaration(exp) => {
                         if is_svelte_internal(exp.source.value.as_str()) {
-                            Some(exp.source.span)
+                            Some(exp.span)
                         } else {
                             None
                         }
                     }
                     Statement::ExportNamedDeclaration(exp) => exp.source.as_ref().and_then(|s| {
                         if is_svelte_internal(s.value.as_str()) {
-                            Some(s.span)
+                            Some(exp.span)
                         } else {
                             None
                         }
@@ -51,9 +63,8 @@ impl Rule for NoSvelteInternal {
                     _ => None,
                 };
                 if let Some(span) = source_span {
-                    // Report the inside of the string literal (between the quotes).
-                    let s = offset + span.start + 1;
-                    let e = offset + span.end - 1;
+                    let s = offset + span.start;
+                    let e = offset + span.end;
                     ctx.diagnostic(
                         "Using svelte/internal is prohibited. This will be removed in Svelte 6.",
                         Span::new(s, e),
@@ -71,8 +82,8 @@ impl Rule for NoSvelteInternal {
                 if !is_svelte_internal(lit.value.as_str()) {
                     continue;
                 }
-                let s = offset + lit.span.start + 1;
-                let e = offset + lit.span.end - 1;
+                let s = offset + import_expr.span.start;
+                let e = offset + import_expr.span.end;
                 ctx.diagnostic(
                     "Using svelte/internal is prohibited. This will be removed in Svelte 6.",
                     Span::new(s, e),
@@ -84,4 +95,28 @@ impl Rule for NoSvelteInternal {
 
 fn is_svelte_internal(s: &str) -> bool {
     s == "svelte/internal" || s.starts_with("svelte/internal/")
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn reports_full_import_nodes_with_unicode_and_comments() {
+        let source = "<!-- é -->\n<script data-x='>'>import /* comment */ x from 'svelte/internal'; import('svelte/internal/foo'); import('svelte/internality');</script>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let diagnostics =
+            crate::linter::Linter::all().lint_with_config(&parsed.ast, source, Default::default());
+        let reads: Vec<_> = diagnostics
+            .iter()
+            .filter(|d| d.rule_name == "svelte/no-svelte-internal")
+            .map(|d| &source[d.span.start as usize..d.span.end as usize])
+            .collect();
+        assert_eq!(
+            reads,
+            [
+                "import /* comment */ x from 'svelte/internal';",
+                "import('svelte/internal/foo')"
+            ]
+        );
+    }
 }

@@ -396,27 +396,6 @@
     "no-reactive-reassign/invalid/props-true01-input.svelte": {
       "diagnostics": "3a757636f0910aefd31b297698bbc02328b944771b6450d00b5fa469bda9be32"
     },
-    "no-svelte-internal/invalid/no-svelte-internal01-input.svelte": {
-      "diagnostics": "ce64b3a4e23e7fa3d8461fb8b4931e617a07f35efc0cee51b34d06602308093e"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal02-input.svelte": {
-      "diagnostics": "771942221cea7a6e72008a68902f72f7a766ec1a6b541bb5285e783fae07d0f8"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal03-input.svelte": {
-      "diagnostics": "33ecc33b0cda6cd0e39a05dadb196d684997d406c7c8da0846d18cbcba1a5223"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal04-input.svelte": {
-      "diagnostics": "e69ad174c17746eeeeea97fa361cb5c67580e67c62f54641c0fee8b4d5d22cd2"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal05-input.svelte": {
-      "diagnostics": "e69ad174c17746eeeeea97fa361cb5c67580e67c62f54641c0fee8b4d5d22cd2"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal06-input.svelte": {
-      "diagnostics": "771942221cea7a6e72008a68902f72f7a766ec1a6b541bb5285e783fae07d0f8"
-    },
-    "no-svelte-internal/invalid/no-svelte-internal07-input.svelte": {
-      "diagnostics": "00d5224004d2faabf3e1ff58ef996ea6839f68f0173abf6a83d3424dd70eaafa"
-    },
     "no-top-level-browser-globals/invalid/guards03-input.svelte": {
       "diagnostic_count": "3718d113bb3c4386a54ab2e2eb7ed094ab7ec6bccfd337b1dcfc3571dc06d6a0",
       "diagnostics": "ad48f948ab38902d7eb904371a339b1cd9e3e17b0a6cd9a15b119bceec333141"
