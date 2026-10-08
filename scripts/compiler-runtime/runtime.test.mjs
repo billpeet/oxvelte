@@ -167,3 +167,30 @@ test('warningFilter mutations are retained only in the reporting view', () => {
     assert.equal(transformed.warnings[0].report.message,'Filtered replacement');
   } finally {rmSync(directory,{recursive:true,force:true});}
 });
+
+
+test('consumer with only Svelte and TypeScript needs no source-map codec dependency', async () => {
+  const { mkdirSync, symlinkSync } = await import('node:fs');
+  const { createRequire } = await import('node:module');
+  const project = mkdtempSync(join(tmpdir(), 'oxvelte-isolated-consumer-'));
+  try {
+    mkdirSync(join(project, 'node_modules'));
+    for (const name of ['svelte', 'typescript']) {
+      symlinkSync(join(runtime, 'node_modules', name), join(project, 'node_modules', name), 'junction');
+    }
+    const filename = join(project, 'Component.svelte');
+    assert.throws(() => createRequire(filename).resolve('@jridgewell/sourcemap-codec'), {code:'MODULE_NOT_FOUND'});
+    const body = 'let value: number = 1;';
+    const prefix = '<script lang="ts">';
+    const source = prefix + body + '</script>\r\n<img src="x">';
+    const child = spawnSync(process.execPath, [join(runtime, 'bridge.cjs')], {
+      input: JSON.stringify({source, filename, settings: {_oxvelteScripts: [{start:prefix.length, end:prefix.length+body.length, lang:'ts'}]}}) + '\n',
+      encoding: 'utf8', env: {...process.env, OXVELTE_COMPILER_RUNTIME: ''},
+    });
+    assert.equal(child.status, 0, child.stderr);
+    const response = JSON.parse(child.stdout);
+    assert.equal(response.error, undefined);
+    assert.equal(response.result.kind, 'warn');
+    assert.equal(response.result.warnings.find(warning => warning.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
+  } finally { rmSync(project, {recursive:true, force:true}); }
+});

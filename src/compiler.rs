@@ -101,7 +101,8 @@ impl Drop for Runtime {
 impl Runtime {
     fn start() -> Result<Self, String> {
         let script = format!(
-            "const typescriptService = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\nconst typescriptConditions = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\n{}",
+            "const embeddedSourceMapCodec = (() => {{ const module = {{exports: {{}}}}; const exports = module.exports; {} ; return module.exports; }})();\nconst typescriptService = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\nconst typescriptConditions = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\n{}",
+            include_str!("../scripts/compiler-runtime/vendor/sourcemap-codec.cjs"),
             include_str!("../scripts/compiler-runtime/typescript-service.cjs"),
             include_str!("../scripts/compiler-runtime/typescript-conditions.cjs"),
             include_str!("../scripts/compiler-runtime/bridge.cjs"),

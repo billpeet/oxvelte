@@ -3,6 +3,9 @@
 const { createRequire } = require('node:module');
 const path = require('node:path');
 const readline = require('node:readline');
+// The binary embeds this implementation dependency; consumers only supply their compiler packages.
+const sourceMapCodec = typeof embeddedSourceMapCodec === 'undefined'
+  ? require('./vendor/sourcemap-codec.cjs') : embeddedSourceMapCodec;
 // User configuration and preprocessors may log while compiling. Keep their
 // output off the line-delimited response channel, including direct stdout writes.
 const protocolWrite = process.stdout.write.bind(process.stdout);
@@ -120,7 +123,7 @@ async function run(request) {
       strip.push([style.start, style.end]);
       strippedStyles.push([style.element_start ?? style.start, style.element_end ?? style.end]);
     } else {
-      transforms.push({ start, end, output: output + '\n', remap: sourceMapRemap(output + '\n', input, mappings, req('@jridgewell/sourcemap-codec').decode) });
+      transforms.push({ start, end, output: output + '\n', remap: sourceMapRemap(output + '\n', input, mappings, sourceMapCodec.decode) });
     }
   }
   const chars = text.split('');
@@ -144,7 +147,7 @@ async function run(request) {
       const result = babel.transformSync(input, { sourceType: 'module', sourceMaps: true, minified: false, ast: false, code: true, cwd: process.env.OXVELTE_COMPILER_RUNTIME || process.cwd() });
       output = result.code; mappings = result.map.mappings;
     }
-    const decode = req('@jridgewell/sourcemap-codec').decode;
+    const decode = sourceMapCodec.decode;
     transforms.push({ start, end, output: output + '\n', remap: sourceMapRemap(output + '\n', input, mappings, decode) });
   }
   const maps = []; let code = '', cursor = 0;
