@@ -1576,6 +1576,11 @@ impl<'a> TemplateParser<'a> {
         {
             let remaining = self.source[self.pos..].strip_prefix('{')?;
             let body = remaining.trim_start();
+            // A JavaScript comment at the beginning of a mustache expression
+            // is not a Svelte block close, including inside attribute values.
+            if prefix == "{/" && (body.starts_with("/*") || body.starts_with("//")) {
+                return None;
+            }
             body.starts_with(&prefix[1..])
                 .then_some(self.pos + 1 + remaining.len() - body.len() + prefix.len() - 1)
         } else {
@@ -10028,5 +10033,22 @@ mod modern_const_tag_tests {
         assert_eq!(&source[span.start as usize..span.end as usize],"props\n");
         let span = meta.mustache_span.unwrap();
         assert_eq!(&source[span.start as usize..span.end as usize],"{\r\n ...props\n}");
+    }
+
+    #[test]
+    fn whitespace_before_javascript_comments_does_not_start_a_block_close() {
+        for source in [
+            "<!-- 😀 --><div value = \"{ /* keep */ value }\" />",
+            "<div>{ /* keep */ value }</div>",
+            "<div>{ // keep\n value }</div>",
+            "<div\nvalue={ // keep\n value }\n/>",
+        ] {
+            let alloc = Allocator::default();
+            let parsed = parser::parse_for_lint(source,&alloc);
+            assert!(parsed.errors.is_empty(),"{source}: {:?}",parsed.errors);
+            assert_eq!(parsed.ast.html.nodes.len(), if source.starts_with("<!--") {2} else {1},"{source}: {:?}",parsed.ast.html.nodes);
+            let TemplateNode::Element(element) = parsed.ast.html.nodes.last().unwrap() else {panic!();};
+            assert_eq!(element.span.end as usize,source.len());
+        }
     }
 }
