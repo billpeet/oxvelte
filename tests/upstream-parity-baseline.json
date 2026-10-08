@@ -345,9 +345,6 @@
     "no-bind-value-on-checkable-inputs/invalid/radio-bind-value-input.svelte": {
       "unsupported_rule": "8241b18af2d18eeea3d5a562fcf9b58769dd37de44b7b305c67682a91a76cf17"
     },
-    "no-dom-manipulating/invalid/chain01-input.svelte": {
-      "diagnostics": "0d19210f26319850acc050628ca8c79aefea29b2aa9efde6ec6eb18bc367076e"
-    },
     "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte": {
       "diagnostics": "a04bbb7bfb0a1e552ced21a267295d7fdda5186f36837c6b7285d2871c0d3c0a"
     },

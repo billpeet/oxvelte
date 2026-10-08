@@ -6,7 +6,7 @@ use crate::linter::{walk_template_nodes, LintContext, Rule};
 use oxc::ast::ast::{AssignmentTarget, Expression};
 use oxc::ast::AstKind;
 use oxc::semantic::SymbolId;
-use oxc::span::Span;
+use oxc::span::{GetSpan, Span};
 use rustc_hash::FxHashSet;
 
 const DOM_METHODS: &[&str] = &[
@@ -106,7 +106,13 @@ impl Rule for NoDomManipulating {
         let Some(semantic) = ctx.instance_semantic else {
             return;
         };
-        let content_offset = ctx.instance_content_offset;
+        let content_offset = ctx
+            .ast
+            .instance
+            .as_ref()
+            .map_or(ctx.instance_content_offset, |script| {
+                script.content_span.start
+            });
         let scoping = semantic.scoping();
 
         // 2. Resolve each bound name to a symbol in the instance root scope.
@@ -153,7 +159,7 @@ impl Rule for NoDomManipulating {
             if !DOM_METHODS.contains(&method) {
                 continue;
             }
-            let s = content_offset + ce.span.start;
+            let s = content_offset + callee.span().start;
             let e = content_offset + end_span.end;
             ctx.diagnostic(msg, Span::new(s, e));
         }
@@ -183,6 +189,24 @@ impl Rule for NoDomManipulating {
 
 fn is_ident_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_' || c == '$'
+}
+
+#[cfg(test)]
+mod span_tests {
+    #[test]
+    fn parenthesized_optional_calls_report_the_member_expression() {
+        let source = "<!-- é -->\n<script data-x='>'>let el; (/* keep */ el?.remove)();</script><p bind:this={el}/>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let diagnostics =
+            crate::linter::Linter::all().lint_with_config(&parsed.ast, source, Default::default());
+        let reads: Vec<_> = diagnostics
+            .iter()
+            .filter(|d| d.rule_name == "svelte/no-dom-manipulating")
+            .map(|d| &source[d.span.start as usize..d.span.end as usize])
+            .collect();
+        assert_eq!(reads, ["el?.remove"]);
+    }
 }
 
 /// Strip `ParenthesizedExpression` and `ChainExpression` wrappers to get the
