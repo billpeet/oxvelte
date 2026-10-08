@@ -125,10 +125,14 @@ fn consume_ignore(
         let between = &source[comment.end as usize..end as usize];
         // HTMLText and opening parentheses are excluded by the upstream token
         // filter. Other markup/control tokens terminate the leading comments.
-        let markup = source[target.start as usize..].starts_with('<');
-        if !between.chars().all(|c| {
-            js_whitespace(c) || c == '(' || (markup && !matches!(c, '<' | '>' | '{' | '}'))
-        }) {
+        let markup = source[target.start as usize..].starts_with(['<', '{']);
+        let no_significant_token = if markup {
+            crate::parser::scanner::SvelteScanner::new(between)
+                .all(|token| matches!(token.kind, crate::parser::scanner::TokenKind::Text(_)))
+        } else {
+            between.chars().all(|c| js_whitespace(c) || c == '(')
+        };
+        if !no_significant_token {
             break;
         }
         end = comment.start;
@@ -303,7 +307,7 @@ mod tests {
 
     #[test]
     fn only_the_nearest_matching_comment_code_is_consumed() {
-        let source = "<!-- svelte-ignore foo -->\n<!-- svelte-ignore foo -->\ntext<img>";
+        let source = "<!-- svelte-ignore foo -->\n<!-- svelte-ignore foo -->\ntext > text<img>";
         let comments = [Span::new(0, 26), Span::new(27, 53)];
         let mut items = Vec::new();
         for comment in comments {
