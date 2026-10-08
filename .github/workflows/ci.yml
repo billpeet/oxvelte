@@ -11,6 +11,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      OXVELTE_COMPILER_RUNTIME: ${{ github.workspace }}/scripts/compiler-runtime
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -23,6 +25,8 @@ jobs:
       - run: cargo build --release
 
   upstream-parity:
+    env:
+      OXVELTE_COMPILER_RUNTIME: ${{ github.workspace }}/scripts/compiler-runtime
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]

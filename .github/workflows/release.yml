@@ -28,10 +28,17 @@ env:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      OXVELTE_COMPILER_RUNTIME: ${{ github.workspace }}/scripts/compiler-runtime
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: scripts/compiler-runtime
 
       - name: Read version and check it matches the tag
         id: version
