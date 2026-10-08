@@ -1,6 +1,24 @@
 # Upstream rule parity
 
-Run the pinned eslint-plugin-svelte fixture suite with:
+Install the pinned compiler runtime before running the fixture suite:
+
+```sh
+npm ci --prefix scripts/compiler-runtime --ignore-scripts --no-audit --no-fund
+```
+
+Set `OXVELTE_COMPILER_RUNTIME` to that directory. In PowerShell:
+
+```powershell
+$env:OXVELTE_COMPILER_RUNTIME = (Resolve-Path scripts/compiler-runtime).Path
+```
+
+On Linux or macOS:
+
+```sh
+export OXVELTE_COMPILER_RUNTIME="$(pwd)/scripts/compiler-runtime"
+```
+
+Then run the pinned eslint-plugin-svelte fixture suite:
 
 ```sh
 cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
@@ -31,7 +49,7 @@ The initial run contains 1,299 inputs for 83 rules using the upstream fixture-lo
 
 These are fixture results, not real-project finding counts. A gap can be a location or message mismatch even when both tools report the same number of findings. All seven writable-derived invalid cases match their diagnostic expectations but require suggestions, which Oxvelte does not expose. The initial reactivity gap was a default-exported binding in a `.svelte.js` module; it is now fixed and all 79 reactivity cases match. Navigation cases expose argument-location differences as well as semantic mismatches. All 56 unused-props valid cases pass. Its 20 invalid cases have diagnostic differences, mostly report locations, with one custom-options case missing a finding.
 
-Unused props now matches all 76 cases, navigation resolve all 84, and writable derived all nine. The [fifth parallel wave report](research/upstream-parity-fifth-wave.md) records the latest changes: all 91 eligible indentation cases match, bringing the full suite to 1,135 matches, 97 gaps and 67 version skips. The current full-suite counts and remaining issues are in the generated gap inventory below.
+Unused props now matches all 76 cases, navigation resolve all 84, and writable derived all nine. The [sixth parallel wave report](research/upstream-parity-sixth-wave.md) records the latest changes: all 90 eligible compiler/configuration cases match, bringing the full suite to 1,225 matches, seven gaps and 67 version skips. The current full-suite counts and remaining issues are in the generated gap inventory below.
 
 The JSON report contains every case ID, status and expected/actual difference. It separates count, diagnostic, fix, parse, version and capability issues. It records unsupported rules, executable configs, compiler-dependent rules, extra parser settings and suggestions. All rule options are passed through. Typed cases run and can fail; they are not skipped wholesale. Unsupported capabilities prevent a case being counted as a full match even when its diagnostics agree.
 
@@ -56,7 +74,7 @@ The initial baseline was inspected for the priority rules and grouped by issue c
 
 ## Reproducing the import
 
-Node dependencies are needed only for importing and testing the importer. Regular parity runs need only Cargo and the committed corpus.
+The importer has separate Node dependencies. Regular parity runs require Cargo, Node.js and the pinned compiler runtime above. CI installs both dependency sets and sets the runtime path on Windows and Linux.
 
 ```sh
 git clone https://github.com/sveltejs/eslint-plugin-svelte /path/to/upstream
@@ -64,7 +82,7 @@ npm ci --prefix scripts/upstream-parity --ignore-scripts
 node scripts/upstream-parity/import.mjs /path/to/upstream --check
 ```
 
-The importer reads the pinned Git blobs, including support files, rule sources, test sources and the MIT license. Local modifications and Git line-ending conversion cannot alter the import. It reproduces the upstream loader's filename discovery, JSON/JS/CJS config precedence and dependency filters. It exports original YAML diagnostics and fix outputs to `manifest.json`, preserving suggestions and parser/config metadata. JS/CJS configs are retained and reported as unsupported rather than executed or silently dropped. Missing error/fix snapshots fail the import; it never generates expectations by running Oxvelte.
+The importer reads the pinned Git blobs, including support files, rule sources, test sources and the MIT license. Local modifications and Git line-ending conversion cannot alter the import. It reproduces the upstream loader's filename discovery, JSON/JS/CJS config precedence and dependency filters. It exports original YAML diagnostics and fix outputs to `manifest.json`, preserving suggestions and parser/config metadata. JS/CJS configs are retained unchanged; eligible compiler configuration modules are executed by the compiler bridge. Missing error/fix snapshots fail the import; it never generates expectations by running Oxvelte.
 
 Metadata inspection uses the exact declared ESLint and TypeScript versions to resolve inherited core fixability and statically proven compiler-version guards. In particular, const-tag migration requires Svelte 5.56 and is skipped under the declared 5.49.2 environment. Diagnostic filename spelling is normalized only for the evaluated fixture when comparing messages; actual file paths remain available to project resolution. See the fourth-wave report for the reviewed metadata and baseline identity changes.
 
@@ -72,7 +90,7 @@ For a future upstream refresh, change the pinned revision and version in the imp
 
 ## Remaining coverage
 
-This first runner covers the raw rule fixtures. The imported TypeScript/core integration test sources, processor/config/settings tests and custom `no-conflicting-module-names` tests are available for later ports but are not executed. It also does not run a reference ESLint installation to validate each snapshot under the declared environment. Expectations come from the pinned upstream files. Compiler warnings and suggestion parity remain explicit capability gaps. The existing real-project parity script remains useful alongside these checks.
+This first runner covers the raw rule fixtures. The imported TypeScript/core integration test sources, processor/config/settings tests and custom `no-conflicting-module-names` tests are available for later ports but are not executed. It also does not run a reference ESLint installation to validate each snapshot under the declared environment. Expectations come from the pinned upstream files. The remaining seven fixture gaps concern TypeScript unnecessary-condition integration. The existing real-project parity script remains useful alongside these checks.
 
 See the [research note](research/eslint-plugin-svelte-test-suite.md) for the upstream test architecture and the JobSys motivation. The upstream MIT license is copied into the corpus and its attribution is retained in `THIRD_PARTY_NOTICES`.
 

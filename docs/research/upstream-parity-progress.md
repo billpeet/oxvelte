@@ -1,6 +1,6 @@
 # Upstream parity progress
 
-The [fifth parallel wave](upstream-parity-fifth-wave.md) is complete and integrated. All 91 eligible indentation cases now match, bringing the full suite to 1,135 matches, 97 gaps and 67 version skips. Remaining work is compiler integration/configuration (90) and TypeScript unnecessary-condition integration (7). The [fourth](upstream-parity-fourth-wave.md), [third](upstream-parity-third-wave.md), [second](upstream-parity-second-wave.md), [first](upstream-parity-first-wave.md) waves and batch below record earlier work.
+The [sixth parallel wave](upstream-parity-sixth-wave.md) is complete and integrated. All 90 eligible compiler/configuration cases now match, bringing the full suite to 1,225 matches, seven gaps and 67 version skips. Remaining work is TypeScript unnecessary-condition integration (7). The earlier wave reports and batch below record previous work.
 
 Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
 
