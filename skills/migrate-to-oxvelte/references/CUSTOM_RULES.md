@@ -98,7 +98,7 @@ keep a minimal ESLint fallback.
 Build/install oxvelte with custom rules enabled:
 
 ```bash
-cargo install --git https://github.com/tolgaouz/oxvelte.git --features custom-rules
+cargo install --git https://github.com/billpeet/oxvelte.git --features custom-rules
 ```
 
 Without the feature, `customRules` is ignored.

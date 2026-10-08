@@ -4,6 +4,9 @@
 
 # oxvelte
 
+> [!NOTE]
+> **This is a fork of [tolgaouz/oxvelte](https://github.com/tolgaouz/oxvelte).** oxvelte was created by [@tolgaouz](https://github.com/tolgaouz), and all credit for the original design and implementation goes to him. The original repository looks to be no longer actively developed, so this fork ([billpeet/oxvelte](https://github.com/billpeet/oxvelte)) continues the work. It is not affiliated with or endorsed by the original author.
+
 A Svelte linter written in Rust. Drop-in replacement for [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) — same rules, same diagnostics, **50-1000x faster**.
 
 <p align="center">
@@ -28,7 +31,7 @@ oxlint can lint the JavaScript/TypeScript inside `.svelte` `<script>` blocks, bu
 ```bash
 # Install both
 npm install -D oxlint
-cargo install --git https://github.com/tolgaouz/oxvelte.git
+cargo install --git https://github.com/billpeet/oxvelte.git
 
 # Add to package.json
 ```
@@ -50,19 +53,19 @@ This repo also includes a `migrate-to-oxvelte` skill for the [skills](https://gi
 Install the skill from this repository:
 
 ```bash
-npx skills add tolgaouz/oxvelte --skill migrate-to-oxvelte
+npx skills add billpeet/oxvelte --skill migrate-to-oxvelte
 ```
 
 For Codex:
 
 ```bash
-npx skills add tolgaouz/oxvelte --skill migrate-to-oxvelte -a codex -g
+npx skills add billpeet/oxvelte --skill migrate-to-oxvelte -a codex -g
 ```
 
 To inspect available skills before installing:
 
 ```bash
-npx skills add tolgaouz/oxvelte --list
+npx skills add billpeet/oxvelte --list
 ```
 
 Once the public skills registry indexes it, it can also be discovered with:
@@ -160,13 +163,13 @@ oxvelte lint --json src/
 ### From GitHub
 
 ```bash
-cargo install --git https://github.com/tolgaouz/oxvelte.git
+cargo install --git https://github.com/billpeet/oxvelte.git
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/tolgaouz/oxvelte.git
+git clone https://github.com/billpeet/oxvelte.git
 cd oxvelte
 cargo build --release
 ```
@@ -275,4 +278,4 @@ README.md               you are here
 
 ## License
 
-MIT
+[MIT](LICENSE). Original work copyright © [@tolgaouz](https://github.com/tolgaouz).

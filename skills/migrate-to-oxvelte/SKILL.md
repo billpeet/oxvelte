@@ -220,7 +220,7 @@ them before deleting ESLint:
 For oxvelte custom rules, install/build oxvelte with custom-rule support:
 
 ```bash
-cargo install --git https://github.com/tolgaouz/oxvelte.git --features custom-rules
+cargo install --git https://github.com/billpeet/oxvelte.git --features custom-rules
 ```
 
 Do not silently drop a custom rule. If a rule cannot be ported, leave ESLint in
@@ -331,19 +331,19 @@ Use `npm install -D oxlint`, `yarn add -D oxlint`, or `bun add -d oxlint` if
 that is the project's package manager.
 
 ```bash
-cargo install --git https://github.com/tolgaouz/oxvelte.git
+cargo install --git https://github.com/billpeet/oxvelte.git
 ```
 
 If custom oxvelte rules were generated, use:
 
 ```bash
-cargo install --git https://github.com/tolgaouz/oxvelte.git --features custom-rules
+cargo install --git https://github.com/billpeet/oxvelte.git --features custom-rules
 ```
 
 Or from source:
 
 ```bash
-git clone https://github.com/tolgaouz/oxvelte.git
+git clone https://github.com/billpeet/oxvelte.git
 cd oxvelte && cargo build --release
 ```
 

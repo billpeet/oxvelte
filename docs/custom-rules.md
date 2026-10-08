@@ -10,7 +10,7 @@ Custom rules are behind a Cargo feature flag, because bundling the JS engine rou
 
 ```bash
 # install with custom-rules support
-cargo install --git https://github.com/tolgaouz/oxvelte.git --features custom-rules
+cargo install --git https://github.com/billpeet/oxvelte.git --features custom-rules
 
 # or from a local checkout
 cargo build --release --features custom-rules
