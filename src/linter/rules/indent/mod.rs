@@ -1,6 +1,7 @@
 //! Whitespace indentation with a shared token offset graph.
 mod layout;
 mod script;
+mod selectors;
 mod template;
 mod typescript;
 use crate::linter::{LintContext, Rule};
@@ -110,11 +111,78 @@ impl Rule for Indent {
                     .collect::<Vec<_>>();
 
                 let parent = ancestors.first().copied();
-                script::apply_node(kind, parent, &ancestors, base, &mut layout);
-                typescript::apply_node(kind, parent, base, &mut layout);
+                let es = script::apply_node(kind, parent, &ancestors, base, &mut layout);
+                let ts = typescript::apply_node(kind, parent, base, &mut layout);
+                if (!es && !ts)
+                    || layout
+                        .options
+                        .ignored_nodes
+                        .iter()
+                        .any(|s| selectors::matches(s, kind, &ancestors))
+                {
+                    layout.ignore(Span::new(start as u32, end as u32));
+                }
             }
         }
         layout.report(ctx);
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        linter::{Linter, RuleConfig},
+        parser,
+    };
+    fn lint(source: &str, options: serde_json::Value) -> Vec<crate::linter::LintDiagnostic> {
+        let a = Allocator::default();
+        let p = parser::parse_for_lint(source, &a);
+        Linter::all()
+            .lint_with_config_and_path(
+                &p.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+                "Test.svelte",
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/indent")
+            .collect()
+    }
+    #[test]
+    fn mixed_whitespace_reports_characters_when_width_matches() {
+        let source = "<script>\n \tlet x = 1;\n</script>";
+        let d = lint(source, serde_json::json!([]));
+        assert_eq!(d.len(), 1);
+        assert_eq!(
+            d[0].message,
+            "Expected \" \" character, but found \"\\t\" character."
+        );
+        assert_eq!(
+            &source[d[0].span.start as usize..d[0].span.end as usize],
+            "\t"
+        );
+        assert_eq!(d[0].fix.as_ref().unwrap().replacement, " ");
+    }
+    #[test]
+    fn comment_only_lines_use_the_following_statement_indent() {
+        let source = "<script>\n// comment\nlet x = 1;\n// final comment\n</script>";
+        let d = lint(source, serde_json::json!([]));
+        assert_eq!(d.len(), 2);
+        assert_eq!(d[0].span.start, source.find("// comment").unwrap() as u32);
+        assert_eq!(d[1].span.start, source.find("let x").unwrap() as u32);
+    }
+    #[test]
+    fn ignored_node_types_preserve_their_actual_indentation() {
+        let source = "<script>\nconst x = [\n1,\n2\n];\n</script>";
+        let d = lint(
+            source,
+            serde_json::json!([{"ignoredNodes":["ArrayExpression"]}]),
+        );
+        assert_eq!(d.len(), 1);
+        assert_eq!(d[0].span.start, source.find("const x").unwrap() as u32);
+    }
+}
