@@ -100,14 +100,23 @@ impl Drop for Runtime {
 }
 impl Runtime {
     fn start() -> Result<Self, String> {
+        let script = format!(
+            "const typescriptService = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\nconst typescriptConditions = (() => {{ const module = {{exports: {{}}}}; {} ; return module.exports; }})();\n{}",
+            include_str!("../scripts/compiler-runtime/typescript-service.cjs"),
+            include_str!("../scripts/compiler-runtime/typescript-conditions.cjs"),
+            include_str!("../scripts/compiler-runtime/bridge.cjs"),
+        );
         let mut child = Command::new(std::env::var_os("OXVELTE_NODE").unwrap_or_else(|| "node".into()))
-            .args(["--input-type=commonjs", "-e", include_str!("../scripts/compiler-runtime/bridge.cjs")])
+            .args(["--input-type=commonjs", "-e", "const fs=require('node:fs');const b=Buffer.alloc(1);let n='';while(fs.readSync(0,b,0,1,null)&&b[0]!==10)n+=b.toString();const code=Buffer.alloc(Number(n));let offset=0;while(offset<code.length){const count=fs.readSync(0,code,offset,code.length-offset,null);if(!count)throw Error('Incomplete Oxvelte runtime bootstrap');offset+=count;}eval(code.toString('utf8'));"])
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::inherit())
             .spawn().map_err(|e| format!("Cannot start Node.js for Svelte compiler rules: {e}. Install Node.js or set OXVELTE_NODE."))?;
-        let input = child
+        let mut input = child
             .stdin
             .take()
             .ok_or("Compiler runtime has no input pipe")?;
+        write!(input, "{}\n{}", script.len(), script)
+            .and_then(|_| input.flush())
+            .map_err(|error| format!("Cannot initialize Node.js lint runtime: {error}"))?;
         let output = BufReader::new(
             child
                 .stdout
@@ -236,14 +245,14 @@ fn convert_warnings(source: &str, warnings: Vec<WireWarning>) -> Vec<Warning> {
         })
         .collect()
 }
-fn byte_utf16(source: &str, byte: u32) -> usize {
+pub(crate) fn byte_utf16(source: &str, byte: u32) -> usize {
     source
         .get(..byte as usize)
         .unwrap_or(source)
         .encode_utf16()
         .count()
 }
-fn utf16_byte(source: &str, index: usize) -> u32 {
+pub(crate) fn utf16_byte(source: &str, index: usize) -> u32 {
     let mut units = 0;
     for (byte, ch) in source.char_indices() {
         if units >= index {
@@ -275,6 +284,13 @@ pub fn apply_warning_callbacks(
     }
     with_runtime(|runtime| runtime.callbacks(source, filename, settings, warnings))
 }
+/// Run opt-in type-aware checks through the shared Node process. TypeScript
+/// programs are refreshed per request so unsaved source and imports stay current.
+pub(crate) fn typescript_conditions(request: &Value) -> Result<Value, String> {
+    let serialized = serde_json::to_string(request).map_err(|error| error.to_string())?;
+    with_runtime(|runtime| runtime.exchange(&serialized))
+}
+
 fn with_runtime<T>(action: impl FnOnce(&mut Runtime) -> Result<T, String>) -> Result<T, String> {
     static RUNTIME: OnceLock<Mutex<Option<Runtime>>> = OnceLock::new();
     let mut state = RUNTIME

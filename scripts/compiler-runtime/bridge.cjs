@@ -183,6 +183,6 @@ async function run(request) {
 }
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on('line', async line => {
-  try { const request = JSON.parse(line); const result = request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
+  try { const request = JSON.parse(line); const result = request.operation === 'typescript-conditions' ? typescriptConditions.analyze(typescriptService.createSession(request), request.options || {}) : request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
   catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });

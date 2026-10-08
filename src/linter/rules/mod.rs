@@ -41,6 +41,7 @@ mod no_svelte_internal;
 mod no_target_blank;
 mod no_trailing_spaces;
 mod no_unknown_style_directive_property;
+mod no_unnecessary_condition;
 mod no_unnecessary_state_wrap;
 mod no_unused_props;
 mod no_unused_svelte_ignore;
@@ -265,6 +266,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(require_store_callbacks_use_set_param::RequireStoreCallbacksUseSetParam),
         Box::new(require_store_reactive_access::RequireStoreReactiveAccess),
         Box::new(valid_compile::ValidCompile),
+        Box::new(no_unnecessary_condition::NoUnnecessaryCondition),
         Box::new(valid_style_parse::ValidStyleParse),
         Box::new(no_unused_class_name::NoUnusedClassName),
         Box::new(prefer_const::PreferConst),
