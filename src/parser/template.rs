@@ -1568,11 +1568,12 @@ impl<'a> TemplateParser<'a> {
     /// Return the source position rather than a normalized length so all AST
     /// and diagnostic spans continue to refer to the original source bytes.
     fn prefix_end(&self, prefix: &str) -> Option<usize> {
-        if prefix.starts_with("{...") || (prefix.starts_with('{')
-            && prefix
-                .as_bytes()
-                .get(1)
-                .is_some_and(|b| matches!(b, b'#' | b':' | b'/' | b'@')))
+        if prefix.starts_with("{...")
+            || (prefix.starts_with('{')
+                && prefix
+                    .as_bytes()
+                    .get(1)
+                    .is_some_and(|b| matches!(b, b'#' | b':' | b'/' | b'@')))
         {
             let remaining = self.source[self.pos..].strip_prefix('{')?;
             let body = remaining.trim_start();
@@ -10024,15 +10025,23 @@ mod modern_const_tag_tests {
     fn multiline_spread_attributes_exclude_ellipsis_from_expression_spans() {
         let source = "<div\n{\r\n ...props\n}\n/>";
         let alloc = Allocator::default();
-        let parsed = parser::parse_for_lint(source,&alloc);
-        assert!(parsed.errors.is_empty(),"{:?}",parsed.errors);
-        let TemplateNode::Element(element) = &parsed.ast.html.nodes[0] else { panic!(); };
-        assert!(matches!(element.attributes[0],crate::ast::Attribute::Spread {..}));
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let TemplateNode::Element(element) = &parsed.ast.html.nodes[0] else {
+            panic!();
+        };
+        assert!(matches!(
+            element.attributes[0],
+            crate::ast::Attribute::Spread { .. }
+        ));
         let meta = &element.attribute_meta[0];
         let span = meta.expression_span.unwrap();
-        assert_eq!(&source[span.start as usize..span.end as usize],"props\n");
+        assert_eq!(&source[span.start as usize..span.end as usize], "props\n");
         let span = meta.mustache_span.unwrap();
-        assert_eq!(&source[span.start as usize..span.end as usize],"{\r\n ...props\n}");
+        assert_eq!(
+            &source[span.start as usize..span.end as usize],
+            "{\r\n ...props\n}"
+        );
     }
 
     #[test]
@@ -10044,11 +10053,18 @@ mod modern_const_tag_tests {
             "<div\nvalue={ // keep\n value }\n/>",
         ] {
             let alloc = Allocator::default();
-            let parsed = parser::parse_for_lint(source,&alloc);
-            assert!(parsed.errors.is_empty(),"{source}: {:?}",parsed.errors);
-            assert_eq!(parsed.ast.html.nodes.len(), if source.starts_with("<!--") {2} else {1},"{source}: {:?}",parsed.ast.html.nodes);
-            let TemplateNode::Element(element) = parsed.ast.html.nodes.last().unwrap() else {panic!();};
-            assert_eq!(element.span.end as usize,source.len());
+            let parsed = parser::parse_for_lint(source, &alloc);
+            assert!(parsed.errors.is_empty(), "{source}: {:?}", parsed.errors);
+            assert_eq!(
+                parsed.ast.html.nodes.len(),
+                if source.starts_with("<!--") { 2 } else { 1 },
+                "{source}: {:?}",
+                parsed.ast.html.nodes
+            );
+            let TemplateNode::Element(element) = parsed.ast.html.nodes.last().unwrap() else {
+                panic!();
+            };
+            assert_eq!(element.span.end as usize, source.len());
         }
     }
 }

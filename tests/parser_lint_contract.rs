@@ -88,7 +88,23 @@ fn lint_parsing_accepts_spaced_template_tags_without_regex_recovery() {
     let alloc = Allocator::default();
     let parsed = parser::parse_for_lint(source, &alloc);
     assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
-    assert_eq!(parsed.ast.html.nodes.len(), 3);
+    assert_eq!(parsed.ast.html.nodes.len(), 2);
+    let TemplateNode::SnippetBlock(snippet) = &parsed.ast.html.nodes[0] else {
+        panic!("spaced snippet tags must form a block");
+    };
+    assert_eq!(snippet.name, "foo");
+    assert!(snippet.body.nodes.is_empty());
+    assert_eq!(
+        &source[snippet.span.start as usize..snippet.span.end as usize],
+        "{ #snippet foo() }{ /snippet }"
+    );
+    let TemplateNode::RenderTag(render) = &parsed.ast.html.nodes[1] else {
+        panic!("spaced render tags must retain their expression metadata");
+    };
+    assert_eq!(
+        &source[render.expression_span.start as usize..render.expression_span.end as usize],
+        "foo() "
+    );
 }
 
 #[test]
