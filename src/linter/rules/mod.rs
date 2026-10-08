@@ -25,6 +25,7 @@ mod no_immutable_reactive_statements;
 mod no_inline_styles;
 mod no_inner_declarations;
 mod no_inspect;
+mod no_nested_style_tag;
 mod no_not_function_handler;
 mod no_object_in_text_mustaches;
 mod no_raw_special_elements;
@@ -216,6 +217,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_inline_styles::NoInlineStyles),
         Box::new(valid_each_key::ValidEachKey),
         Box::new(no_not_function_handler::NoNotFunctionHandler),
+        Box::new(no_nested_style_tag::NoNestedStyleTag),
         Box::new(no_ignored_unsubscribe::NoIgnoredUnsubscribe),
         Box::new(no_inner_declarations::NoInnerDeclarations),
         Box::new(spaced_html_comment::SpacedHtmlComment),

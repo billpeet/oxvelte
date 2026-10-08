@@ -351,18 +351,6 @@
     "no-inner-declarations/invalid/v8/test01-input.svelte": {
       "version_skip": "e7fb23074757273334488c569c05c9fa6cb6906a0027d226efd467f00f3f55fe"
     },
-    "no-nested-style-tag/invalid/nested-in-element-input.svelte": {
-      "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
-    },
-    "no-nested-style-tag/invalid/nested-in-snippet-input.svelte": {
-      "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
-    },
-    "no-nested-style-tag/valid/no-style-input.svelte": {
-      "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
-    },
-    "no-nested-style-tag/valid/top-level-style-input.svelte": {
-      "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
-    },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
       "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
