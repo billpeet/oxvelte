@@ -30,7 +30,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 | 2, complete | Align unused-props diagnostic locations | 19 | The 19 location-only cases match; all 56 valid cases remain clean. |
 | 3, complete | Fix unused-props custom option combinations | 1 | The remaining invalid case reports all three expected findings, at the expected locations. |
 | 4, complete | Align navigation diagnostic argument locations | 29 | The 29 location-only navigation cases match, without changing which calls or links are flagged. |
-| 5 | Fix navigation nullish and literal link handling | 2 | `link-nullish-like-literal01` and valid `link-nullish02` match. |
+| 5, complete | Fix navigation nullish and literal link handling | 2 | `link-nullish-like-literal01` and valid `link-nullish02` match. |
 | 6 | Fix navigation branches and operators | 10 | Eight ternary cases and two invalid-operator cases match. |
 | 7 | Recognize resolved pathname types in navigation | 7 | Six valid goto/pushState/replaceState cases and one invalid unresolved-link case match. Check actual imported type identity and scope, rather than accepting a type by its spelling alone. |
 | 8 | Correct SvelteKit page, layout and error props | 4 | The four eligible invalid cases match, including children-on-page and error-page behavior. The 11 Svelte 3/4 cases remain explicit version skips. |
@@ -89,3 +89,5 @@ Treat the generated case inventory as current data. This document records the or
 Commit 3 checks named nested types on destructured props, including imported types when enabled, and applies nested type/property exclusions. All 76 unused-props cases now pass in strict mode. The full suite has 710 matches, 525 gaps and 64 version skips.
 
 Commit 4 reports navigation findings on the first argument, including aliases and namespace calls. All 29 location-only cases now match. The 19 remaining navigation gaps retain their finding counts; their script spans also received this correction. The full suite has 739 matches, 496 gaps and 64 version skips.
+
+Commit 5 distinguishes empty strings from unknown template prefixes and reads null/undefined annotations on destructured bindings. Scheme-bearing template quasis keep their upstream absolute-URL exemption. Both targeted cases match, with all previously matching navigation cases preserved. The full suite has 741 matches, 494 gaps and 64 version skips.

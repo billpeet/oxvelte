@@ -5,7 +5,10 @@
 use crate::ast::{Attribute, AttributeValue, TemplateNode};
 use crate::linter::{walk_template_nodes, LintContext, Rule};
 use oxc::allocator::Allocator;
-use oxc::ast::ast::{Expression, ImportDeclarationSpecifier, ModuleExportName, Statement};
+use oxc::ast::ast::{
+    BindingPattern, Expression, ImportDeclarationSpecifier, ModuleExportName, Statement,
+    TSSignature, TSType, TSTypeName,
+};
 use oxc::ast::AstKind;
 use oxc::parser::Parser;
 use oxc::semantic::Semantic;
@@ -245,6 +248,23 @@ nav.replaceState(url, {});
             ["'/jobs'", "`/jobs/${id}`", "url"]
         );
     }
+
+    #[test]
+    fn nullish_values_are_safe_but_string_interpolation_is_not() {
+        let source = r#"<script lang="ts">
+            interface Props { missing: undefined; empty: null; }
+            const { missing, empty }: Props = $props();
+        </script>
+        <a href={missing}>missing</a><a href={empty}>empty</a>
+        <a href={`${undefined}`}>string</a><a href={`${null}`}>string</a>
+        <a href={`custom:${missing}`}>absolute</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 2);
+        for diagnostic in diagnostics {
+            let attribute = &source[diagnostic.span.start as usize..diagnostic.span.end as usize];
+            assert!(attribute == "href={`${undefined}`}" || attribute == "href={`${null}`}");
+        }
+    }
 }
 
 fn is_nav_ignored(
@@ -262,13 +282,12 @@ fn is_nav_ignored(
 }
 
 fn is_exempt_href(s: &str) -> bool {
-    s.is_empty()
-        || s.starts_with("http://")
-        || s.starts_with("https://")
-        || s.starts_with("mailto:")
-        || s.starts_with("tel:")
-        || s.starts_with("//")
-        || s.starts_with('#')
+    s.is_empty() || is_absolute_url(s) || s.starts_with("//") || s.starts_with('#')
+}
+
+fn is_absolute_url(s: &str) -> bool {
+    s.split_once(':')
+        .is_some_and(|(scheme, _)| scheme.bytes().all(|b| b.is_ascii_alphabetic() || b == b'+'))
 }
 
 /// Compute the longest static string that `expr` is guaranteed to start with,
@@ -278,15 +297,27 @@ fn static_string_prefix(expr: &Expression<'_>) -> Option<String> {
     match expr {
         Expression::StringLiteral(l) => Some(l.value.to_string()),
         Expression::TemplateLiteral(t) => {
+            // Upstream treats a scheme in any quasi as an absolute URL.
+            if let Some(quasi) = t
+                .quasis
+                .iter()
+                .find(|q| is_absolute_url(q.value.raw.as_str()))
+            {
+                return Some(quasi.value.raw.to_string());
+            }
             let first = t.quasis.first()?;
-            Some(
-                first
-                    .value
-                    .cooked
-                    .as_deref()
-                    .unwrap_or(first.value.raw.as_str())
-                    .to_string(),
-            )
+            let prefix = first
+                .value
+                .cooked
+                .as_deref()
+                .unwrap_or(first.value.raw.as_str())
+                .to_string();
+            // An empty leading quasi says nothing about an interpolated value.
+            if prefix.is_empty() && !t.expressions.is_empty() {
+                None
+            } else {
+                Some(prefix)
+            }
         }
         Expression::BinaryExpression(b) => {
             let left = static_string_prefix(&b.left)?;
@@ -481,6 +512,9 @@ fn is_safe_template_root<'a>(
             let Some(sid) = scoping.find_binding(scoping.root_scope_id(), name.into()) else {
                 return false;
             };
+            if symbol_type(sem, sid).is_some_and(is_nullish_type) {
+                return true;
+            }
             let decl_node_id = scoping.symbol_declaration(sid);
             let init = std::iter::once(decl_node_id)
                 .chain(sem.nodes().ancestor_ids(decl_node_id))
@@ -496,6 +530,56 @@ fn is_safe_template_root<'a>(
         // `{foo ?? '/bar'}`, etc. — conservative: flag.
         _ => false,
     }
+}
+
+fn is_nullish_type(ty: &TSType<'_>) -> bool {
+    matches!(ty, TSType::TSNullKeyword(_) | TSType::TSUndefinedKeyword(_))
+}
+
+/// Get the annotation on a binding, including a property destructured from a
+/// typed object. Type references are resolved through their semantic symbols.
+fn symbol_type<'a>(sem: &'a Semantic<'a>, sid: oxc::semantic::SymbolId) -> Option<&'a TSType<'a>> {
+    let declaration = sem.scoping().symbol_declaration(sid);
+    let variable = std::iter::once(declaration)
+        .chain(sem.nodes().ancestor_ids(declaration))
+        .find_map(|id| {
+            if let AstKind::VariableDeclarator(v) = sem.nodes().kind(id) {
+                Some(v)
+            } else {
+                None
+            }
+        })?;
+    let ty = &variable.type_annotation.as_ref()?.type_annotation;
+    let BindingPattern::ObjectPattern(pattern) = &variable.id else {
+        return Some(ty);
+    };
+    let property = pattern.properties.iter().find(|p| matches!(&p.value, BindingPattern::BindingIdentifier(id) if id.symbol_id.get() == Some(sid)))?;
+    let name = property.key.static_name()?;
+    let members = match ty {
+        TSType::TSTypeLiteral(literal) => &literal.members,
+        TSType::TSTypeReference(reference) => {
+            let TSTypeName::IdentifierReference(id) = &reference.type_name else {
+                return None;
+            };
+            let type_sid = sem.scoping().get_reference(id.reference_id()).symbol_id()?;
+            let AstKind::TSInterfaceDeclaration(interface) =
+                sem.nodes().kind(sem.scoping().symbol_declaration(type_sid))
+            else {
+                return None;
+            };
+            &interface.body.body
+        }
+        _ => return None,
+    };
+    members.iter().find_map(|member| {
+        let TSSignature::TSPropertySignature(p) = member else {
+            return None;
+        };
+        if p.key.static_name().as_deref() != Some(name.as_ref()) {
+            return None;
+        }
+        Some(&p.type_annotation.as_ref()?.type_annotation)
+    })
 }
 
 /// Safety check for an expression in the instance script (uses instance semantic
