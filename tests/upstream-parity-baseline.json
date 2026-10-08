@@ -405,18 +405,6 @@
     "no-nested-style-tag/valid/top-level-style-input.svelte": {
       "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
     },
-    "no-object-in-text-mustaches/invalid/array01-input.svelte": {
-      "diagnostics": "1708eaf910b32d0b9f9e2c6da9a9906e6318a5d925133955e58c8a8f123a9c98"
-    },
-    "no-object-in-text-mustaches/invalid/class01-input.svelte": {
-      "diagnostics": "8d242ac4674eda3b807d0cdd8ce3505e32670b9a27238b0d5ae6fb0fb96f372c"
-    },
-    "no-object-in-text-mustaches/invalid/function01-input.svelte": {
-      "diagnostics": "73c2b3ec165c942a1360c7381ea3b3e80fa4ebfef6dc367247b38b6a461e1062"
-    },
-    "no-object-in-text-mustaches/invalid/object01-input.svelte": {
-      "diagnostics": "5e7f2e925922ef6e7a179df0a1c2c85e70e1f764ee52932138f262cf452c1d96"
-    },
     "no-reactive-reassign/invalid/delete01-input.svelte": {
       "diagnostics": "ee33ada15abd00801737f3280769b47ce9601a621f989c1c130146cad18d1ba6"
     },

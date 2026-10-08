@@ -18,8 +18,7 @@ impl Rule for NoObjectInTextMustaches {
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
         walk_template_nodes(&ctx.ast.html, &mut |node| match node {
             TemplateNode::MustacheTag(tag) => {
-                let expr = tag.expression.trim();
-                let kind = detect_expression_kind(expr);
+                let kind = tag.expression_ast.and_then(detect_expression_kind);
                 if let Some(label) = kind {
                     ctx.diagnostic(
                         format!("Unexpected {} in text mustache interpolation.", label),
@@ -28,23 +27,23 @@ impl Rule for NoObjectInTextMustaches {
                 }
             }
             TemplateNode::Element(el) => {
-                for attr in &el.attributes {
+                for (attr, meta) in el.attributes.iter().zip(&el.attribute_meta) {
                     if let Attribute::NormalAttribute {
                         value: AttributeValue::Concat(parts),
-                        span,
                         ..
                     } = attr
                     {
-                        for part in parts {
-                            if let AttributeValuePart::Expression(expr) = part {
-                                let trimmed = expr.trim();
-                                if let Some(label) = detect_expression_kind(trimmed) {
+                        for (part, part_meta) in parts.iter().zip(&meta.parts) {
+                            if let AttributeValuePart::Expression(_) = part {
+                                if let Some(label) =
+                                    part_meta.expression_ast.and_then(detect_expression_kind)
+                                {
                                     ctx.diagnostic(
                                         format!(
                                             "Unexpected {} in text mustache interpolation.",
                                             label
                                         ),
-                                        *span,
+                                        part_meta.mustache_span.unwrap_or(part_meta.span),
                                     );
                                 }
                             }
@@ -57,75 +56,41 @@ impl Rule for NoObjectInTextMustaches {
     }
 }
 
-fn detect_expression_kind(expr: &str) -> Option<&'static str> {
-    if expr.starts_with('{') {
-        return Some("object");
-    }
-    if expr.starts_with('[') {
-        if let Some(end) = find_matching(expr, '[', ']') {
-            let after = expr[end + 1..].trim_start();
-            if after.is_empty() {
-                return Some("array");
-            }
-        } else {
-            return Some("array");
+fn detect_expression_kind(expr: &oxc::ast::ast::Expression<'_>) -> Option<&'static str> {
+    use oxc::ast::ast::Expression;
+    match expr.get_inner_expression() {
+        Expression::ObjectExpression(_) => Some("object"),
+        Expression::ArrayExpression(_) => Some("array"),
+        Expression::ArrowFunctionExpression(_) | Expression::FunctionExpression(_) => {
+            Some("function")
         }
+        Expression::ClassExpression(_) => Some("class"),
+        _ => None,
     }
-    if is_top_level_arrow(expr) {
-        return Some("function");
-    }
-    if expr.starts_with("function") {
-        let after = &expr["function".len()..];
-        if after.is_empty()
-            || after.starts_with(' ')
-            || after.starts_with('(')
-            || after.starts_with('*')
-        {
-            return Some("function");
-        }
-    }
-    if expr.starts_with("class") {
-        let after = &expr["class".len()..];
-        if after.is_empty() || after.starts_with(' ') || after.starts_with('{') {
-            return Some("class");
-        }
-    }
-    None
 }
 
-fn is_top_level_arrow(expr: &str) -> bool {
-    let s = expr.trim();
-    let s = match s.strip_prefix("async") {
-        Some(after) if after.starts_with(' ') || after.starts_with('(') => after.trim_start(),
-        Some(_) => return false,
-        None => s,
-    };
-    if s.starts_with('(') {
-        return find_matching(s, '(', ')')
-            .is_some_and(|close| s[close + 1..].trim_start().starts_with("=>"));
-    }
-    let end = s
-        .find(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
-        .unwrap_or(s.len());
-    end > 0 && s[end..].trim_start().starts_with("=>")
-}
+#[cfg(test)]
+mod tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
 
-fn find_matching(s: &str, open: char, close: char) -> Option<usize> {
-    let mut depth = 0i32;
-    let mut in_string = None::<char>;
-    for (i, c) in s.char_indices() {
-        match c {
-            '\'' | '"' | '`' if in_string.is_none() => in_string = Some(c),
-            c2 if in_string == Some(c2) => in_string = None,
-            c2 if c2 == open && in_string.is_none() => depth += 1,
-            c2 if c2 == close && in_string.is_none() => {
-                depth -= 1;
-                if depth == 0 {
-                    return Some(i);
-                }
-            }
-            _ => {}
-        }
+    #[test]
+    fn reports_each_concatenated_expression_at_its_own_span() {
+        let source =
+            "<!-- 😀 --><div text=\"prefix {[1]} {({a: 1})}\" prop={{a: 1}} />{[1].length}";
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let diagnostics: Vec<_> = Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-object-in-text-mustaches")
+            .collect();
+        assert_eq!(diagnostics.len(), 2);
+        let spans: Vec<_> = diagnostics
+            .iter()
+            .map(|d| &source[d.span.start as usize..d.span.end as usize])
+            .collect();
+        assert_eq!(spans, ["{[1]}", "{({a: 1})}"]);
     }
-    None
 }

@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 968,
-    "gaps": 267,
+    "pass": 972,
+    "gaps": 263,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1536,7 +1536,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 36,
+      "count": 32,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1557,32 +1557,6 @@
         "no-dupe-style-properties": [
           {
             "id": "no-dupe-style-properties/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-object-in-text-mustaches": [
-          {
-            "id": "no-object-in-text-mustaches/invalid/array01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-object-in-text-mustaches/invalid/class01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-object-in-text-mustaches/invalid/function01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-object-in-text-mustaches/invalid/object01-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -1862,7 +1836,7 @@
       }
     },
     "diagnostics": {
-      "count": 81,
+      "count": 77,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -1870,7 +1844,6 @@
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
-        "no-object-in-text-mustaches": 4,
         "no-reactive-reassign": 4,
         "no-shorthand-style-property-overrides": 2,
         "no-svelte-internal": 7,
