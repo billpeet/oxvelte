@@ -201,6 +201,7 @@ mod directive_identity_tests {
 /// Return all implemented lint rules.
 pub fn all_rules() -> Vec<Box<dyn Rule>> {
     vec![
+        Box::new(indent::Indent),
         Box::new(no_at_html_tags::NoAtHtmlTags),
         Box::new(no_at_debug_tags::NoAtDebugTags),
         Box::new(no_at_const_tags::NoAtConstTags),

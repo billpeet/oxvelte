@@ -236,9 +236,7 @@ impl<'s> Layout<'s> {
         for node in nodes {
             if let Some((first, last)) = self.first_last(*node, self.tokens[previous].span.end) {
                 for i in previous + 1..first {
-                    if self.tokens[i].comment {
-                        assign(self, i);
-                    }
+                    assign(self, i);
                 }
                 assign(self, first);
                 previous = last;
