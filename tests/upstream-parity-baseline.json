@@ -359,13 +359,6 @@
       "diagnostic_count": "b859ebaf9478f517a7f5ef02e2ceaccd88c58d3dfd33821aa0c31fcf434efad7",
       "diagnostics": "c9ed9fd5766420848f7d74c065179716db4294e5be5f8297b36584964e1bc10d"
     },
-    "no-dupe-style-properties/invalid/ternary01-input.svelte": {
-      "diagnostic_count": "eec66b2fc2eba7d68624d63ce2ff558bc279d24171d0454d2b0eddf9aa742e6b",
-      "diagnostics": "8c29d43f855cb5d8bc53c6c07e9be469539b516793f0263b21f2edaf7b9f7b29"
-    },
-    "no-dupe-style-properties/invalid/test01-input.svelte": {
-      "diagnostics": "19bc98152226f7c3cdc9ecc77a1cce435329c625d53db200f75c1ee33f186721"
-    },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
     },
