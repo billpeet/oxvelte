@@ -111,6 +111,10 @@ fn property(l: &mut Layout<'_>, span: Span, key: Span, value: Option<Span>, comp
     };
     if let Some(v) = value {
         if let Some(vf) = l.first(v) {
+            if vf <= last_key {
+                l.set(vf, 1, last_key);
+                return;
+            }
             let mut current = last_key;
             while let Some(next) = l.after(current) {
                 l.set(next, 1, last_key);
@@ -151,6 +155,9 @@ fn binary(
     l.set(rf, 1, anchor);
 }
 fn chain(kind: AstKind<'_>) -> bool {
+    if let AstKind::AssignmentTargetPropertyIdentifier(n) = kind {
+        return n.init.is_some();
+    }
     matches!(
         kind,
         AstKind::AssignmentExpression(_)
@@ -247,6 +254,7 @@ pub(super) fn apply_node(
         AstKind::AssignmentExpression(_)
             | AstKind::AssignmentPattern(_)
             | AstKind::AssignmentTargetWithDefault(_)
+            | AstKind::AssignmentTargetPropertyIdentifier(_)
     );
     let Some(first) = l.first(span) else {
         return true;
@@ -419,15 +427,14 @@ pub(super) fn apply_node(
         ),
         AstKind::VariableDeclarator(n) => {
             if let Some(init) = &n.init {
-                if let Some(idlast) = l.last(s(n.id.span())) {
-                    if let Some(eq) = l.after(idlast) {
+                if let Some((init_first, _)) = l.first_last(s(init.span()), span.start) {
+                    if let Some(eq) = find_before(l, init_first, "=").filter(|i| *i >= first) {
                         l.set(eq, 1, first);
                         if let Some(next) = l.after(eq) {
                             l.set(next, 1, first);
                         }
                     }
                 }
-                set_first(l, s(init.span()), 1, first);
             }
         }
         AstKind::ObjectProperty(n) => property(
@@ -469,6 +476,18 @@ pub(super) fn apply_node(
         AstKind::ComputedMemberExpression(n) => {
             if let Some(pf) = l.first(s(n.expression.span())) {
                 if let Some(left) = find_before(l, pf, "[") {
+                    if let Some(ol) = l.last(s(n.object.span())) {
+                        let mut current = ol;
+                        while let Some(next) = l.after(current) {
+                            if next >= left {
+                                break;
+                            }
+                            if l.text(next) == "?." {
+                                l.set(next, 1, first);
+                            }
+                            current = next;
+                        }
+                    }
                     l.set(left, 1, first);
                     if let Some(pl) = l.last(s(n.expression.span())) {
                         if let Some(right) = find_after(l, pl, "]") {
@@ -776,7 +795,14 @@ pub(super) fn apply_node(
         }
         AstKind::TemplateLiteral(n) => {
             for q in n.quasis.iter().skip(1) {
-                set_first(l, s(q.span), 0, first);
+                let qspan = s(q.span);
+                if let Some(index) = l
+                    .tokens
+                    .iter()
+                    .position(|t| t.span.start <= qspan.start && qspan.start < t.span.end)
+                {
+                    l.set(index, 0, first);
+                }
             }
             for e in &n.expressions {
                 set_first(l, s(e.span()), 1, first);
@@ -895,11 +921,30 @@ pub(super) fn apply_node(
         | AstKind::FormalParameters(_)
         | AstKind::FormalParameter(_)
         | AstKind::CatchParameter(_)
-        | AstKind::Directive(_) => {}
+        | AstKind::Directive(_)
+        | AstKind::WithClause(_) => {}
         _ => return false,
     }
+    // ESTree treats grammar parentheses around conditions like expression parentheses.
+    // OXC records explicit parentheses as nodes, but omits the condition delimiters.
+    if is_expression(kind) {
+        let mut inner = first;
+        let mut last = l.last(span).unwrap_or(first);
+        while let (Some(left), Some(right)) = (l.before(inner), l.after(last)) {
+            if l.text(left) != "(" || l.text(right) != ")" {
+                break;
+            }
+            l.set(inner, 1, left);
+            l.set(right, 0, left);
+            inner = left;
+            last = right;
+        }
+    }
     if let Some(last) = l.last(span) {
-        if l.text(last) == ";" && last != first {
+        if !matches!(kind,AstKind::Function(n) if n.body.is_none())
+            && l.text(last) == ";"
+            && last != first
+        {
             if l.after(last).is_none_or(|next| {
                 l.line_of(l.tokens[last].span.start) < l.line_of(l.tokens[next].span.start)
             }) {
@@ -908,6 +953,44 @@ pub(super) fn apply_node(
         }
     }
     true
+}
+
+fn is_expression(kind: AstKind<'_>) -> bool {
+    matches!(
+        kind,
+        AstKind::IdentifierReference(_)
+            | AstKind::ThisExpression(_)
+            | AstKind::ArrayExpression(_)
+            | AstKind::ObjectExpression(_)
+            | AstKind::TemplateLiteral(_)
+            | AstKind::TaggedTemplateExpression(_)
+            | AstKind::ComputedMemberExpression(_)
+            | AstKind::StaticMemberExpression(_)
+            | AstKind::PrivateFieldExpression(_)
+            | AstKind::CallExpression(_)
+            | AstKind::NewExpression(_)
+            | AstKind::MetaProperty(_)
+            | AstKind::UpdateExpression(_)
+            | AstKind::UnaryExpression(_)
+            | AstKind::BinaryExpression(_)
+            | AstKind::LogicalExpression(_)
+            | AstKind::ConditionalExpression(_)
+            | AstKind::AssignmentExpression(_)
+            | AstKind::SequenceExpression(_)
+            | AstKind::Super(_)
+            | AstKind::AwaitExpression(_)
+            | AstKind::ChainExpression(_)
+            | AstKind::ParenthesizedExpression(_)
+            | AstKind::ArrowFunctionExpression(_)
+            | AstKind::YieldExpression(_)
+            | AstKind::ImportExpression(_)
+            | AstKind::BooleanLiteral(_)
+            | AstKind::NullLiteral(_)
+            | AstKind::NumericLiteral(_)
+            | AstKind::StringLiteral(_)
+            | AstKind::BigIntLiteral(_)
+            | AstKind::RegExpLiteral(_)
+    )
 }
 
 fn control_test(l: &mut Layout<'_>, first: usize, _test: Span, body: Span) {
@@ -1056,5 +1139,60 @@ fn import_export(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn fixed(source: &str, options: serde_json::Value) -> String {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let mut fixes: Vec<_> = Linter::all()
+            .lint_with_config_and_path(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+                "Regression.svelte",
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/indent")
+            .filter_map(|d| d.fix)
+            .collect();
+        fixes.sort_by_key(|f| std::cmp::Reverse(f.span.start));
+        let mut result = source.to_owned();
+        for fix in fixes {
+            result.replace_range(
+                fix.span.start as usize..fix.span.end as usize,
+                &fix.replacement,
+            );
+        }
+        result
+    }
+
+    #[test]
+    fn script_chains_keep_original_unicode_and_crlf_offsets() {
+        let source = "<!-- é😀 -->\r\n<script data-note=\">\">\r\nfunction f() {\r\nconst result = a\r\n+ b\r\n+ c;\r\nreturn result;\r\n}\r\n</script>";
+        let expected = "<!-- é😀 -->\r\n<script data-note=\">\">\r\n  function f() {\r\n    const result = a\r\n      + b\r\n      + c;\r\n    return result;\r\n  }\r\n</script>";
+        assert_eq!(fixed(source, serde_json::json!([2])), expected);
+        assert_eq!(fixed(expected, serde_json::json!([2])), expected);
+    }
+
+    #[test]
+    fn script_tab_offsets_honor_the_script_anchor_option() {
+        let source = "<script>\nfunction f() {\nconst value = first\n+ second\n+ third;\nreturn value;\n}\n</script>";
+        let expected = "<script>\nfunction f() {\n\tconst value = first\n\t\t+ second\n\t\t+ third;\n\treturn value;\n}\n</script>";
+        let options = serde_json::json!([{"indent": "tab", "indentScript": false}]);
+        assert_eq!(fixed(source, options.clone()), expected);
+        assert_eq!(fixed(expected, options), expected);
     }
 }
