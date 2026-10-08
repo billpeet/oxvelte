@@ -486,6 +486,7 @@ fn extract_type_properties_with_file(
         let eq_pos = content[start..].find('=').unwrap_or(0);
         let rhs_start = start + eq_pos + 1;
         let rhs = content[rhs_start..].trim_start();
+        let rhs = &rhs[..find_type_end(rhs)];
 
         if rhs.contains('&') {
             for part in &split_at_depth0(&rhs[..find_type_end(rhs)], '&') {
@@ -509,8 +510,10 @@ fn extract_type_properties_with_file(
                     }
                 }
             }
-        } else if let Some(brace_rel) = content[start..].find('{') {
-            extract_props_from_block(content, start + brace_rel, &mut props);
+        } else if rhs.starts_with('{') {
+            let brace =
+                rhs_start + content[rhs_start..].len() - content[rhs_start..].trim_start().len();
+            extract_props_from_block(content, brace, &mut props);
         }
     }
     props
@@ -619,7 +622,11 @@ fn extract_props_from_block(content: &str, brace_start: usize, props: &mut Vec<(
 /// Read TypeScript member boundaries, retaining original source offsets.
 fn parse_type_block(content: &str, brace_start: usize) -> (Vec<(String, usize)>, bool) {
     const PREFIX: &str = "type __OxvelteProps = ";
-    let code = format!("{}{}", PREFIX, &content[brace_start..]);
+    let code = format!(
+        "{}{}",
+        PREFIX,
+        &content[brace_start..type_block_end(content, brace_start)]
+    );
     let allocator = oxc::allocator::Allocator::default();
     let parsed = oxc::parser::Parser::new(&allocator, &code, oxc::span::SourceType::ts()).parse();
     let Some(oxc::ast::ast::Statement::TSTypeAliasDeclaration(alias)) = parsed.program.body.first()
@@ -647,6 +654,47 @@ fn parse_type_block(content: &str, brace_start: usize) -> (Vec<(String, usize)>,
         }
     }
     (properties, index_signature)
+}
+
+fn type_block_end(content: &str, start: usize) -> usize {
+    let bytes = content.as_bytes();
+    let mut i = start;
+    let mut depth = 0;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'\'' | b'"' | b'`' => {
+                let quote = bytes[i];
+                i += 1;
+                while i < bytes.len() && bytes[i] != quote {
+                    i += if bytes[i] == b'\\' { 2 } else { 1 };
+                }
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'/') => {
+                while i < bytes.len() && bytes[i] != b'\n' {
+                    i += 1;
+                }
+                continue;
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'*') => {
+                i += 2;
+                while i + 1 < bytes.len() && &bytes[i..i + 2] != b"*/" {
+                    i += 1;
+                }
+                i += 2;
+                continue;
+            }
+            b'{' => depth += 1,
+            b'}' => {
+                depth -= 1;
+                if depth == 0 {
+                    return i + 1;
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    content.len()
 }
 
 fn extract_option_patterns(options: &Option<serde_json::Value>, key: &str) -> Vec<String> {
