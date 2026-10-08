@@ -1582,6 +1582,15 @@ impl<'a> TemplateParser<'a> {
             if prefix == "{/" && (body.starts_with("/*") || body.starts_with("//")) {
                 return None;
             }
+            if prefix == "{/" && remaining.len() != body.len() {
+                // Whitespace also permits an expression beginning with a
+                // regular expression. A block close contains only its name.
+                let name = body.strip_prefix('/')?.trim_start();
+                let end = name.find(|ch:char|!ch.is_ascii_alphanumeric() && ch != '_' && ch != '$').unwrap_or(name.len());
+                if end == 0 || !name[end..].trim_start().starts_with('}') {
+                    return None;
+                }
+            }
             body.starts_with(&prefix[1..])
                 .then_some(self.pos + 1 + remaining.len() - body.len() + prefix.len() - 1)
         } else {
@@ -10051,6 +10060,8 @@ mod modern_const_tag_tests {
             "<div>{ /* keep */ value }</div>",
             "<div>{ // keep\n value }</div>",
             "<div\nvalue={ // keep\n value }\n/>",
+            "<div>{ /foo/.test(value) }</div>",
+            "<div\nvalue={ /[a/b]+/u.test(value) }\n/>",
         ] {
             let alloc = Allocator::default();
             let parsed = parser::parse_for_lint(source, &alloc);
