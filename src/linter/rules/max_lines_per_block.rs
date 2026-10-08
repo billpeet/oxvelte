@@ -120,19 +120,35 @@ impl Rule for MaxLinesPerBlock {
             let tc = extract_template_content(ctx.source, ctx);
             let lc = count_template_lines(&tc, skip_blank, skip_comments);
             if lc > max {
-                let ts = [&ctx.ast.instance, &ctx.ast.module]
-                    .iter()
-                    .filter_map(|s| s.as_ref())
-                    .map(|s| s.span.end)
-                    .max()
-                    .map(|e| e)
-                    .unwrap_or(0);
+                let Some(span) = ctx.ast.html.nodes.iter()
+                    .find(|node| !matches!(node, crate::ast::TemplateNode::Element(el) if el.name == "svelte:options"))
+                    .map(template_span) else { return };
+
                 ctx.diagnostic(
                     format!("template block has too many lines ({lc}). Maximum allowed is {max}."),
-                    Span::new(ts, ts + 1),
+                    span,
                 );
             }
         }
+    }
+}
+
+fn template_span(node: &crate::ast::TemplateNode<'_>) -> Span {
+    use crate::ast::TemplateNode;
+    match node {
+        TemplateNode::Text(node) => node.span,
+        TemplateNode::Element(node) => node.span,
+        TemplateNode::MustacheTag(node) => node.span,
+        TemplateNode::RawMustacheTag(node) => node.span,
+        TemplateNode::DebugTag(node) => node.span,
+        TemplateNode::ConstTag(node) => node.span,
+        TemplateNode::RenderTag(node) => node.span,
+        TemplateNode::Comment(node) => node.span,
+        TemplateNode::IfBlock(node) => node.span,
+        TemplateNode::EachBlock(node) => node.span,
+        TemplateNode::AwaitBlock(node) => node.span,
+        TemplateNode::KeyBlock(node) => node.span,
+        TemplateNode::SnippetBlock(node) => node.span,
     }
 }
 
@@ -225,6 +241,17 @@ mod tests {
             .into_iter()
             .filter(|d| d.rule_name == "svelte/max-lines-per-block")
             .collect()
+    }
+
+    #[test]
+    fn template_location_uses_the_first_retained_node() {
+        let source = "<style>p { color: red; }</style>\n<p>first</p>\n<script>let value = 1;</script>\n<script module>const shared = 1;</script>\n<p>last</p>\n";
+        let diagnostics = lint(source, serde_json::json!([{ "template": 1 }]));
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(
+            diagnostics[0].span.start as usize,
+            source.find("</style>").unwrap() + 8
+        );
     }
 
     #[test]
