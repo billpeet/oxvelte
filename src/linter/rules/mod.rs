@@ -53,6 +53,7 @@ mod require_stores_init;
 mod shorthand_attribute;
 mod shorthand_directive;
 mod spaced_html_comment;
+mod style_declarations;
 mod valid_each_key;
 
 mod no_dynamic_slot_name;
