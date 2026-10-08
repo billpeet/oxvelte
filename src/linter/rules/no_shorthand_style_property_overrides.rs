@@ -1,13 +1,10 @@
 //! `svelte/no-shorthand-style-property-overrides` — disallow shorthand properties that override related longhand properties.
 //! ⭐ Recommended
 
-use crate::ast::{Attribute, AttributeValue, AttributeValuePart, DirectiveKind, TemplateNode};
+use super::style_declarations::declarations;
+use crate::ast::TemplateNode;
 use crate::linter::{walk_template_nodes, LintContext, Rule};
-use oxc::span::Span;
 use rustc_hash::FxHashSet;
-
-type StyleDecl = (String, Span);
-type StyleDeclSet = Vec<StyleDecl>;
 
 pub struct NoShorthandStylePropertyOverrides;
 
@@ -25,21 +22,10 @@ impl Rule for NoShorthandStylePropertyOverrides {
             let TemplateNode::Element(el) = node else {
                 return;
             };
-            let mut decl_sets: Vec<StyleDeclSet> = Vec::new();
-            for attr in &el.attributes {
-                match attr {
-                    Attribute::NormalAttribute { name, value, span } if name == "style" => {
-                        collect_style_decl_sets(value, *span, &mut decl_sets)
-                    }
-                    Attribute::Directive {
-                        kind: DirectiveKind::StyleDirective,
-                        name,
-                        span,
-                        ..
-                    } => decl_sets.push(vec![(name.to_lowercase(), *span)]),
-                    _ => {}
-                }
-            }
+            let decl_sets = el
+                .attributes
+                .iter()
+                .flat_map(|attr| declarations(attr, ctx.source));
             let mut before_declarations = FxHashSet::default();
             for decls in decl_sets {
                 for (prop, span) in &decls {
@@ -63,90 +49,6 @@ impl Rule for NoShorthandStylePropertyOverrides {
             }
         });
     }
-}
-
-fn parse_css_prop(decl: &str) -> Option<String> {
-    let prop = decl[..decl.find(':')?].trim().to_lowercase();
-    if !prop.is_empty() && prop.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-        Some(prop)
-    } else {
-        None
-    }
-}
-
-fn collect_static_props(text: &str, span: Span, out: &mut Vec<StyleDeclSet>) {
-    for decl in text.split(';') {
-        if let Some(prop) = parse_css_prop(decl.trim()) {
-            out.push(vec![(prop, span)]);
-        }
-    }
-}
-
-fn collect_style_decl_sets(value: &AttributeValue, span: Span, out: &mut Vec<StyleDeclSet>) {
-    match value {
-        AttributeValue::Static(s) => collect_static_props(s, span, out),
-        AttributeValue::Concat(parts) => {
-            for part in parts {
-                match part {
-                    AttributeValuePart::Static(s) => collect_static_props(s, span, out),
-                    AttributeValuePart::Expression(e) => {
-                        let props = extract_props_from_expression(e);
-                        if !props.is_empty() {
-                            out.push(props.into_iter().map(|p| (p, span)).collect());
-                        }
-                    }
-                }
-            }
-        }
-        _ => {}
-    }
-}
-
-fn extract_props_from_expression(expr: &str) -> Vec<String> {
-    let mut seen = FxHashSet::default();
-    let mut props = Vec::new();
-    let bytes = expr.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        let ch = bytes[i];
-        if ch == b'\'' || ch == b'"' || ch == b'`' {
-            i += 1;
-            let start = i;
-            while i < bytes.len() {
-                if bytes[i] == b'\\' {
-                    i += 2;
-                    continue;
-                }
-                if ch == b'`' && bytes[i] == b'$' && i + 1 < bytes.len() && bytes[i + 1] == b'{' {
-                    let mut depth = 1;
-                    i += 2;
-                    while i < bytes.len() && depth > 0 {
-                        if bytes[i] == b'{' {
-                            depth += 1;
-                        }
-                        if bytes[i] == b'}' {
-                            depth -= 1;
-                        }
-                        i += 1;
-                    }
-                    continue;
-                }
-                if bytes[i] == ch {
-                    for decl in expr[start..i].split(';') {
-                        if let Some(prop) = parse_css_prop(decl.trim()) {
-                            if seen.insert(prop.clone()) {
-                                props.push(prop);
-                            }
-                        }
-                    }
-                    break;
-                }
-                i += 1;
-            }
-        }
-        i += 1;
-    }
-    props
 }
 
 fn split_vendor_prefix(prop: &str) -> (&str, &str) {

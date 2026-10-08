@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 989,
-    "gaps": 246,
+    "pass": 991,
+    "gaps": 244,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 9,
+      "count": 8,
       "rules": {
         "no-dupe-else-if-blocks": [
           {
@@ -1383,15 +1383,6 @@
         "no-reactive-reassign": [
           {
             "id": "no-reactive-reassign/invalid/member01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-shorthand-style-property-overrides": [
-          {
-            "id": "no-shorthand-style-property-overrides/invalid/ternary01-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
@@ -1474,7 +1465,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 23,
+      "count": 22,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1501,14 +1492,6 @@
           },
           {
             "id": "no-reactive-reassign/invalid/destructure01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-shorthand-style-property-overrides": [
-          {
-            "id": "no-shorthand-style-property-overrides/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -1681,12 +1664,11 @@
       }
     },
     "diagnostics": {
-      "count": 61,
+      "count": 59,
       "rules": {
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-reactive-reassign": 4,
-        "no-shorthand-style-property-overrides": 2,
         "no-svelte-internal": 7,
         "no-top-level-browser-globals": 3,
         "no-unused-svelte-ignore": 18,
@@ -1697,11 +1679,10 @@
       }
     },
     "diagnostic_count": {
-      "count": 35,
+      "count": 34,
       "rules": {
         "no-dupe-else-if-blocks": 2,
         "no-reactive-reassign": 1,
-        "no-shorthand-style-property-overrides": 1,
         "no-top-level-browser-globals": 2,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 3,

@@ -396,13 +396,6 @@
     "no-reactive-reassign/invalid/props-true01-input.svelte": {
       "diagnostics": "3a757636f0910aefd31b297698bbc02328b944771b6450d00b5fa469bda9be32"
     },
-    "no-shorthand-style-property-overrides/invalid/ternary01-input.svelte": {
-      "diagnostic_count": "1860b55bbecf2e254298689fbac3eb7ccfe79bfa21fd48bd51f58bc1afd9d5f9",
-      "diagnostics": "d368c8b10cc1d8e5f00c6e4a0fd2f24a1b0c25642d46a0a16dca027896ac59c2"
-    },
-    "no-shorthand-style-property-overrides/invalid/test01-input.svelte": {
-      "diagnostics": "be3b89ed0f39540b8549e3b0aa3fa87505b90d0adef604944ef731331a58ab37"
-    },
     "no-svelte-internal/invalid/no-svelte-internal01-input.svelte": {
       "diagnostics": "ce64b3a4e23e7fa3d8461fb8b4931e617a07f35efc0cee51b34d06602308093e"
     },
