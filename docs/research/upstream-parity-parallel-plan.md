@@ -1,6 +1,6 @@
 # Parallel parity work plan
 
-Status: the [first wave](upstream-parity-first-wave.md) and [second wave](upstream-parity-second-wave.md) are complete. `foundation-suggestions`, `foundation-parser`, `navigation-base`, `duplicate-directives`, `block-language` and `rune-suggestions` are integrated. Current results are 863 matches, 372 gaps and 64 skips. The tables and dispatch manifest below retain the original queue snapshot; use the wave reports and current inventory for remaining counts. Parser-dependent packages can now proceed from the reviewed integration head.
+Status: the [first wave](upstream-parity-first-wave.md), [second wave](upstream-parity-second-wave.md) and [third wave](upstream-parity-third-wave.md) are complete. Suggestions and parser foundations, navigation base, duplicate directives, block language, rune suggestions, attribute sorting, handler checks, parser-dependent rules, store rules and other suggestions are integrated. Current results are 946 matches, 289 gaps and 64 skips, leaving 101 native gaps and 188 capability-decision cases. The tables and dispatch manifest below retain the original queue snapshot; use the wave reports and current inventory for remaining counts.
 
 The code starting point is `aa9b3ea`, with 762 matches, 473 gaps and 64 version skips. The [dispatch manifest](upstream-parity-work-packages.json) assigns every remaining gap case to exactly one package and records its rules, source files and dependencies. It is a snapshot of this starting point; use fresh reports to assess a package after prerequisites merge.
 

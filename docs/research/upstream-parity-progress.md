@@ -1,6 +1,6 @@
 # Upstream parity progress
 
-The [second parallel wave](upstream-parity-second-wave.md) is complete and integrated. Current results are 863 matches, 372 gaps and 64 version skips. It closes 74 cases across block language, rune suggestions and parser foundations. The [first wave](upstream-parity-first-wave.md) and batch below record earlier work.
+The [third parallel wave](upstream-parity-third-wave.md) is complete and integrated. Current results are 946 matches, 289 gaps and 64 version skips. It closes 83 cases across attribute sorting, handlers, dynamic slots, store rules and remaining suggestions. The [second wave](upstream-parity-second-wave.md), [first wave](upstream-parity-first-wave.md) and batch below record earlier work.
 
 Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
 
