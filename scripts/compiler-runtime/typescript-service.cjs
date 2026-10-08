@@ -78,6 +78,10 @@ function createSession(request) {
   const program = ts.createProgram([...projectFiles, virtualFilename], compilerOptions, host);
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile(virtualFilename);
+  const syntaxErrors = program.getSyntacticDiagnostics(sourceFile);
+  if (syntaxErrors.length) {
+    throw new Error(`Unable to parse component TypeScript: ${syntaxErrors.map(error => ts.flattenDiagnosticMessageText(error.messageText, '\n')).join('\n')}`);
+  }
 
   const mutableRootSymbols = new Set();
   function collectBinding(name) {

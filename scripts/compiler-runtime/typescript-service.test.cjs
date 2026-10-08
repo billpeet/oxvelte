@@ -93,3 +93,7 @@ test('invalid explicit project and source ranges give actionable errors', t => {
   assert.throws(() => session('if (true) {}', { filename:path.join(directory,'Component.svelte'),settings:{typescript:{project:'missing.json'}} }), /Unable to read TypeScript configuration/);
   assert.throws(() => session('if (true) {}', {scripts:[{start:-1,end:0}]}), /UTF-16 source offsets/);
 });
+
+test('recovered TypeScript syntax is rejected instead of returning misleading types', () => {
+  assert.throws(() => session('const value: = 1; if (value) {}'), /Unable to parse component TypeScript: Type expected/);
+});
