@@ -46,7 +46,7 @@ impl Rule for Indent {
                 &ctx.source[span.start as usize..span.end as usize]
             );
             let allocator = Allocator::default();
-            let parsed = Parser::new(&allocator, &text, SourceType::tsx())
+            let parsed = Parser::new(&allocator, &text, SourceType::ts())
                 .with_config(oxc::parser::config::TokensParserConfig)
                 .parse();
             let base = span.start as i64 - prefix.len() as i64;
@@ -73,7 +73,7 @@ impl Rule for Indent {
                 &ctx.source[span.start as usize..span.end as usize]
             );
             let allocator = Allocator::default();
-            let parsed = Parser::new(&allocator, &text, SourceType::tsx()).parse();
+            let parsed = Parser::new(&allocator, &text, SourceType::ts()).parse();
             let base = span.start as i64 - prefix.len() as i64;
             if is_script {
                 if let Some(anchor) = layout.tokens.iter().rposition(|t| {
@@ -117,3 +117,4 @@ impl Rule for Indent {
         layout.report(ctx);
     }
 }
+
