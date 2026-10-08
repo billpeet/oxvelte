@@ -1,0 +1,21 @@
+{
+  "name": "oxvelte-parity-svelte3",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@babel/core": "7.29.7",
+    "@babel/plugin-proposal-function-bind": "7.27.1",
+    "@jridgewell/sourcemap-codec": "1.5.5",
+    "less": "4.5.1",
+    "postcss": "8.5.29",
+    "postcss-load-config": "6.0.1",
+    "postcss-nested": "7.0.2",
+    "sass": "1.97.2",
+    "stylus": "0.64.0",
+    "svelte": "3.59.2",
+    "typescript": "5.2.2",
+    "eslint": "8.57.1",
+    "@typescript-eslint/parser": "6.10.0",
+    "svelte-eslint-parser": "1.8.1"
+  }
+}
