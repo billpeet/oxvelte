@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1009,
-    "gaps": 226,
+    "pass": 1012,
+    "gaps": 223,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,24 +1362,8 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 5,
+      "count": 3,
       "rules": {
-        "no-dupe-else-if-blocks": [
-          {
-            "id": "no-dupe-else-if-blocks/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-dupe-else-if-blocks/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
         "prefer-style-directive": [
           {
             "id": "prefer-style-directive/invalid/ternary01-input.svelte",
@@ -1432,16 +1416,8 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 8,
+      "count": 7,
       "rules": {
-        "no-dupe-else-if-blocks": [
-          {
-            "id": "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
         "prefer-style-directive": [
           {
             "id": "prefer-style-directive/invalid/complex-test01-input.svelte",
@@ -1536,30 +1512,28 @@
         "prefer-derived-over-derived-by": 9
       }
     },
-    "diagnostics": {
-      "count": 41,
-      "rules": {
-        "no-dupe-else-if-blocks": 3,
-        "no-unused-svelte-ignore": 18,
-        "prefer-style-directive": 10,
-        "valid-compile": 8,
-        "valid-style-parse": 2
-      }
-    },
-    "diagnostic_count": {
-      "count": 31,
-      "rules": {
-        "no-dupe-else-if-blocks": 2,
-        "no-unused-svelte-ignore": 18,
-        "prefer-style-directive": 3,
-        "valid-compile": 8
-      }
-    },
     "compiler_capability": {
       "count": 84,
       "rules": {
         "no-unused-svelte-ignore": 46,
         "valid-compile": 38
+      }
+    },
+    "diagnostic_count": {
+      "count": 29,
+      "rules": {
+        "no-unused-svelte-ignore": 18,
+        "prefer-style-directive": 3,
+        "valid-compile": 8
+      }
+    },
+    "diagnostics": {
+      "count": 38,
+      "rules": {
+        "no-unused-svelte-ignore": 18,
+        "prefer-style-directive": 10,
+        "valid-compile": 8,
+        "valid-style-parse": 2
       }
     },
     "unexpected_fix": {

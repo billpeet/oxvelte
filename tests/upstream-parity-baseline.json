@@ -345,17 +345,6 @@
     "no-bind-value-on-checkable-inputs/invalid/radio-bind-value-input.svelte": {
       "unsupported_rule": "8241b18af2d18eeea3d5a562fcf9b58769dd37de44b7b305c67682a91a76cf17"
     },
-    "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte": {
-      "diagnostics": "a04bbb7bfb0a1e552ced21a267295d7fdda5186f36837c6b7285d2871c0d3c0a"
-    },
-    "no-dupe-else-if-blocks/invalid/test01-input.svelte": {
-      "diagnostic_count": "0c58ddca6f0dd1fc53c6729330947d9fb356badaad045b82343cccaacfb886ba",
-      "diagnostics": "40311ebc0a0a60dfd7b7d296f73ec86aee3e822b1f719c23a2fa27ab09c14224"
-    },
-    "no-dupe-else-if-blocks/invalid/test02-input.svelte": {
-      "diagnostic_count": "b859ebaf9478f517a7f5ef02e2ceaccd88c58d3dfd33821aa0c31fcf434efad7",
-      "diagnostics": "c9ed9fd5766420848f7d74c065179716db4294e5be5f8297b36584964e1bc10d"
-    },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
     },
