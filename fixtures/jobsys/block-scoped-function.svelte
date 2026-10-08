@@ -1,0 +1,6 @@
+<script>
+if (Math.random()) {
+  function f() {}
+  f();
+}
+</script>
