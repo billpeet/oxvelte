@@ -39,3 +39,5 @@ Compiler rules require Node.js, an actual `.svelte` component filename and an in
 Executable configuration is passed through compiler settings; this work does not add automatic discovery of every project svelte.config.js. Passing the frozen suite does not establish support for arbitrary preprocessors or future compiler versions. The JobSys comparison has not been rerun.
 
 The only remaining fixture gaps are **seven @typescript-eslint/no-unnecessary-condition integration cases**. See the [current inventory](upstream-parity-gaps.md).
+
+The [PR runtime fixes](upstream-parity-runtime-fixes.md) supersede the cross-component result cache described above and embed the source-map decoder so consumer projects need no extra helper dependency.
