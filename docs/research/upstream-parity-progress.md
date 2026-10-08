@@ -1,5 +1,7 @@
 # Upstream parity progress
 
+The [first parallel wave](upstream-parity-first-wave.md) is now complete and integrated. Current results are 789 matches, 446 gaps and 64 version skips. The batch below records the preceding commits 3-8.
+
 The next work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md), with exact case IDs and file ownership in its [dispatch manifest](upstream-parity-work-packages.json).
 
 Commits 3–8 are complete. They close all 53 targeted gaps against the pinned eslint-plugin-svelte 3.23.0 corpus at revision `18339c886320151148568063c5801bf69cb51027`.

@@ -74,4 +74,6 @@ This first runner covers the raw rule fixtures. The imported TypeScript/core int
 
 See the [research note](research/eslint-plugin-svelte-test-suite.md) for the upstream test architecture and the JobSys motivation. The upstream MIT license is copied into the corpus and its attribution is retained in `THIRD_PARTY_NOTICES`.
 
-After commits 1–8, the suite has 762 matches, 473 gaps and 64 version skips. Unused props matches all 76 cases, navigation-without-resolve matches all 84, and Kit prop names matches all 11 eligible cases with 11 legacy version skips. See the [progress report](research/upstream-parity-progress.md) and [current gap inventory](research/upstream-parity-gaps.md).
+After commits 1-8, the suite has 762 matches, 473 gaps and 64 version skips. Unused props matches all 76 cases, navigation-without-resolve matches all 84, and Kit prop names matches all 11 eligible cases with 11 legacy version skips. See the [progress report](research/upstream-parity-progress.md) and [current gap inventory](research/upstream-parity-gaps.md).
+
+The [first parallel wave](research/upstream-parity-first-wave.md) brings the suite to 789 matches, 446 gaps and 64 version skips. Suggestions are now compared as exact per-diagnostic alternatives. Duplicate directive and navigation-base fixtures all match.

@@ -1,5 +1,7 @@
 # Parallel parity work plan
 
+Status: the [first wave](upstream-parity-first-wave.md) is complete. `foundation-suggestions`, `navigation-base` and `duplicate-directives` are integrated. The tables and dispatch manifest below retain the original queue snapshot; use the first-wave report and current inventory for remaining counts.
+
 The code starting point is `aa9b3ea`, with 762 matches, 473 gaps and 64 version skips. The [dispatch manifest](upstream-parity-work-packages.json) assigns every remaining gap case to exactly one package and records its rules, source files and dependencies. It is a snapshot of this starting point; use fresh reports to assess a package after prerequisites merge.
 
 Split ownership by rule. Location, count, fix and suggestion differences in the same rule stay with one owner. Each owner should make separate commits for distinct fixes or rules within their package. The counts below are assigned gap cases, not a promise that one change will resolve them all.
@@ -120,4 +122,4 @@ Commit distinct fixes separately. Return commit hashes, report paths, test resul
 resolved/remaining case IDs and any shared-file changes needed from the coordinator.
 ```
 
-This turn prepares the queue and dispatch contract. It does not start implementation workers or create the implementation worktrees.
+The dispatch contract is established. First-wave workers ran in three separate worktrees; their delivery and integration are recorded in the first-wave report.
