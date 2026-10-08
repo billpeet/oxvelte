@@ -7,6 +7,34 @@ use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion
 use serde_json::json;
 
 #[test]
+fn compiler_configuration_preserves_settings_and_executable_module_paths() {
+    let config = json!({
+        "settings": {"svelte": {"ignoreWarnings": ["example"]}, "compiler": {"customElement": true}},
+        "languageOptions": {"parserOptions": {
+            "parser": "@babel/eslint-parser",
+            "svelteConfig": {"compilerOptions": {"experimental": {"async": true}}, "kit": {"files": {"routes": "custom/routes"}}}
+        }}
+    });
+    let settings = parity::compiler_settings(&config, Some("/fixtures/_config.cjs")).unwrap();
+    assert_eq!(
+        settings["compiler"]["executableConfigPath"],
+        "/fixtures/_config.cjs"
+    );
+    assert_eq!(settings["compiler"]["parser"], "@babel/eslint-parser");
+    assert_eq!(settings["compiler"]["customElement"], true);
+    assert_eq!(
+        settings["compiler"]["svelteConfig"],
+        config["languageOptions"]["parserOptions"]["svelteConfig"]
+    );
+    assert_eq!(
+        settings["svelte"]["kit"]["files"]["routes"],
+        "custom/routes"
+    );
+    assert_eq!(settings["svelte"]["ignoreWarnings"], json!(["example"]));
+    assert_eq!(parity::compiler_settings(&json!({}), None), None);
+}
+
+#[test]
 fn script_parse_errors_distinguish_modifier_checks_from_syntax_errors() {
     use oxc::{allocator::Allocator, parser::Parser, span::SourceType};
     let source = "class Box { readonly protected value: number; }";

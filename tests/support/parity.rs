@@ -5,6 +5,37 @@ use std::collections::BTreeMap;
 
 pub type Signatures = BTreeMap<String, BTreeMap<String, String>>;
 
+/// Preserve compiler settings without serializing executable callback functions.
+/// The runtime loads the hashed fixture module at the supplied absolute path.
+pub fn compiler_settings(config: &Value, executable_path: Option<&str>) -> Option<Value> {
+    let mut settings = config.get("settings").cloned();
+    let parser_options = config.pointer("/languageOptions/parserOptions");
+    let svelte_config = parser_options.and_then(|options| options.get("svelteConfig"));
+    let parser = parser_options.and_then(|options| options.get("parser"));
+    if executable_path.is_some() || svelte_config.is_some() || parser.is_some() {
+        let settings = settings.get_or_insert_with(|| json!({}));
+        if settings.get("compiler").is_none() {
+            settings["compiler"] = json!({});
+        }
+        if let Some(path) = executable_path {
+            settings["compiler"]["executableConfigPath"] = json!(path);
+        }
+        if let Some(config) = svelte_config {
+            settings["compiler"]["svelteConfig"] = config.clone();
+            if let Some(kit) = config.get("kit") {
+                if settings.get("svelte").is_none() {
+                    settings["svelte"] = json!({});
+                }
+                settings["svelte"]["kit"] = kit.clone();
+            }
+        }
+        if let Some(parser) = parser {
+            settings["compiler"]["parser"] = parser.clone();
+        }
+    }
+    settings
+}
+
 /// Match the upstream parser's distinction between parsing and checking types.
 /// typescript-estree 8.70.0 rejects SourceFile.parseDiagnostics, but modifier
 /// ordering (TS1029) is a checker diagnostic and is absent even from its opt-in
