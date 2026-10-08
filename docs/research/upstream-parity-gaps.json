@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 866,
-    "gaps": 369,
+    "pass": 868,
+    "gaps": 367,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -2540,22 +2540,8 @@
     {
       "id": "suggestions",
       "label": "Suggestions are the remaining blocker",
-      "count": 4,
+      "count": 2,
       "rules": {
-        "no-extra-reactive-curlies": [
-          {
-            "id": "no-extra-reactive-curlies/invalid/test01-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "no-extra-reactive-curlies/invalid/test02-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          }
-        ],
         "no-reactive-functions": [
           {
             "id": "no-reactive-functions/invalid/test01-input.svelte",
@@ -2661,10 +2647,9 @@
       }
     },
     "suggestions": {
-      "count": 15,
+      "count": 13,
       "rules": {
         "no-add-event-listener": 2,
-        "no-extra-reactive-curlies": 2,
         "no-reactive-functions": 1,
         "no-reactive-literals": 1,
         "prefer-destructured-store-props": 7,

@@ -438,12 +438,6 @@
     "no-export-load-in-svelte-module-in-kit-pages/invalid/test02/+page.svelte": {
       "diagnostics": "63728f6a37d6e190eff209d04cb7bac8a5c91ab8a057c9683dcd855725e33fd8"
     },
-    "no-extra-reactive-curlies/invalid/test01-input.svelte": {
-      "suggestions": "a490cb809cf5da20578310ef8b74ef98a7af5a1733e0e6c04c3e646a67927fa9"
-    },
-    "no-extra-reactive-curlies/invalid/test02-input.svelte": {
-      "suggestions": "5e78fd22299b60470dbefd9f08ae3c5dcca4cf50b7abcf4b6dd5812156d71b7f"
-    },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
     },
