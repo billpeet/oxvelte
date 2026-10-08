@@ -620,22 +620,6 @@
     "no-unknown-style-directive-property/invalid/test01-input.svelte": {
       "diagnostics": "f8e1f54121e0e8d3ed665cd53f8d7e08a0ec6a10c139215e329aff77d68fb364"
     },
-    "no-unnecessary-state-wrap/invalid/additional-class-input.svelte": {
-      "diagnostics": "4287a7cf8a1193a5de719b0751eeeac2ee908a49f2b1573debdc89ac1c96d541",
-      "suggestions": "38aebb07663effb41290ccb3bf59e12732418b30ef5e445a334b736aff0d13c5"
-    },
-    "no-unnecessary-state-wrap/invalid/allow-reassign-input.svelte": {
-      "diagnostics": "9b4e393875ccd45c4cff270ffbba69a9e009c859cfd834616f711dde13c3494f",
-      "suggestions": "1976c7c6205fb107578f17f1eaf8478ea599d0e7ef6a06c3b3f323fffd49231f"
-    },
-    "no-unnecessary-state-wrap/invalid/basic-input.svelte": {
-      "diagnostics": "585563a8b8372707debe68b84492b615b536fa4039f4de31c6de55c7317db77a",
-      "suggestions": "243d18109bcf2ab9092ecb5aa0c3a2f7416a759a5feeb8a92b6dddf12a6152c3"
-    },
-    "no-unnecessary-state-wrap/invalid/import-alias-input.svelte": {
-      "diagnostics": "8eea2847623d5ed40fe4834204a0051f53da2da38f5170fca9f4a09ed68c5110",
-      "suggestions": "3da771267a5b12167675474330ed34a99a9ab534e94037c4a6b5bb68b622de88"
-    },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
       "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
