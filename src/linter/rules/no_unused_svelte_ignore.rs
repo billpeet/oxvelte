@@ -1,8 +1,7 @@
 //! `svelte/no-unused-svelte-ignore` — disallow unused svelte-ignore comments.
 //! ⭐ Recommended
 
-use crate::ast::TemplateNode;
-use crate::linter::{walk_template_nodes, LintContext, Rule};
+use crate::linter::{LintContext, Rule};
 use oxc::span::Span;
 
 pub struct NoUnusedSvelteIgnore;
@@ -17,46 +16,33 @@ impl Rule for NoUnusedSvelteIgnore {
     }
 
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
-        // Template HTML comments: `<!-- svelte-ignore ... -->`
-        walk_template_nodes(&ctx.ast.html, &mut |node| {
-            if let TemplateNode::Comment(c) = node {
-                if let Some(after) = c.data.trim_start().strip_prefix("svelte-ignore") {
-                    if after.trim().is_empty() {
-                        ctx.diagnostic("svelte-ignore comment must include the code", c.span);
-                    }
-                }
-            }
-        });
-
-        // JS `// svelte-ignore` line comments via the parsed Program's `comments`.
-        for (sem, offset) in [
-            (ctx.instance_semantic, ctx.instance_content_offset),
-            (ctx.module_semantic, ctx.module_content_offset),
-        ]
-        .into_iter()
-        .filter_map(|(s, o)| s.map(|s| (s, o)))
+        let items = crate::compiler_ignore::items(ctx);
+        for item in items.iter().filter(|item| item.code.is_none()) {
+            ctx.diagnostic(
+                "svelte-ignore comment must include the code",
+                item.token_span,
+            );
+        }
+        if ctx.is_svelte_module
+            || !ctx
+                .file_path
+                .as_deref()
+                .is_some_and(|path| path.ends_with(".svelte"))
+            || !items.iter().any(|item| item.code.is_some())
         {
-            for c in sem.nodes().program().comments.iter() {
-                let text = &sem.source_text()[c.span.start as usize..c.span.end as usize];
-                let body = if c.is_line() {
-                    text.strip_prefix("//").unwrap_or(text)
-                } else {
-                    text.strip_prefix("/*")
-                        .and_then(|t| t.strip_suffix("*/"))
-                        .unwrap_or(text)
-                };
-                let trimmed = body.trim_start();
-                if let Some(rest) = trimmed.strip_prefix("svelte-ignore") {
-                    if rest.trim().is_empty() {
-                        let s = offset + c.span.start;
-                        let e = offset + c.span.end;
-                        ctx.diagnostic(
-                            "svelte-ignore comment must include the code",
-                            Span::new(s, e),
-                        );
-                    }
-                }
+            return;
+        }
+        let unused = match ctx.compiler_result() {
+            Ok(result) if result.kind != "error" => result.unused_ignores.clone(),
+            Err(error) => {
+                let message = format!("Unable to run Svelte compiler: {error}");
+                ctx.diagnostic(message, Span::new(0, 0));
+                return;
             }
+            _ => return,
+        };
+        for item in unused {
+            ctx.diagnostic("svelte-ignore comment is used, but not warned", item.span);
         }
     }
 }
