@@ -1,0 +1,3427 @@
+{
+  "date": "2026-10-09",
+  "oxvelteCommit": "369503f02e2afa81b40edd3010230c3a551d2c03",
+  "jobSysCommit": "1713a95ce76e81b4e9873fd03fa4c04504ed0f24",
+  "versions": {
+    "eslint": "10.9.1",
+    "eslint-plugin-svelte": "3.23.0",
+    "svelte": "5.57.2",
+    "@sveltejs/kit": "3.0.1",
+    "typescript": "6.0.3",
+    "@typescript-eslint/parser": "8.70.0",
+    "svelte-eslint-parser": "1.8.1"
+  },
+  "method": {
+    "scope": "All ESLint-eligible **/*.svelte, **/*.svelte.js and **/*.svelte.ts files, with resolved per-file Svelte rules and compiler options.",
+    "exact": "File, rule, line, column, end line, end column, message and severity, preserving multiplicity. Fixes and suggestions were not compared.",
+    "exclude": "Only files with fatal reference ESLint parsing errors are excluded from the comparable counts.",
+    "configuration": "Non-Svelte native rules disabled. SvelteKit 3 rule gate difference is retained in raw comparison."
+  },
+  "files": 990,
+  "fatalFiles": [
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "messages": [
+        {
+          "ruleId": null,
+          "fatal": true,
+          "severity": 2,
+          "message": "Parsing error: Expected JS Identifier, or MemberExpression, but CallExpression found.",
+          "line": 331,
+          "column": 11
+        }
+      ]
+    }
+  ],
+  "raw": {
+    "eslint": 1030,
+    "oxvelte": 1318
+  },
+  "comparable": {
+    "eslint": 1030,
+    "oxvelte": 1311,
+    "lineMatches": 1028,
+    "exactMatches": 1028,
+    "eslintOnly": 2,
+    "oxvelteOnly": 283
+  },
+  "rules": [
+    {
+      "rule": "svelte/no-at-html-tags",
+      "eslint": 11,
+      "oxvelte": 11,
+      "comparableESLint": 11,
+      "comparableOxvelte": 11,
+      "lineMatches": 11,
+      "exactMatches": 11,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-dom-manipulating",
+      "eslint": 4,
+      "oxvelte": 4,
+      "comparableESLint": 4,
+      "comparableOxvelte": 4,
+      "lineMatches": 4,
+      "exactMatches": 4,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-inner-declarations",
+      "eslint": 0,
+      "oxvelte": 3,
+      "comparableESLint": 0,
+      "comparableOxvelte": 3,
+      "lineMatches": 0,
+      "exactMatches": 0,
+      "eslintOnly": 0,
+      "oxvelteOnly": 3
+    },
+    {
+      "rule": "svelte/no-inspect",
+      "eslint": 2,
+      "oxvelte": 2,
+      "comparableESLint": 2,
+      "comparableOxvelte": 2,
+      "lineMatches": 2,
+      "exactMatches": 2,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-navigation-without-resolve",
+      "eslint": 0,
+      "oxvelte": 234,
+      "comparableESLint": 0,
+      "comparableOxvelte": 231,
+      "lineMatches": 0,
+      "exactMatches": 0,
+      "eslintOnly": 0,
+      "oxvelteOnly": 231
+    },
+    {
+      "rule": "svelte/no-unnecessary-state-wrap",
+      "eslint": 8,
+      "oxvelte": 8,
+      "comparableESLint": 8,
+      "comparableOxvelte": 8,
+      "lineMatches": 8,
+      "exactMatches": 8,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-unused-props",
+      "eslint": 2,
+      "oxvelte": 49,
+      "comparableESLint": 2,
+      "comparableOxvelte": 49,
+      "lineMatches": 1,
+      "exactMatches": 1,
+      "eslintOnly": 1,
+      "oxvelteOnly": 48
+    },
+    {
+      "rule": "svelte/no-unused-svelte-ignore",
+      "eslint": 39,
+      "oxvelte": 39,
+      "comparableESLint": 39,
+      "comparableOxvelte": 39,
+      "lineMatches": 39,
+      "exactMatches": 39,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-useless-children-snippet",
+      "eslint": 9,
+      "oxvelte": 9,
+      "comparableESLint": 9,
+      "comparableOxvelte": 9,
+      "lineMatches": 9,
+      "exactMatches": 9,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-useless-mustaches",
+      "eslint": 1,
+      "oxvelte": 1,
+      "comparableESLint": 1,
+      "comparableOxvelte": 1,
+      "lineMatches": 1,
+      "exactMatches": 1,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/prefer-svelte-reactivity",
+      "eslint": 181,
+      "oxvelte": 181,
+      "comparableESLint": 181,
+      "comparableOxvelte": 180,
+      "lineMatches": 180,
+      "exactMatches": 180,
+      "eslintOnly": 1,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/prefer-writable-derived",
+      "eslint": 36,
+      "oxvelte": 37,
+      "comparableESLint": 36,
+      "comparableOxvelte": 36,
+      "lineMatches": 36,
+      "exactMatches": 36,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/require-each-key",
+      "eslint": 735,
+      "oxvelte": 737,
+      "comparableESLint": 735,
+      "comparableOxvelte": 735,
+      "lineMatches": 735,
+      "exactMatches": 735,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/system",
+      "eslint": 0,
+      "oxvelte": 1,
+      "comparableESLint": 0,
+      "comparableOxvelte": 1,
+      "lineMatches": 0,
+      "exactMatches": 0,
+      "eslintOnly": 0,
+      "oxvelteOnly": 1
+    },
+    {
+      "rule": "svelte/valid-prop-names-in-kit-pages",
+      "eslint": 2,
+      "oxvelte": 2,
+      "comparableESLint": 2,
+      "comparableOxvelte": 2,
+      "lineMatches": 2,
+      "exactMatches": 2,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    }
+  ],
+  "excludedOxvelte": [
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/require-each-key",
+      "line": 300,
+      "col": 3,
+      "endLine": 373,
+      "endCol": 10,
+      "message": "Each block should have a key",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/require-each-key",
+      "line": 377,
+      "col": 4,
+      "endLine": 411,
+      "endCol": 11,
+      "message": "Each block should have a key",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/prefer-writable-derived",
+      "line": 56,
+      "col": 6,
+      "endLine": 56,
+      "endCol": 40,
+      "message": "Prefer using writable $derived instead of $state and $effect",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/prefer-svelte-reactivity",
+      "line": 134,
+      "col": 19,
+      "endLine": 134,
+      "endCol": 41,
+      "message": "Found a mutable instance of the built-in Set class. Use SvelteSet instead.",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/no-navigation-without-resolve",
+      "line": 362,
+      "col": 7,
+      "endLine": 362,
+      "endCol": 38,
+      "message": "Unexpected href link without resolve().",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/no-navigation-without-resolve",
+      "line": 381,
+      "col": 8,
+      "endLine": 381,
+      "endCol": 39,
+      "message": "Unexpected href link without resolve().",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/no-navigation-without-resolve",
+      "line": 391,
+      "col": 9,
+      "endLine": 391,
+      "endCol": 40,
+      "message": "Unexpected href link without resolve().",
+      "severity": 2
+    }
+  ],
+  "eslintRun": {
+    "seconds": 279.49806450000005,
+    "files": 990,
+    "groups": 1
+  },
+  "oxvelteRun": {
+    "seconds": 8.8130301,
+    "files": 990
+  },
+  "unusedPropDifferenceCategories": {
+    "nested-property-consumption": 31,
+    "multiline-union-token-parsing": 11,
+    "index-signature-scanning": 1,
+    "destructuring-default-parsing": 3,
+    "used-callback-destructuring": 2
+  },
+  "kitGateAdjusted": {
+    "eslint": 1030,
+    "oxvelte": 1080,
+    "exactMatches": 1028,
+    "eslintOnly": 2,
+    "oxvelteOnly": 52
+  },
+  "differences": {
+    "eslintOnly": [
+      {
+        "file": "src/lib/components/inputs/ContentEditableWithAsyncSearch.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 25,
+        "col": 6,
+        "endLine": 41,
+        "endCol": 10,
+        "message": "'getId' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/url-params.svelte.ts",
+        "rule": "svelte/prefer-svelte-reactivity",
+        "line": 41,
+        "col": 16,
+        "endLine": 41,
+        "endCol": 33,
+        "message": "Found a mutable instance of the built-in Set class. Use SvelteSet instead.",
+        "severity": 2
+      }
+    ],
+    "oxvelteOnly": [
+      {
+        "file": "src/lib/components/cadSys/CadSysEntityCanvas.svelte",
+        "rule": "svelte/no-inner-declarations",
+        "line": 956,
+        "col": 4,
+        "endLine": 1044,
+        "endCol": 5,
+        "message": "Move function declaration to function body root.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/cadSys/CadSysEntityCanvas.svelte",
+        "rule": "svelte/no-inner-declarations",
+        "line": 1063,
+        "col": 5,
+        "endLine": 1100,
+        "endCol": 6,
+        "message": "Move function declaration to function body root.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/cadSys/CadSysEntityCanvas.svelte",
+        "rule": "svelte/no-inner-declarations",
+        "line": 1103,
+        "col": 5,
+        "endLine": 1122,
+        "endCol": 6,
+        "message": "Move function declaration to function body root.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'icon' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'label' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'title' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'onclick' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'variant' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/ActionMenu.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 3,
+        "message": "'hidden' in 'items' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/controls/Tab.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 42,
+        "col": 2,
+        "endLine": 42,
+        "endCol": 8,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/components/ComponentTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 39,
+        "col": 6,
+        "endLine": 89,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/components/ComponentTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 39,
+        "col": 6,
+        "endLine": 89,
+        "endCol": 3,
+        "message": "'| undefined' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/components/ComponentTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 39,
+        "col": 6,
+        "endLine": 89,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/components/ComponentTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 39,
+        "col": 6,
+        "endLine": 89,
+        "endCol": 3,
+        "message": "'| undefined' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/FullKitListTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 24,
+        "col": 9,
+        "endLine": 24,
+        "endCol": 89,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/FullKitListTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 35,
+        "col": 10,
+        "endLine": 35,
+        "endCol": 86,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/error/FullKitErrorList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 76,
+        "col": 8,
+        "endLine": 76,
+        "endCol": 12,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/setup/FullKitPresetsControl.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 81,
+        "col": 8,
+        "endLine": 81,
+        "endCol": 76,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/fullkit/takeoff/EquipmentMappingPopup.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 30,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 10,
+        "message": "Index signature is unused. Consider using rest operator (...) to capture remaining properties.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/helpers/PageContainer.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 50,
+        "col": 11,
+        "endLine": 50,
+        "endCol": 28,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/helpers/PageContainer.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 52,
+        "col": 11,
+        "endLine": 52,
+        "endCol": 35,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/helpers/PageContainer.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 75,
+        "col": 7,
+        "endLine": 75,
+        "endCol": 15,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/ContentEditableTd.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 130,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/ContentEditableTd.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 130,
+        "endCol": 3,
+        "message": "'| undefined' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/ContentEditableTd.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 130,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/ContentEditableTd.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 16,
+        "col": 6,
+        "endLine": 130,
+        "endCol": 3,
+        "message": "'| undefined' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/EditableValue.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 44,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/EditableValue.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 44,
+        "endCol": 3,
+        "message": "'|' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/EditableValue.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 44,
+        "endCol": 3,
+        "message": "'| undefined' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/TemplateSelector.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 5,
+        "col": 6,
+        "endLine": 29,
+        "endCol": 3,
+        "message": "'fileName' in 'templates' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/TemplateSelector.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 5,
+        "col": 6,
+        "endLine": 29,
+        "endCol": 3,
+        "message": "'dockerPath' in 'templates' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inputs/TemplateSelector.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 5,
+        "col": 6,
+        "endLine": 29,
+        "endCol": 3,
+        "message": "'windowsPath' in 'templates' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/inventory/NewProductControl.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 124,
+        "col": 10,
+        "endLine": 124,
+        "endCol": 71,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/job/job-list/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 80,
+        "col": 5,
+        "endLine": 80,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/kpis/KPITablePeriods.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 151,
+        "col": 12,
+        "endLine": 151,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/layout/BrandMark.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 26,
+        "col": 2,
+        "endLine": 26,
+        "endCol": 8,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/layout/EBars.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 12,
+        "col": 6,
+        "endLine": 20,
+        "endCol": 3,
+        "message": "'size = 'md',' in 'size' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/layout/EBars.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 12,
+        "col": 6,
+        "endLine": 20,
+        "endCol": 3,
+        "message": "'animated = false,' in 'size' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/layout/EBars.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 12,
+        "col": 6,
+        "endLine": 20,
+        "endCol": 3,
+        "message": "'class' in 'size' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 486,
+        "col": 11,
+        "endLine": 486,
+        "endCol": 24,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 498,
+        "col": 10,
+        "endLine": 498,
+        "endCol": 26,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 545,
+        "col": 11,
+        "endLine": 545,
+        "endCol": 24,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 611,
+        "col": 11,
+        "endLine": 611,
+        "endCol": 26,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 650,
+        "col": 11,
+        "endLine": 650,
+        "endCol": 32,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 656,
+        "col": 12,
+        "endLine": 656,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 694,
+        "col": 8,
+        "endLine": 694,
+        "endCol": 24,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 702,
+        "col": 8,
+        "endLine": 702,
+        "endCol": 22,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 710,
+        "col": 8,
+        "endLine": 710,
+        "endCol": 29,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 730,
+        "col": 10,
+        "endLine": 730,
+        "endCol": 25,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/NavBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 743,
+        "col": 11,
+        "endLine": 743,
+        "endCol": 25,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 32,
+        "col": 8,
+        "endLine": 52,
+        "endCol": 3,
+        "message": "'label' in 'sections' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 32,
+        "col": 8,
+        "endLine": 52,
+        "endCol": 3,
+        "message": "'icon' in 'sections' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 32,
+        "col": 8,
+        "endLine": 52,
+        "endCol": 3,
+        "message": "'items' in 'sections' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 32,
+        "col": 8,
+        "endLine": 52,
+        "endCol": 3,
+        "message": "'defaultExpanded' in 'sections' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 249,
+        "col": 16,
+        "endLine": 249,
+        "endCol": 32,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 286,
+        "col": 14,
+        "endLine": 286,
+        "endCol": 30,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/Sidebar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 400,
+        "col": 13,
+        "endLine": 400,
+        "endCol": 29,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/UniversalSearchBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 82,
+        "col": 8,
+        "endLine": 82,
+        "endCol": 16,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/nav/UniversalSearchBar.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 166,
+        "col": 7,
+        "endLine": 166,
+        "endCol": 22,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 53,
+        "col": 6,
+        "endLine": 108,
+        "endCol": 3,
+        "message": "'jobNumber' in 'currentTask' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 53,
+        "col": 6,
+        "endLine": 108,
+        "endCol": 3,
+        "message": "'taskName' in 'currentTask' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 53,
+        "col": 6,
+        "endLine": 108,
+        "endCol": 3,
+        "message": "'jobName' in 'currentTask' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 53,
+        "col": 6,
+        "endLine": 108,
+        "endCol": 3,
+        "message": "'customerAbbrev' in 'currentTask' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 866,
+        "col": 12,
+        "endLine": 866,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/schedules/Drum.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 868,
+        "col": 12,
+        "endLine": 868,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/serial/SerialTab.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 19,
+        "col": 3,
+        "endLine": 19,
+        "endCol": 9,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/variations/VariationModal.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 48,
+        "col": 6,
+        "endLine": 80,
+        "endCol": 3,
+        "message": "'onSave' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/wowsys/AddIssueDetailedPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 1054,
+        "col": 16,
+        "endLine": 1054,
+        "endCol": 62,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/components/wowsys/WOWPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 80,
+        "col": 8,
+        "endLine": 80,
+        "endCol": 46,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/lib/url-params.svelte.ts",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 92,
+        "col": 16,
+        "endLine": 92,
+        "endCol": 19,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/+error.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 162,
+        "col": 13,
+        "endLine": 162,
+        "endCol": 16,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/bills/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 32,
+        "col": 9,
+        "endLine": 32,
+        "endCol": 17,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/CommissioningTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 142,
+        "col": 5,
+        "endLine": 142,
+        "endCol": 64,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/CommissioningTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 190,
+        "col": 8,
+        "endLine": 190,
+        "endCol": 58,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/EditCommissionJob.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 177,
+        "col": 6,
+        "endLine": 177,
+        "endCol": 65,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/day-logs/add/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 57,
+        "col": 9,
+        "endLine": 57,
+        "endCol": 30,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/day-logs/edit/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 47,
+        "col": 8,
+        "endLine": 47,
+        "endCol": 29,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/commissioning-dash/day-logs/edit/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 54,
+        "col": 8,
+        "endLine": 54,
+        "endCol": 29,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/component-supply-dash/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 89,
+        "col": 11,
+        "endLine": 89,
+        "endCol": 70,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/customer/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 27,
+        "col": 5,
+        "endLine": 27,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/customer/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 200,
+        "col": 10,
+        "endLine": 200,
+        "endCol": 48,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/debtor/DebtorTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 408,
+        "col": 18,
+        "endLine": 408,
+        "endCol": 57,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/delivery-note/DeliveryNoteTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 103,
+        "col": 9,
+        "endLine": 103,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/delivery-note/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 128,
+        "col": 9,
+        "endLine": 128,
+        "endCol": 48,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-dash/DrawingPackagesList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 89,
+        "col": 10,
+        "endLine": 89,
+        "endCol": 86,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-dash/DrawingPackagesList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 99,
+        "col": 11,
+        "endLine": 99,
+        "endCol": 90,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-dash/DrawingPackagesList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 110,
+        "col": 8,
+        "endLine": 110,
+        "endCol": 42,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-dash/WOWIssuesList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 263,
+        "col": 14,
+        "endLine": 263,
+        "endCol": 39,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-schedule/DesignDrum.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 925,
+        "col": 12,
+        "endLine": 925,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-schedule/DesignDrum.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 927,
+        "col": 12,
+        "endLine": 927,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-schedule/DesignGantt.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 703,
+        "col": 11,
+        "endLine": 703,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/design-schedule/DesignGantt.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 751,
+        "col": 11,
+        "endLine": 751,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/embed/circuit-builder/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 70,
+        "col": 9,
+        "endLine": 70,
+        "endCol": 17,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/embed/layout-sys/[fullKitId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 44,
+        "col": 9,
+        "endLine": 44,
+        "endCol": 63,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/embed/layout-sys/serial/[serialId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 43,
+        "col": 9,
+        "endLine": 43,
+        "endCol": 63,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-design/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 149,
+        "col": 10,
+        "endLine": 149,
+        "endCol": 69,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-list/CreateBatchModal.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 25,
+        "col": 6,
+        "endLine": 35,
+        "endCol": 3,
+        "message": "'materialID' in 'selectedJobs' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-list/CreateBatchModal.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 25,
+        "col": 6,
+        "endLine": 35,
+        "endCol": 3,
+        "message": "'serialNumber' in 'selectedJobs' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-list/CreateBatchModal.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 25,
+        "col": 6,
+        "endLine": 35,
+        "endCol": 3,
+        "message": "'bomDescription' in 'selectedJobs' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-list/CreateBatchModal.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 25,
+        "col": 6,
+        "endLine": 35,
+        "endCol": 3,
+        "message": "'materialName' in 'selectedJobs' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/fab-list/JobTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 44,
+        "col": 6,
+        "endLine": 56,
+        "endCol": 3,
+        "message": "'sortBy' in 'sortConfig' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 109,
+        "col": 6,
+        "endLine": 109,
+        "endCol": 71,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 126,
+        "col": 9,
+        "endLine": 126,
+        "endCol": 70,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/DemandHistoryModal.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 107,
+        "col": 5,
+        "endLine": 107,
+        "endCol": 62,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/DemandTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 156,
+        "col": 5,
+        "endLine": 156,
+        "endCol": 22,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/DemandTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 180,
+        "col": 5,
+        "endLine": 180,
+        "endCol": 22,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/OrdersTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 109,
+        "col": 5,
+        "endLine": 109,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/ProductHistory.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 195,
+        "col": 6,
+        "endLine": 195,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/ProductInfo.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 1024,
+        "col": 10,
+        "endLine": 1024,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/[slug]/StocktakeItem.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 15,
+        "col": 6,
+        "endLine": 28,
+        "endCol": 3,
+        "message": "'description' in 'product' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/inventory/wip-summary/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 147,
+        "col": 5,
+        "endLine": 147,
+        "endCol": 72,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/invoice-dash/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 98,
+        "col": 11,
+        "endLine": 98,
+        "endCol": 51,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/invoice/InvoiceTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 70,
+        "col": 5,
+        "endLine": 70,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/invoice/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 349,
+        "col": 9,
+        "endLine": 349,
+        "endCol": 45,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/invoice/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 171,
+        "col": 9,
+        "endLine": 171,
+        "endCol": 44,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/NewJob/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 489,
+        "col": 9,
+        "endLine": 489,
+        "endCol": 28,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/NewJob/SerialTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 12,
+        "col": 6,
+        "endLine": 28,
+        "endCol": 3,
+        "message": "'poNumber' in 'pos' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 337,
+        "col": 9,
+        "endLine": 337,
+        "endCol": 48,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 376,
+        "col": 9,
+        "endLine": 376,
+        "endCol": 48,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/BOMPriceModal.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 226,
+        "col": 5,
+        "endLine": 226,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/BOMTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 359,
+        "col": 8,
+        "endLine": 359,
+        "endCol": 65,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/BOMTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 369,
+        "col": 6,
+        "endLine": 369,
+        "endCol": 69,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/bom/BOMTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 500,
+        "col": 7,
+        "endLine": 500,
+        "endCol": 57,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 45,
+        "col": 5,
+        "endLine": 45,
+        "endCol": 93,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 137,
+        "col": 9,
+        "endLine": 137,
+        "endCol": 93,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 183,
+        "col": 9,
+        "endLine": 183,
+        "endCol": 86,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 201,
+        "col": 7,
+        "endLine": 201,
+        "endCol": 95,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 205,
+        "col": 10,
+        "endLine": 205,
+        "endCol": 95,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design-fullkit/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 222,
+        "col": 17,
+        "endLine": 222,
+        "endCol": 20,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design/DeliverablesTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 75,
+        "col": 10,
+        "endLine": 75,
+        "endCol": 82,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/design/DeliverablesTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 85,
+        "col": 11,
+        "endLine": 85,
+        "endCol": 86,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/LinkTab.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 51,
+        "col": 2,
+        "endLine": 51,
+        "endCol": 8,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/invoicing/ProgressClaimTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 303,
+        "col": 8,
+        "endLine": 303,
+        "endCol": 56,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/production/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 25,
+        "col": 8,
+        "endLine": 25,
+        "endCol": 53,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/production/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 1430,
+        "col": 11,
+        "endLine": 1430,
+        "endCol": 29,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/production/[slug]/TaskTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 137,
+        "col": 8,
+        "endLine": 137,
+        "endCol": 80,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/scope/ProgressClaimTablePopUp.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 94,
+        "col": 6,
+        "endLine": 94,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job-costings/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 245,
+        "col": 10,
+        "endLine": 245,
+        "endCol": 32,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job-costings/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 400,
+        "col": 11,
+        "endLine": 400,
+        "endCol": 59,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job-costings/PartsActualPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 240,
+        "col": 15,
+        "endLine": 240,
+        "endCol": 73,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job-costings/PartsActualPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 329,
+        "col": 13,
+        "endLine": 329,
+        "endCol": 70,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/scope/SerialTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 218,
+        "col": 7,
+        "endLine": 218,
+        "endCol": 57,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/scope/SerialTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 239,
+        "col": 7,
+        "endLine": 239,
+        "endCol": 57,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/scope/VariationTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 137,
+        "col": 6,
+        "endLine": 137,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/service/CommissioningSerialsTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 146,
+        "col": 5,
+        "endLine": 146,
+        "endCol": 64,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/sundry-tasks/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 228,
+        "col": 7,
+        "endLine": 228,
+        "endCol": 37,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/job/[slug]/sundry-tasks/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 233,
+        "col": 6,
+        "endLine": 233,
+        "endCol": 36,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/kpisys/KPITable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 46,
+        "col": 5,
+        "endLine": 46,
+        "endCol": 39,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/kpisys/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 59,
+        "col": 9,
+        "endLine": 59,
+        "endCol": 27,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/po/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 54,
+        "col": 4,
+        "endLine": 54,
+        "endCol": 51,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/po/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 113,
+        "col": 7,
+        "endLine": 113,
+        "endCol": 21,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/po/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 471,
+        "col": 10,
+        "endLine": 471,
+        "endCol": 15,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/po/[slug]/POItemsTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 328,
+        "col": 10,
+        "endLine": 328,
+        "endCol": 69,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/po/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 657,
+        "col": 9,
+        "endLine": 657,
+        "endCol": 26,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-calendar/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 84,
+        "col": 10,
+        "endLine": 84,
+        "endCol": 42,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-calendar/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 86,
+        "col": 10,
+        "endLine": 86,
+        "endCol": 42,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-prep-jobs/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 117,
+        "col": 5,
+        "endLine": 117,
+        "endCol": 64,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-schedule/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 319,
+        "col": 10,
+        "endLine": 319,
+        "endCol": 75,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 295,
+        "col": 8,
+        "endLine": 295,
+        "endCol": 80,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/UserPopUpDialog.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 3,
+        "message": "'taskId' in 'logInPopUpJob' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/UserPopUpDialog.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 3,
+        "message": "'jobNumber' in 'logInPopUpJob' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/UserPopUpDialog.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 3,
+        "message": "'projSummID' in 'logInPopUpJob' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/UserPopUpDialog.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 3,
+        "message": "'wowIssueId' in 'logInPopUpJob' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/UserPopUpDialog.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 3,
+        "message": "'wireSysProjectNumber' in 'logInPopUpJob' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/production-tasks/wiresys/OperatorSelect.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 5,
+        "col": 6,
+        "endLine": 17,
+        "endCol": 3,
+        "message": "'id' in 'users' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/DatesPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 62,
+        "col": 6,
+        "endLine": 62,
+        "endCol": 63,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/DatesPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 66,
+        "col": 6,
+        "endLine": 66,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/DatesPopup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 68,
+        "col": 6,
+        "endLine": 68,
+        "endCol": 36,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/DateStep.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 44,
+        "col": 8,
+        "endLine": 44,
+        "endCol": 36,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 647,
+        "col": 8,
+        "endLine": 647,
+        "endCol": 65,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 651,
+        "col": 8,
+        "endLine": 651,
+        "endCol": 48,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 653,
+        "col": 8,
+        "endLine": 653,
+        "endCol": 65,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 657,
+        "col": 8,
+        "endLine": 657,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 659,
+        "col": 8,
+        "endLine": 659,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/proformas/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 888,
+        "col": 5,
+        "endLine": 890,
+        "endCol": 35,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 115,
+        "col": 8,
+        "endLine": 115,
+        "endCol": 28,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 147,
+        "col": 6,
+        "endLine": 147,
+        "endCol": 22,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 1137,
+        "col": 8,
+        "endLine": 1137,
+        "endCol": 28,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/LinkTab.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 12,
+        "col": 5,
+        "endLine": 12,
+        "endCol": 24,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/alert/AlertTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 312,
+        "col": 14,
+        "endLine": 312,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/alert/AlertTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 387,
+        "col": 12,
+        "endLine": 387,
+        "endCol": 100,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/alert/AlertTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 475,
+        "col": 13,
+        "endLine": 475,
+        "endCol": 45,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/alert/AlertTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 553,
+        "col": 11,
+        "endLine": 553,
+        "endCol": 99,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/dash/DashTaskList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 266,
+        "col": 12,
+        "endLine": 266,
+        "endCol": 34,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/dash/DashTaskList.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 332,
+        "col": 11,
+        "endLine": 332,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/project-management-dash/task-list/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 263,
+        "col": 6,
+        "endLine": 263,
+        "endCol": 17,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/JobTable.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 13,
+        "col": 6,
+        "endLine": 23,
+        "endCol": 3,
+        "message": "'sortBy' in 'sortConfig' is an unused property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/JobTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 74,
+        "col": 5,
+        "endLine": 74,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/[slug]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 158,
+        "col": 6,
+        "endLine": 158,
+        "endCol": 12,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 699,
+        "col": 6,
+        "endLine": 699,
+        "endCol": 48,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/[slug]/ProjectBreadcrumb.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 21,
+        "col": 7,
+        "endLine": 21,
+        "endCol": 23,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/[slug]/ProjectBreadcrumb.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 28,
+        "col": 8,
+        "endLine": 28,
+        "endCol": 27,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/projects/[slug]/drawings/DrawingSubmissionTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 55,
+        "col": 4,
+        "endLine": 55,
+        "endCol": 34,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchase-history/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 48,
+        "col": 5,
+        "endLine": 48,
+        "endCol": 61,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchase-history/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 62,
+        "col": 6,
+        "endLine": 62,
+        "endCol": 63,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 86,
+        "col": 4,
+        "endLine": 86,
+        "endCol": 115,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 147,
+        "col": 4,
+        "endLine": 147,
+        "endCol": 68,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 166,
+        "col": 6,
+        "endLine": 166,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/BlankItemsGroup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 162,
+        "col": 6,
+        "endLine": 162,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/ProductDetailPanel.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 119,
+        "col": 11,
+        "endLine": 119,
+        "endCol": 50,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/ProductDetailPanel.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 227,
+        "col": 11,
+        "endLine": 227,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/SupplierGroup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 167,
+        "col": 9,
+        "endLine": 167,
+        "endCol": 54,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/SupplierGroup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 198,
+        "col": 6,
+        "endLine": 200,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/purchsys/SupplierGroup.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 303,
+        "col": 8,
+        "endLine": 303,
+        "endCol": 84,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/reportsys/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 28,
+        "col": 9,
+        "endLine": 28,
+        "endCol": 43,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/reportsys/ReportTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 48,
+        "col": 5,
+        "endLine": 48,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/reportsys/ReportTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 52,
+        "col": 5,
+        "endLine": 52,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/reportsys/[slug]/edit/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 26,
+        "col": 9,
+        "endLine": 26,
+        "endCol": 43,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/service-dash/calendar/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 652,
+        "col": 9,
+        "endLine": 652,
+        "endCol": 29,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 182,
+        "col": 11,
+        "endLine": 182,
+        "endCol": 27,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 19,
+        "col": 6,
+        "endLine": 19,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 27,
+        "col": 6,
+        "endLine": 27,
+        "endCol": 37,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 30,
+        "col": 6,
+        "endLine": 30,
+        "endCol": 36,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 33,
+        "col": 6,
+        "endLine": 33,
+        "endCol": 37,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 36,
+        "col": 6,
+        "endLine": 36,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 39,
+        "col": 6,
+        "endLine": 39,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 42,
+        "col": 6,
+        "endLine": 42,
+        "endCol": 48,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/category/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 107,
+        "col": 12,
+        "endLine": 107,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/category/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 109,
+        "col": 9,
+        "endLine": 109,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/circuit-builder/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 108,
+        "col": 9,
+        "endLine": 108,
+        "endCol": 93,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/circuit-builder/[assembly]/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 105,
+        "col": 15,
+        "endLine": 105,
+        "endCol": 92,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/circuit-builder/[assembly]/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 117,
+        "col": 15,
+        "endLine": 117,
+        "endCol": 94,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/circuit-builder/[assembly]/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 135,
+        "col": 12,
+        "endLine": 135,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/ethernetSwitch/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 111,
+        "col": 12,
+        "endLine": 111,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/ethernetSwitch/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 113,
+        "col": 9,
+        "endLine": 113,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/layoutTerminal/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 123,
+        "col": 12,
+        "endLine": 123,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/layoutTerminal/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 125,
+        "col": 9,
+        "endLine": 125,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/section/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 169,
+        "col": 12,
+        "endLine": 169,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/section/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 171,
+        "col": 9,
+        "endLine": 171,
+        "endCol": 37,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/tagStrip/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 148,
+        "col": 12,
+        "endLine": 148,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/tagStrip/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 150,
+        "col": 9,
+        "endLine": 150,
+        "endCol": 38,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/terminalSizeMapping/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 116,
+        "col": 12,
+        "endLine": 116,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/cadSys/terminalSizeMapping/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 118,
+        "col": 9,
+        "endLine": 118,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-categories/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 235,
+        "col": 12,
+        "endLine": 235,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-categories/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 237,
+        "col": 9,
+        "endLine": 237,
+        "endCol": 44,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-categories/+page.svelte",
+        "rule": "svelte/system",
+        "line": 269,
+        "col": 2,
+        "endLine": 279,
+        "endCol": 10,
+        "message": "`<style>` should be at the top level of the component, not nested inside markup.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 52,
+        "col": 9,
+        "endLine": 52,
+        "endCol": 60,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 63,
+        "col": 8,
+        "endLine": 63,
+        "endCol": 59,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 93,
+        "col": 9,
+        "endLine": 93,
+        "endCol": 53,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 113,
+        "col": 12,
+        "endLine": 113,
+        "endCol": 46,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 115,
+        "col": 9,
+        "endLine": 115,
+        "endCol": 50,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/checklist-templates/[slug]/TemplateEditor.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 56,
+        "col": 7,
+        "endLine": 56,
+        "endCol": 42,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/fullkit/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 71,
+        "col": 14,
+        "endLine": 71,
+        "endCol": 30,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/fullkit/fullkit-preset/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 73,
+        "col": 9,
+        "endLine": 73,
+        "endCol": 74,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/fullkit/fullkit-preset/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 92,
+        "col": 12,
+        "endLine": 92,
+        "endCol": 34,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/fullkit/fullkit-preset/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 93,
+        "col": 12,
+        "endLine": 93,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/fullkit/fullkit-preset/[fullkit]/+layout.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 95,
+        "col": 9,
+        "endLine": 95,
+        "endCol": 45,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/task-stages/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 114,
+        "col": 12,
+        "endLine": 114,
+        "endCol": 26,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/task-stages/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 116,
+        "col": 9,
+        "endLine": 116,
+        "endCol": 35,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/tasksys-rules/PreviewResultsDialog.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 309,
+        "col": 6,
+        "endLine": 309,
+        "endCol": 35,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/tasksys-rules/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 183,
+        "col": 16,
+        "endLine": 183,
+        "endCol": 39,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 214,
+        "col": 7,
+        "endLine": 214,
+        "endCol": 50,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 240,
+        "col": 9,
+        "endLine": 240,
+        "endCol": 51,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/[slug]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 281,
+        "col": 9,
+        "endLine": 281,
+        "endCol": 34,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/new-user/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 47,
+        "col": 8,
+        "endLine": 47,
+        "endCol": 43,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/new-user/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 195,
+        "col": 12,
+        "endLine": 195,
+        "endCol": 42,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/user-management/new-user/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 197,
+        "col": 9,
+        "endLine": 197,
+        "endCol": 48,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/CheckTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 47,
+        "col": 5,
+        "endLine": 47,
+        "endCol": 39,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/RunHistoryTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 98,
+        "col": 5,
+        "endLine": 98,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/RunHistoryTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 106,
+        "col": 6,
+        "endLine": 106,
+        "endCol": 28,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/RunHistoryTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 121,
+        "col": 23,
+        "endLine": 121,
+        "endCol": 62,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 111,
+        "col": 16,
+        "endLine": 111,
+        "endCol": 46,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/[id]/RunsTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 124,
+        "col": 25,
+        "endLine": 124,
+        "endCol": 64,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/[id]/RunsTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 129,
+        "col": 8,
+        "endLine": 129,
+        "endCol": 30,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/[id]/RunsTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 178,
+        "col": 9,
+        "endLine": 178,
+        "endCol": 48,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/[id]/rules/[ruleId]/TestSandboxPane.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 325,
+        "col": 8,
+        "endLine": 325,
+        "endCol": 41,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/datasources/DataSourceTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 54,
+        "col": 5,
+        "endLine": 54,
+        "endCol": 51,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/datasources/[id]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 77,
+        "col": 9,
+        "endLine": 77,
+        "endCol": 38,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/runs/[runId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 135,
+        "col": 12,
+        "endLine": 135,
+        "endCol": 56,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/runs/[runId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 137,
+        "col": 12,
+        "endLine": 137,
+        "endCol": 56,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/runs/[runId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 146,
+        "col": 12,
+        "endLine": 146,
+        "endCol": 34,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/runs/[runId]/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 203,
+        "col": 5,
+        "endLine": 203,
+        "endCol": 70,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/suppressions/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 233,
+        "col": 5,
+        "endLine": 233,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/suppressions/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 237,
+        "col": 6,
+        "endLine": 237,
+        "endCol": 70,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/suppressions/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 246,
+        "col": 11,
+        "endLine": 246,
+        "endCol": 33,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/setups/wattson/suppressions/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 287,
+        "col": 5,
+        "endLine": 287,
+        "endCol": 52,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/supplier/ItemTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 32,
+        "col": 6,
+        "endLine": 32,
+        "endCol": 49,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/supplier/new/+page.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 89,
+        "col": 9,
+        "endLine": 89,
+        "endCol": 52,
+        "message": "Unexpected goto() call without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/tasksys-dash/JobTaskTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 379,
+        "col": 5,
+        "endLine": 379,
+        "endCol": 21,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/tasksys-dash/TaskCard.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 123,
+        "col": 31,
+        "endLine": 123,
+        "endCol": 47,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/tasksys-dash/TaskSysDashTaskTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 409,
+        "col": 5,
+        "endLine": 409,
+        "endCol": 21,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/variation/EditVariationPopup.svelte",
+        "rule": "svelte/no-unused-props",
+        "line": 32,
+        "col": 6,
+        "endLine": 66,
+        "endCol": 3,
+        "message": "'onSaved' is an unused Props property.",
+        "severity": 2
+      },
+      {
+        "file": "src/routes/wowsys/issues/IssuesTable.svelte",
+        "rule": "svelte/no-navigation-without-resolve",
+        "line": 152,
+        "col": 6,
+        "endLine": 152,
+        "endCol": 43,
+        "message": "Unexpected href link without resolve().",
+        "severity": 2
+      }
+    ],
+    "diagnosticDifferences": [
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 44,
+          "endLine": 24,
+          "endCol": 46,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 90,
+          "endLine": 24,
+          "endCol": 97,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 47,
+          "endLine": 24,
+          "endCol": 54,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 86,
+          "endLine": 24,
+          "endCol": 89,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 55,
+          "endLine": 24,
+          "endCol": 64,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 81,
+          "endLine": 24,
+          "endCol": 85,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 65,
+          "endLine": 24,
+          "endCol": 70,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 74,
+          "endLine": 24,
+          "endCol": 80,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 74,
+          "endLine": 24,
+          "endCol": 80,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 65,
+          "endLine": 24,
+          "endCol": 70,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 81,
+          "endLine": 24,
+          "endCol": 85,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 55,
+          "endLine": 24,
+          "endCol": 64,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 86,
+          "endLine": 24,
+          "endCol": 89,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 47,
+          "endLine": 24,
+          "endCol": 54,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 90,
+          "endLine": 24,
+          "endCol": 97,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 44,
+          "endLine": 24,
+          "endCol": 46,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      }
+    ]
+  },
+  "reductions": [
+    {
+      "name": "union-property",
+      "rule": "svelte/no-unused-props",
+      "ext": "svelte",
+      "code": "<script lang=\"ts\">\nlet {onSave}: {\n onSave?:\n  | ((value: number) => void)\n  | undefined;\n} = $props();\n</script>\n<button onclick={() => onSave?.(1)}>Save</button>",
+      "eslint": [],
+      "oxvelte": [
+        {
+          "column": 5,
+          "endColumn": 2,
+          "endLine": 6,
+          "line": 2,
+          "message": "'|' is an unused Props property.",
+          "rule": "svelte/no-unused-props",
+          "severity": "error"
+        },
+        {
+          "column": 5,
+          "endColumn": 2,
+          "endLine": 6,
+          "line": 2,
+          "message": "'| undefined' is an unused Props property.",
+          "rule": "svelte/no-unused-props",
+          "severity": "error"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "block-scoped-function",
+      "rule": "svelte/no-inner-declarations",
+      "ext": "svelte",
+      "options": [
+        2,
+        "functions",
+        {
+          "blockScopedFunctions": "allow"
+        }
+      ],
+      "code": "<script>\nif (Math.random()) {\n  function f() {}\n  f();\n}\n</script>",
+      "eslint": [],
+      "oxvelte": [
+        {
+          "column": 3,
+          "endColumn": 18,
+          "endLine": 3,
+          "line": 3,
+          "message": "Move function declaration to program root.",
+          "rule": "svelte/no-inner-declarations",
+          "severity": "error"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "nested-style",
+      "rule": "svelte/system",
+      "ext": "svelte",
+      "code": "<div><style>p { color: red; }</style></div>",
+      "eslint": [],
+      "oxvelte": [
+        {
+          "column": 6,
+          "endColumn": 38,
+          "endLine": 1,
+          "line": 1,
+          "message": "`<style>` should be at the top level of the component, not nested inside markup.",
+          "rule": "svelte/system",
+          "severity": "error"
+        }
+      ],
+      "stderr": ""
+    }
+  ],
+  "corrections": [
+    {
+      "rule": "svelte/prefer-svelte-reactivity",
+      "file": "src/lib/url-params.svelte.ts",
+      "line": 41,
+      "explanation": "The ESLint-only entry is a duplicate reference diagnostic. Oxvelte already reports this exact constructor once; it was incorrectly described as a semantic miss."
+    }
+  ]
+}

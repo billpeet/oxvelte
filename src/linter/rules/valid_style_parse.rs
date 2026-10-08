@@ -1,7 +1,7 @@
 //! `svelte/valid-style-parse` — report style parsing errors in `<style>` blocks.
 
 use crate::linter::{LintContext, Rule};
-use crate::parser::css::parse_css;
+use crate::parser::css::{parse_css, CssParseErrorKind};
 
 pub struct ValidStyleParse;
 
@@ -29,11 +29,7 @@ impl Rule for ValidStyleParse {
         // Upstream reports parser-service style context failures. Until this
         // project has dedicated preprocessors for every style lang, the
         // Svelte-compatible CSS parser is the canonical syntax check here.
-        let tag_text = &ctx.source[style.span.start as usize..style.span.end as usize];
-        let cs = tag_text
-            .find('>')
-            .map(|p| style.span.start + p as u32 + 1)
-            .unwrap_or(style.span.start);
+        let cs = style.content_span.start;
         let parsed = parse_css(&style.content, cs);
         let err_pos = if let Some(error) = parsed.errors.first() {
             Some(error.position as u32)
@@ -45,12 +41,67 @@ impl Rule for ValidStyleParse {
             None
         };
         if let Some(ep) = err_pos {
+            let (position, reason) = style_error_message(
+                &style.content,
+                ep as usize,
+                parsed.errors.first().map(|e| e.kind),
+            );
+            let prefix = &style.content[..position];
+            let line = prefix.bytes().filter(|b| *b == b'\n').count() + 1;
+            let column = prefix
+                .rsplit('\n')
+                .next()
+                .unwrap_or(prefix)
+                .encode_utf16()
+                .count()
+                + 1;
+            let filename = ctx
+                .file_path
+                .as_deref()
+                .unwrap_or("<input>")
+                .replace('\\', "/");
+            let cwd = std::env::current_dir()
+                .ok()
+                .map(|p| p.to_string_lossy().replace('\\', "/") + "/");
+            let filename = cwd
+                .as_deref()
+                .and_then(|cwd| filename.strip_prefix(cwd))
+                .unwrap_or(&filename);
             ctx.diagnostic(
-                "CSS parsing error in <style> block.",
-                oxc::span::Span::new(cs + ep, style.span.end),
+                format!("Error parsing style element. Error message: \"{filename}:{line}:{column}: {reason}\""),
+                style.span,
             );
         }
     }
+}
+
+fn style_error_message(
+    css: &str,
+    position: usize,
+    kind: Option<CssParseErrorKind>,
+) -> (usize, String) {
+    if kind == Some(CssParseErrorKind::UnclosedComment) {
+        return (position, "Unclosed comment".into());
+    }
+    if kind == Some(CssParseErrorKind::InvalidDeclaration) {
+        let tail = &css[position..];
+        let property_len = tail.find(char::is_whitespace).unwrap_or(tail.len());
+        let after_property = &tail[property_len..];
+        let whitespace_len = after_property.len() - after_property.trim_start().len();
+        let next = property_len + whitespace_len;
+        let word_position =
+            if next < tail.len() && !matches!(tail.as_bytes()[next], b':' | b';' | b'}') {
+                position + next
+            } else {
+                position
+            };
+        let word = css[word_position..]
+            .split(|c: char| c.is_whitespace() || matches!(c, ';' | '}' | ':'))
+            .next()
+            .unwrap_or("");
+        return (word_position, format!("Unknown word {word}"));
+    }
+    (position, "Unclosed block".into())
 }
 
 #[cfg(test)]
@@ -90,6 +141,23 @@ mod tests {
         assert_eq!(
             messages,
             vec!["Found unsupported style element language \"wat\"".to_string()]
+        );
+    }
+
+    #[test]
+    fn reports_css_error_with_real_filename_and_style_relative_location() {
+        let source = "<!-- é -->\n<style data-label='>'>.x { color red; }</style>";
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        let mut ctx = LintContext::new(&parsed.ast, source);
+        ctx.file_path = Some("src/Panel.svelte".into());
+        ValidStyleParse.run(&mut ctx);
+        let diagnostics = ctx.into_diagnostics();
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics[0].message, "Error parsing style element. Error message: \"src/Panel.svelte:1:12: Unknown word red\"");
+        assert_eq!(
+            diagnostics[0].span.start,
+            source.find("<style").unwrap() as u32
         );
     }
 }

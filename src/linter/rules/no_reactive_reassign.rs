@@ -39,10 +39,7 @@ impl Rule for NoReactiveReassign {
         let Some(script) = &ctx.ast.instance else {
             return;
         };
-        let base = script.span.start as usize;
-        let source = ctx.source;
-        let tag_text = &source[base..script.span.end as usize];
-        let content_offset = tag_text.find('>').map(|p| base + p + 1).unwrap_or(base);
+        let content_offset = script.content_span.start as usize;
 
         let Some(semantic) = ctx.instance_semantic else {
             return;
@@ -208,7 +205,14 @@ impl Rule for NoReactiveReassign {
                 if is_in_direct_reactive_statement(nodes, node.id()) {
                     continue;
                 }
-                let sp = content_offset as u32 + base.span.start;
+                let start = match node.kind() {
+                    AstKind::AssignmentExpression(ae) => ae.span.start,
+                    AstKind::UpdateExpression(ue) => ue.span.start,
+                    AstKind::UnaryExpression(ue) => ue.span.start,
+                    AstKind::CallExpression(ce) => ce.span.start,
+                    _ => base.span.start,
+                };
+                let sp = content_offset as u32 + start;
                 let end = content_offset as u32 + span_end;
                 let msg = if depth == 0 && is_method_call {
                     format!("Assignment to reactive value '{}'.", base_name)
@@ -259,8 +263,8 @@ impl Rule for NoReactiveReassign {
                 if !reported.insert(name) {
                     continue;
                 } // report each var once per pattern
-                let sp = content_offset as u32 + id.span.start;
-                let end = content_offset as u32 + id.span.end;
+                let sp = content_offset as u32 + ae.span.start;
+                let end = content_offset as u32 + ae.span.end;
                 ctx.diagnostic(
                     format!("Assignment to reactive value '{}'.", name),
                     Span::new(sp, end),
@@ -481,7 +485,14 @@ impl Rule for NoReactiveReassign {
                         };
                         if matched {
                             ctx.diagnostic(
-                                format!("Assignment to reactive value '{}'.", base_name),
+                                if is_member {
+                                    format!(
+                                        "Assignment to property of reactive value '{}'.",
+                                        base_name
+                                    )
+                                } else {
+                                    format!("Assignment to reactive value '{}'.", base_name)
+                                },
                                 *span,
                             );
                         }
@@ -523,8 +534,8 @@ fn parse_bind_target(text: &str) -> Option<(String, bool)> {
 /// `reactive_vars`. Diagnostics are placed at the identifier's position in
 /// the source (computed via `text_start`), so multi-line event handlers
 /// line up with the assignment itself rather than the enclosing attribute.
-/// Template expressions have no semantic scope of their own, so shadowing
-/// inside the expression is not checked (matching prior behavior).
+/// Resolve expression-local bindings so callback parameters and local variables
+/// do not count as writes to the component's reactive declarations.
 fn check_template_expression<'a>(
     text: &str,
     text_start: u32,
@@ -550,7 +561,6 @@ fn check_template_expression<'a>(
     let semantic = SemanticBuilder::new().build(&parsed.program).semantic;
     let nodes = semantic.nodes();
 
-    let mut reported_direct = std::collections::HashSet::<String>::new();
     const MUTATING_NAMES: &[&str] = &[
         "push",
         "pop",
@@ -583,15 +593,18 @@ fn check_template_expression<'a>(
                     continue;
                 };
                 let name = base.name.as_str();
-                if !check_reactive(name) {
+                if !check_reactive(name)
+                    || semantic
+                        .scoping()
+                        .get_reference(base.reference_id())
+                        .symbol_id()
+                        .is_some()
+                {
                     continue;
                 }
-                let sp = src_pos(base.span.start);
-                let end = src_pos(base.span.end);
+                let sp = src_pos(ae.span.start);
+                let end = src_pos(ae.span.end);
                 if depth == 0 {
-                    if !reported_direct.insert(name.to_string()) {
-                        continue;
-                    }
                     ctx.diagnostic(
                         format!("Assignment to reactive value '{}'.", name),
                         Span::new(sp, end),
@@ -608,15 +621,18 @@ fn check_template_expression<'a>(
                     continue;
                 };
                 let name = base.name.as_str();
-                if !check_reactive(name) {
+                if !check_reactive(name)
+                    || semantic
+                        .scoping()
+                        .get_reference(base.reference_id())
+                        .symbol_id()
+                        .is_some()
+                {
                     continue;
                 }
-                let sp = src_pos(base.span.start);
-                let end = src_pos(base.span.end);
+                let sp = src_pos(ue.span.start);
+                let end = src_pos(ue.span.end);
                 if depth == 0 {
-                    if !reported_direct.insert(name.to_string()) {
-                        continue;
-                    }
                     ctx.diagnostic(
                         format!("Assignment to reactive value '{}'.", name),
                         Span::new(sp, end),
@@ -640,11 +656,17 @@ fn check_template_expression<'a>(
                     continue;
                 };
                 let name = base.name.as_str();
-                if !check_reactive(name) {
+                if !check_reactive(name)
+                    || semantic
+                        .scoping()
+                        .get_reference(base.reference_id())
+                        .symbol_id()
+                        .is_some()
+                {
                     continue;
                 }
-                let sp = src_pos(base.span.start);
-                let end = src_pos(base.span.end);
+                let sp = src_pos(ce.span.start);
+                let end = src_pos(ce.span.end);
                 ctx.diagnostic(
                     format!("Assignment to property of reactive value '{}'.", name),
                     Span::new(sp, end),
@@ -843,11 +865,12 @@ fn is_in_direct_reactive_statement(nodes: &oxc::semantic::AstNodes, node_id: Nod
 }
 
 fn expr_base_ident<'a>(expr: &'a Expression<'a>) -> Option<&'a IdentifierReference<'a>> {
-    match expr {
+    match unwrap_paren(expr) {
         Expression::Identifier(id) => Some(id),
         Expression::StaticMemberExpression(m) => expr_base_ident(&m.object),
         Expression::ComputedMemberExpression(m) => expr_base_ident(&m.object),
         Expression::PrivateFieldExpression(m) => expr_base_ident(&m.object),
+        Expression::ChainExpression(_) => expr_member_path(expr).map(|(id, _)| id),
         _ => None,
     }
 }
@@ -856,7 +879,7 @@ fn expr_base_ident<'a>(expr: &'a Expression<'a>) -> Option<&'a IdentifierReferen
 /// `IdentifierReference` and the number of member layers above it
 /// (`var` → depth 0, `var.a` → depth 1, `var.a.b` → depth 2, `var?.a` → 1).
 fn expr_member_path<'a>(expr: &'a Expression<'a>) -> Option<(&'a IdentifierReference<'a>, usize)> {
-    match expr {
+    match unwrap_paren(expr) {
         Expression::Identifier(id) => Some((id, 0)),
         Expression::StaticMemberExpression(m) => {
             expr_member_path(&m.object).map(|(i, d)| (i, d + 1))
@@ -1032,5 +1055,63 @@ fn simple_target_member_path<'a>(
             expr_member_path(&m.object).map(|(i, d)| (i, d + 1))
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
+    #[test]
+    fn reactive_mutations_use_operation_spans_and_respect_local_symbols() {
+        let source="<!-- 😀 --><script data-note=\">\">let value=1; $: reactive={value}; function change(){ delete reactive.value; (reactive?.value).nested=2; ({value:reactive}=other); } function shadow(reactive){delete reactive.value; reactive.value=3;}</script><input bind:value={reactive.value} />";
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        let diagnostics: Vec<_> = Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-reactive-reassign")
+            .collect();
+        assert_eq!(diagnostics.len(), 4);
+        for expected in [
+            "delete reactive.value",
+            "(reactive?.value).nested=2",
+            "{value:reactive}=other",
+            "bind:value={reactive.value}",
+        ] {
+            assert!(
+                diagnostics
+                    .iter()
+                    .any(|d| &source[d.span.start as usize..d.span.end as usize] == expected),
+                "missing {expected}: {diagnostics:?}"
+            );
+        }
+        assert_eq!(
+            diagnostics
+                .iter()
+                .filter(|d| d.message.contains("property of"))
+                .count(),
+            3
+        );
+    }
+    #[test]
+    fn template_callback_bindings_shadow_reactive_declarations() {
+        let source="<script>let source=0; $: reactive=source;</script><button onclick={(reactive)=>reactive++}/><button onclick={()=>{reactive=1; reactive=2;}}/>";
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        let diagnostics: Vec<_> = Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-reactive-reassign")
+            .collect();
+        assert_eq!(diagnostics.len(), 2);
+        assert_eq!(
+            &source[diagnostics[0].span.start as usize..diagnostics[0].span.end as usize],
+            "reactive=1"
+        );
+        assert_eq!(
+            &source[diagnostics[1].span.start as usize..diagnostics[1].span.end as usize],
+            "reactive=2"
+        );
     }
 }

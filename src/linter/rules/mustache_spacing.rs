@@ -49,6 +49,17 @@ impl Rule for MustacheSpacing {
             .unwrap_or("never")
             .to_string();
         let template_tag_spans = ctx.ast.html.template_tag_spans.clone();
+        // A shorthand await branch without a binding has no branch expression.
+        let mut unbound_await_starts = HashSet::new();
+        walk_template_nodes(&ctx.ast.html, &mut |node| {
+            if let TemplateNode::AwaitBlock(block) = node {
+                if (block.then.is_some() && block.then_binding.is_none())
+                    || (block.catch.is_some() && block.catch_binding.is_none())
+                {
+                    unbound_await_starts.insert(block.span.start);
+                }
+            }
+        });
         let template_tag_span_keys: HashSet<(u32, u32)> = template_tag_spans
             .iter()
             .map(|tag| (tag.span.start, tag.span.end))
@@ -118,6 +129,11 @@ impl Rule for MustacheSpacing {
         });
 
         for tag in template_tag_spans {
+            let text = ctx.source[tag.span.start as usize..tag.span.end as usize]
+                .trim_end_matches('}')
+                .trim_end();
+            let unbound_shorthand = unbound_await_starts.contains(&tag.span.start)
+                && (text.ends_with(" then") || text.ends_with(" catch"));
             let closing_mode = if tag.check_closing {
                 closing.as_str()
             } else {
@@ -128,7 +144,7 @@ impl Rule for MustacheSpacing {
                 tag.span,
                 tags_opening_always,
                 closing_mode,
-                tag.has_expression,
+                tag.has_expression && !unbound_shorthand,
             );
         }
     }
@@ -242,4 +258,46 @@ fn last_non_whitespace_end(source: &str, start: usize, end: usize) -> Option<usi
         .rev()
         .find(|(_, ch)| !ch.is_whitespace())
         .map(|(idx, ch)| start + idx + ch.len_utf8())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/mustache-spacing")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let source = "{#await promise then}{'😀'}{/await}{#await promise catch}{/await}";
+        let diagnostics = lint(
+            source,
+            serde_json::json!([{"tags":{"closingBrace":"always-after-expression"}}]),
+        );
+        assert!(diagnostics.is_empty());
+        let diagnostics = lint(
+            "{#await promise then value}{/await}",
+            serde_json::json!([{"tags":{"closingBrace":"always-after-expression"}}]),
+        );
+        assert_eq!(diagnostics.len(), 1);
+    }
 }

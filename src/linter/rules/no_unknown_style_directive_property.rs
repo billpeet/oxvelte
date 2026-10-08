@@ -487,12 +487,35 @@ impl Rule for NoUnknownStyleDirectiveProperty {
                         if !known_property(name) {
                             ctx.diagnostic(
                                 format!("Unexpected unknown style directive property '{}'.", name),
-                                *span,
+                                oxc::span::Span::new(
+                                    span.start + 6,
+                                    span.start + 6 + name.len() as u32,
+                                ),
                             );
                         }
                     }
                 }
             }
         });
+    }
+}
+
+#[cfg(test)]
+mod span_tests {
+    use super::*;
+    #[test]
+    fn reports_only_the_property_name_after_unicode() {
+        let source = "<div title='é' style:unknown-color={value}/>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let mut ctx = LintContext::new(&parsed.ast, source);
+        NoUnknownStyleDirectiveProperty.run(&mut ctx);
+        let diagnostics = ctx.into_diagnostics();
+        assert_eq!(diagnostics.len(), 1);
+        let span = diagnostics[0].span;
+        assert_eq!(
+            &source[span.start as usize..span.end as usize],
+            "unknown-color"
+        );
     }
 }

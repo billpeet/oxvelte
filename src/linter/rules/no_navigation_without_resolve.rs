@@ -5,7 +5,10 @@
 use crate::ast::{Attribute, AttributeValue, TemplateNode};
 use crate::linter::{walk_template_nodes, LintContext, Rule};
 use oxc::allocator::Allocator;
-use oxc::ast::ast::{Expression, ImportDeclarationSpecifier, ModuleExportName, Statement};
+use oxc::ast::ast::{
+    BindingPattern, Expression, ImportDeclarationSpecifier, ModuleExportName, Statement,
+    TSSignature, TSType, TSTypeName,
+};
 use oxc::ast::AstKind;
 use oxc::parser::Parser;
 use oxc::semantic::Semantic;
@@ -30,6 +33,9 @@ impl Rule for NoNavigationWithoutResolve {
     }
 
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
+        if !kit_version_is_eligible(ctx.file_path.as_deref()) {
+            return;
+        }
         let opts = ctx
             .config
             .options
@@ -49,21 +55,15 @@ impl Rule for NoNavigationWithoutResolve {
         // Resolve import locals.
         let mut nav_locals: Vec<(String, &'static str)> = Vec::new(); // (local-callable, original)
         let mut resolve_locals: Vec<String> = Vec::new();
-        let mut has_sveltekit_paths = false;
-        let mut has_any_imports = false;
 
         if let Some(sem) = ctx.instance_semantic {
             for stmt in &sem.nodes().program().body {
                 let Statement::ImportDeclaration(imp) = stmt else {
                     continue;
                 };
-                has_any_imports = true;
                 let src = imp.source.value.as_str();
                 let is_nav_mod = src == "$app/navigation";
                 let is_paths_mod = src == "$app/paths";
-                if is_paths_mod {
-                    has_sveltekit_paths = true;
-                }
                 let Some(specifiers) = &imp.specifiers else {
                     continue;
                 };
@@ -119,7 +119,7 @@ impl Rule for NoNavigationWithoutResolve {
         // Walk script nav calls.
         if !nav_locals.is_empty() {
             if let Some(sem) = ctx.instance_semantic {
-                let content_offset = ctx.instance_content_offset;
+                let content_offset = ctx.ast.instance.as_ref().unwrap().content_span.start;
                 for node in sem.nodes().iter() {
                     let AstKind::CallExpression(ce) = node.kind() else {
                         continue;
@@ -136,12 +136,17 @@ impl Rule for NoNavigationWithoutResolve {
                         continue;
                     };
 
-                    let safe =
-                        is_safe_nav_arg(first_arg, &resolve_locals, sem, &mut FxHashSet::default());
+                    let safe = is_safe_nav_arg(
+                        first_arg,
+                        &resolve_locals,
+                        sem,
+                        &mut FxHashSet::default(),
+                        *orig_name != "goto",
+                    );
                     if !safe {
-                        let callee_span = ce.callee.span();
-                        let s = content_offset + callee_span.start;
-                        let e = content_offset + callee_span.end + 1;
+                        let argument_span = first_arg.span();
+                        let s = content_offset + argument_span.start;
+                        let e = content_offset + argument_span.end;
                         ctx.diagnostic(
                             format!("Unexpected {}() call without resolve().", orig_name),
                             Span::new(s, e),
@@ -155,13 +160,7 @@ impl Rule for NoNavigationWithoutResolve {
             return;
         }
 
-        // Template anchor href checks.
-        // Skip entirely for non-SvelteKit files (fast bail).
-        if has_any_imports && !has_sveltekit_paths && nav_locals.is_empty() {
-            // No `$app/*` imports at all — definitely not a SvelteKit routing context.
-            return;
-        }
-
+        // Link checks also apply when a file imports only types or components.
         walk_template_nodes(&ctx.ast.html, &mut |node| {
             if let TemplateNode::Element(el) = node {
                 if el.name != "a" {
@@ -209,6 +208,171 @@ impl Rule for NoNavigationWithoutResolve {
     }
 }
 
+/// Upstream's rule conditions accept Kit 1/2. Prefer installed dependencies,
+/// then a declared major for fixtures and projects without node_modules.
+fn kit_version_is_eligible(filename: Option<&str>) -> bool {
+    let Some(filename) = filename else {
+        return true;
+    };
+    let mut directory = std::path::Path::new(filename).parent();
+    while let Some(dir) = directory {
+        for (path, installed) in [
+            (dir.join("node_modules/@sveltejs/kit/package.json"), true),
+            (dir.join("package.json"), false),
+        ] {
+            let Some(package) = std::fs::read_to_string(path)
+                .ok()
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+            else {
+                continue;
+            };
+            let version = if installed {
+                package.get("version")
+            } else {
+                ["dependencies", "devDependencies", "peerDependencies"]
+                    .iter()
+                    .find_map(|section| package.get(section)?.get("@sveltejs/kit"))
+            };
+            if let Some(major) = version.and_then(|v| v.as_str()).and_then(|s| {
+                s.trim_start_matches(['^', '~', '=', ' '])
+                    .split('.')
+                    .next()?
+                    .parse::<u32>()
+                    .ok()
+            }) {
+                return major == 1 || major == 2;
+            }
+        }
+        directory = dir.parent();
+    }
+    true
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter};
+    use crate::parser;
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-navigation-without-resolve")
+            .collect()
+    }
+
+    #[test]
+    fn navigation_reports_the_first_argument() {
+        let source = r#"<!-- 😀 -->
+<script data-note=">">
+import { goto as go, pushState } from '$app/navigation';
+import * as nav from '$app/navigation';
+go('/jobs');
+pushState(`/jobs/${id}`, {});
+nav.replaceState(url, {});
+</script>"#;
+        let diagnostics = lint(source);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .map(|d| &source[d.span.start as usize..d.span.end as usize])
+                .collect::<Vec<_>>(),
+            ["'/jobs'", "`/jobs/${id}`", "url"]
+        );
+    }
+
+    #[test]
+    fn nullish_values_are_safe_but_string_interpolation_is_not() {
+        let source = r#"<script lang="ts">
+            interface Props { missing: undefined; empty: null; }
+            const { missing, empty }: Props = $props();
+        </script>
+        <a href={missing}>missing</a><a href={empty}>empty</a>
+        <a href={`${undefined}`}>string</a><a href={`${null}`}>string</a>
+        <a href={`custom:${missing}`}>absolute</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 2);
+        for diagnostic in diagnostics {
+            let attribute = &source[diagnostic.span.start as usize..diagnostic.span.end as usize];
+            assert!(attribute == "href={`${undefined}`}" || attribute == "href={`${null}`}");
+        }
+    }
+
+    #[test]
+    fn branches_must_each_meet_the_navigation_policy() {
+        let source = r#"<script>
+            import { goto, pushState } from '$app/navigation';
+            import { resolve } from '$app/paths';
+            const resolved = resolve('/jobs');
+            goto(flag ? resolved : resolved);
+            goto(flag ? resolved : '/jobs');
+            goto(flag ? resolved : '');
+            pushState(flag ? resolved : '', {});
+            pushState(flag ? resolved : 'https://example.com', {});
+        </script>
+        <a href={flag ? resolved : '#jobs'}>safe</a>
+        <a href={flag ? resolved : '/jobs'}>unsafe</a>
+        <a href={'#jobs' - 1}>unsafe operator</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 5);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .filter(|d| d.message.contains("href"))
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn pathname_types_follow_import_identity_and_scope() {
+        let source = r#"<script lang="ts">
+            import { goto, pushState } from '$app/navigation';
+            import type { ResolvedPathname as Resolved, Pathname } from '$app/types';
+            import type { ResolvedPathname as Other } from './other';
+            type Alias = Resolved;
+            function accepted(href: Alias) { goto(href); }
+            function wrong(href: Other) { goto(href); }
+            function unresolved(href: Pathname) { goto(href); }
+            function shadowed() {
+                type Resolved = string;
+                function local(href: Resolved) { goto(href); }
+            }
+            interface Props { good: Resolved; maybe?: Resolved; }
+            const { good, maybe }: Props = $props();
+            goto(good);
+            goto(maybe);
+            pushState(maybe, {});
+        </script>
+        <a href={good}>safe</a><a href={maybe}>safe</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 5);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .filter(|d| d.message.contains("pushState"))
+                .count(),
+            1
+        );
+        assert!(diagnostics.iter().all(|d| !d.message.contains("href")));
+    }
+
+    #[test]
+    fn nullable_pathname_types_are_allowed_only_for_links() {
+        let source = r#"<script lang="ts">
+            import { goto } from '$app/navigation';
+            import type { ResolvedPathname } from '$app/types';
+            let href: ResolvedPathname | null = null;
+            goto(href);
+        </script><a {href}>safe</a>"#;
+        assert_eq!(lint(source).len(), 1);
+    }
+}
+
 fn is_nav_ignored(
     name: &str,
     ignore_goto: bool,
@@ -224,13 +388,12 @@ fn is_nav_ignored(
 }
 
 fn is_exempt_href(s: &str) -> bool {
-    s.is_empty()
-        || s.starts_with("http://")
-        || s.starts_with("https://")
-        || s.starts_with("mailto:")
-        || s.starts_with("tel:")
-        || s.starts_with("//")
-        || s.starts_with('#')
+    s.is_empty() || is_absolute_url(s) || s.starts_with("//") || s.starts_with('#')
+}
+
+fn is_absolute_url(s: &str) -> bool {
+    s.split_once(':')
+        .is_some_and(|(scheme, _)| scheme.bytes().all(|b| b.is_ascii_alphabetic() || b == b'+'))
 }
 
 /// Compute the longest static string that `expr` is guaranteed to start with,
@@ -240,17 +403,31 @@ fn static_string_prefix(expr: &Expression<'_>) -> Option<String> {
     match expr {
         Expression::StringLiteral(l) => Some(l.value.to_string()),
         Expression::TemplateLiteral(t) => {
+            // Upstream treats a scheme in any quasi as an absolute URL.
+            if let Some(quasi) = t
+                .quasis
+                .iter()
+                .find(|q| is_absolute_url(q.value.raw.as_str()))
+            {
+                return Some(quasi.value.raw.to_string());
+            }
             let first = t.quasis.first()?;
-            Some(
-                first
-                    .value
-                    .cooked
-                    .as_deref()
-                    .unwrap_or(first.value.raw.as_str())
-                    .to_string(),
-            )
+            let prefix = first
+                .value
+                .cooked
+                .as_deref()
+                .unwrap_or(first.value.raw.as_str())
+                .to_string();
+            // An empty leading quasi says nothing about an interpolated value.
+            if prefix.is_empty() && !t.expressions.is_empty() {
+                None
+            } else {
+                Some(prefix)
+            }
         }
-        Expression::BinaryExpression(b) => {
+        Expression::BinaryExpression(b)
+            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
+        {
             let left = static_string_prefix(&b.left)?;
             // If left is a complete static string (no dynamic tail), try to
             // extend with right; otherwise left's prefix is already the answer.
@@ -360,16 +537,35 @@ fn is_safe_nav_arg<'a>(
     resolve_locals: &[String],
     semantic: &'a Semantic<'a>,
     seen: &mut FxHashSet<oxc::semantic::SymbolId>,
+    allow_empty: bool,
 ) -> bool {
-    if static_string_prefix(expr).is_some_and(|p| is_exempt_href(&p)) {
+    if allow_empty && matches!(expr, Expression::StringLiteral(l) if l.value.is_empty())
+        || allow_empty
+            && matches!(expr, Expression::TemplateLiteral(t) if t.expressions.is_empty() && t.quasis.iter().all(|q| q.value.raw.is_empty()))
+    {
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_nav_arg(
+                &c.consequent,
+                resolve_locals,
+                semantic,
+                &mut seen.clone(),
+                allow_empty,
+            ) && is_safe_nav_arg(
+                &c.alternate,
+                resolve_locals,
+                semantic,
+                &mut seen.clone(),
+                allow_empty,
+            )
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
-        Expression::NullLiteral(_) => true,
+        Expression::NullLiteral(_) => false,
         Expression::Identifier(id) => {
             if id.name == "undefined" {
-                return true;
+                return false;
             }
             let reference = semantic.scoping().get_reference(id.reference_id());
             let Some(sid) = reference.symbol_id() else {
@@ -377,6 +573,9 @@ fn is_safe_nav_arg<'a>(
             };
             if !seen.insert(sid) {
                 return false; // recursion guard
+            }
+            if symbol_has_allowed_type(semantic, sid, false) {
+                return true;
             }
             // Find the symbol's initializer.
             let decl_node_id = semantic.scoping().symbol_declaration(sid);
@@ -387,7 +586,9 @@ fn is_safe_nav_arg<'a>(
                     _ => None,
                 });
             match init {
-                Some(init_expr) => is_safe_nav_arg(init_expr, resolve_locals, semantic, seen),
+                Some(init_expr) => {
+                    is_safe_nav_arg(init_expr, resolve_locals, semantic, seen, allow_empty)
+                }
                 None => false,
             }
         }
@@ -424,6 +625,19 @@ fn is_safe_template_root<'a>(
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_template_root(
+                &c.consequent,
+                resolve_locals,
+                instance_sem,
+                &mut seen.clone(),
+            ) && is_safe_template_root(
+                &c.alternate,
+                resolve_locals,
+                instance_sem,
+                &mut seen.clone(),
+            )
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
         Expression::NullLiteral(_) => true,
         Expression::Identifier(id) => {
@@ -443,6 +657,9 @@ fn is_safe_template_root<'a>(
             let Some(sid) = scoping.find_binding(scoping.root_scope_id(), name.into()) else {
                 return false;
             };
+            if symbol_has_allowed_type(sem, sid, true) {
+                return true;
+            }
             let decl_node_id = scoping.symbol_declaration(sid);
             let init = std::iter::once(decl_node_id)
                 .chain(sem.nodes().ancestor_ids(decl_node_id))
@@ -460,6 +677,114 @@ fn is_safe_template_root<'a>(
     }
 }
 
+fn is_nullish_type(ty: &TSType<'_>) -> bool {
+    matches!(ty, TSType::TSNullKeyword(_) | TSType::TSUndefinedKeyword(_))
+}
+
+/// Get the annotation on a binding, including a property destructured from a
+/// typed object. Type references are resolved through their semantic symbols.
+fn symbol_type<'a>(
+    sem: &'a Semantic<'a>,
+    sid: oxc::semantic::SymbolId,
+) -> Option<(&'a TSType<'a>, bool)> {
+    let declaration = sem.scoping().symbol_declaration(sid);
+    let (pattern, annotation, optional) = std::iter::once(declaration)
+        .chain(sem.nodes().ancestor_ids(declaration))
+        .find_map(|id| match sem.nodes().kind(id) {
+            AstKind::VariableDeclarator(v) => Some((&v.id, v.type_annotation.as_ref(), false)),
+            AstKind::FormalParameter(p) => {
+                Some((&p.pattern, p.type_annotation.as_ref(), p.optional))
+            }
+            _ => None,
+        })?;
+    let ty = &annotation?.type_annotation;
+    let BindingPattern::ObjectPattern(pattern) = pattern else {
+        return Some((ty, optional));
+    };
+    let property = pattern.properties.iter().find(|p| matches!(&p.value, BindingPattern::BindingIdentifier(id) if id.symbol_id.get() == Some(sid)))?;
+    let name = property.key.static_name()?;
+    let members = match ty {
+        TSType::TSTypeLiteral(literal) => &literal.members,
+        TSType::TSTypeReference(reference) => {
+            let TSTypeName::IdentifierReference(id) = &reference.type_name else {
+                return None;
+            };
+            let type_sid = sem.scoping().get_reference(id.reference_id()).symbol_id()?;
+            let AstKind::TSInterfaceDeclaration(interface) =
+                sem.nodes().kind(sem.scoping().symbol_declaration(type_sid))
+            else {
+                return None;
+            };
+            &interface.body.body
+        }
+        _ => return None,
+    };
+    members.iter().find_map(|member| {
+        let TSSignature::TSPropertySignature(p) = member else {
+            return None;
+        };
+        if p.key.static_name().as_deref() != Some(name.as_ref()) {
+            return None;
+        }
+        Some((&p.type_annotation.as_ref()?.type_annotation, p.optional))
+    })
+}
+
+fn symbol_has_allowed_type(
+    sem: &Semantic<'_>,
+    sid: oxc::semantic::SymbolId,
+    allow_nullish: bool,
+) -> bool {
+    symbol_type(sem, sid).is_some_and(|(ty, optional)| {
+        (!optional || allow_nullish)
+            && is_allowed_type(ty, sem, allow_nullish, &mut FxHashSet::default())
+    })
+}
+
+fn is_allowed_type(
+    ty: &TSType<'_>,
+    sem: &Semantic<'_>,
+    allow_nullish: bool,
+    seen: &mut FxHashSet<oxc::semantic::SymbolId>,
+) -> bool {
+    if allow_nullish && is_nullish_type(ty) {
+        return true;
+    }
+    match ty {
+        TSType::TSUnionType(union) => union
+            .types
+            .iter()
+            .all(|ty| is_allowed_type(ty, sem, allow_nullish, &mut seen.clone())),
+        TSType::TSTypeReference(reference) => {
+            let TSTypeName::IdentifierReference(id) = &reference.type_name else {
+                return false;
+            };
+            let Some(sid) = sem.scoping().get_reference(id.reference_id()).symbol_id() else {
+                return false;
+            };
+            if !seen.insert(sid) {
+                return false;
+            }
+            let declaration = sem.scoping().symbol_declaration(sid);
+            for node in std::iter::once(declaration).chain(sem.nodes().ancestor_ids(declaration)) {
+                match sem.nodes().kind(node) {
+                    AstKind::TSTypeAliasDeclaration(alias) => {
+                        return is_allowed_type(&alias.type_annotation, sem, allow_nullish, seen)
+                    }
+                    AstKind::ImportDeclaration(import) if import.source.value == "$app/types" => {
+                        return import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|specifier| {
+                            matches!(specifier, ImportDeclarationSpecifier::ImportSpecifier(s) if s.local.symbol_id.get() == Some(sid) && s.imported.name() == "ResolvedPathname")
+                        }));
+                    }
+                    _ => {}
+                }
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
 /// Safety check for an expression in the instance script (uses instance semantic
 /// for reference resolution).
 fn is_safe_instance_expr<'a>(
@@ -472,6 +797,10 @@ fn is_safe_instance_expr<'a>(
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_instance_expr(&c.consequent, resolve_locals, sem, &mut seen.clone())
+                && is_safe_instance_expr(&c.alternate, resolve_locals, sem, &mut seen.clone())
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
         Expression::NullLiteral(_) => true,
         Expression::Identifier(id) => {
@@ -486,6 +815,9 @@ fn is_safe_instance_expr<'a>(
             let Some(sid) = reference.symbol_id() else {
                 return false;
             };
+            if symbol_has_allowed_type(sem, sid, true) {
+                return true;
+            }
             let decl_node_id = sem.scoping().symbol_declaration(sid);
             let init = std::iter::once(decl_node_id)
                 .chain(sem.nodes().ancestor_ids(decl_node_id))

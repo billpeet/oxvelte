@@ -1,5 +1,6 @@
 # Build
 /target
+/scripts/upstream-parity/node_modules/
 
 # Vendor (cloned by prepare.sh)
 /vendor/

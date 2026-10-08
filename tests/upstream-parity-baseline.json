@@ -1,0 +1,209 @@
+{
+  "cases": {
+    "experimental-require-strict-events/invalid/no-strict-events01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "experimental-require-strict-events/valid/has-events-interface01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "experimental-require-strict-events/valid/has-events-type-alias01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "experimental-require-strict-events/valid/has-strict-events01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "experimental-require-strict-events/valid/no-typescript01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "experimental-require-strict-events/valid/script-module-context01-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "indent/invalid/declaration-tag-input.svelte": {
+      "version_skip": "dce4e4fcce2ff8a70c15854cad7af5ebee5e641f68910c9ad3f4c3ed0c76df69"
+    },
+    "indent/invalid/ts-v5/ts-import-assertion01-input.svelte": {
+      "version_skip": "198b80c15b54829100649a44517aefda1e7b68a34d10ed688d1a9f5f9eab5066"
+    },
+    "indent/invalid/ts-v5/ts-import-assertion03-input.svelte": {
+      "version_skip": "198b80c15b54829100649a44517aefda1e7b68a34d10ed688d1a9f5f9eab5066"
+    },
+    "indent/invalid/ts-v5/ts-import-assertion04-input.svelte": {
+      "version_skip": "198b80c15b54829100649a44517aefda1e7b68a34d10ed688d1a9f5f9eab5066"
+    },
+    "indent/valid/declaration-tag-input.svelte": {
+      "version_skip": "dce4e4fcce2ff8a70c15854cad7af5ebee5e641f68910c9ad3f4c3ed0c76df69"
+    },
+    "mustache-spacing/invalid/declaration-tag-input.svelte": {
+      "version_skip": "cf663011ac1149132681647835e8e7d4e8f247c148480d12a1042bad537ca39c"
+    },
+    "no-at-const-tags/invalid/const01-input.svelte": {
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
+    },
+    "no-at-const-tags/valid/declaration-tag-input.svelte": {
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
+    },
+    "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte": {
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
+    },
+    "no-inner-declarations/invalid/both/test01-input.svelte": {
+      "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
+    },
+    "no-inner-declarations/invalid/test01-input.svelte": {
+      "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
+    },
+    "no-inner-declarations/invalid/v8/both/test01-input.svelte": {
+      "version_skip": "e7fb23074757273334488c569c05c9fa6cb6906a0027d226efd467f00f3f55fe"
+    },
+    "no-inner-declarations/invalid/v8/test01-input.svelte": {
+      "version_skip": "e7fb23074757273334488c569c05c9fa6cb6906a0027d226efd467f00f3f55fe"
+    },
+    "no-unused-svelte-ignore/invalid/script-comment02-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "no-unused-svelte-ignore/valid/reactive-component-input.svelte": {
+      "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
+    },
+    "no-unused-svelte-ignore/valid/script-comment-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "no-unused-svelte-ignore/valid/style-lang01-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "no-unused-svelte-ignore/valid/style-lang02-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "no-unused-svelte-ignore/valid/style-lang03-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "no-unused-svelte-ignore/valid/style-lang04-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "no-unused-svelte-ignore/valid/style-lang05-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "no-unused-svelte-ignore/valid/style-lang06-input.svelte": {
+      "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
+    },
+    "require-event-dispatcher-types/invalid/import-alias01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "require-event-dispatcher-types/invalid/no-types01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "require-event-dispatcher-types/valid/has-types01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "require-event-dispatcher-types/valid/no-typescript01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "require-event-dispatcher-types/valid/non-svelte-dispatcher01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "require-store-reactive-access/invalid/calc01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/a11y01-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/dyamic-slot01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/invalid-svelte-ignore01-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/invalid-svelte-ignore02-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/invalid-svelte-ignore03-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/style-lang01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/style-without-global-01-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/svelte-config-custom-warn/a11y-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/svelte-config-onwarn/a11y-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/invalid/ts/enum01-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/ignore01-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/ignore02-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/script-comment-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore01-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore02-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore03-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore04-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore05-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore06-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte-ignore07-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-compile/valid/svelte3-options-custom-element-input.svelte": {
+      "version_skip": "65d8a4adc513b6eb5ab8babf06160e24af2f5dfd8cb878b2aefb38eac3dc524d"
+    },
+    "valid-compile/valid/ts/script-comment-svelte4-input.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/invalid/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/invalid/svelte-config/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/invalid/svelte4-children/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test001/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test002-1/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test002-2/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test003-1/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test003-2/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test004-1/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    },
+    "valid-prop-names-in-kit-pages/valid/test004-2/+page.svelte": {
+      "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
+    }
+  },
+  "manifestHash": "9cb1a959dc6557aa9c76c2b4059d049f9e478722e16b2e9c47e6f0f973213206",
+  "note": "Known gaps, not rewritten upstream expectations. Regenerate only after reviewing a full --report.",
+  "revision": "18339c886320151148568063c5801bf69cb51027",
+  "schema": 1
+}

@@ -13,6 +13,15 @@ pub struct LintDiagnostic {
     pub message: String,
     pub span: Span,
     pub fix: Option<Fix>,
+    /// Optional alternatives, in rule-defined order. Never applied automatically.
+    pub suggestions: Vec<Suggestion>,
+}
+
+/// A user-selected replacement, independent of automatic fixes and other suggestions.
+#[derive(Debug, Clone)]
+pub struct Suggestion {
+    pub description: String,
+    pub fix: Fix,
 }
 
 /// An auto-fix: replace a span of source text.
@@ -47,10 +56,24 @@ impl SvelteVersionInfo {
     pub fn is_unknown(&self) -> bool {
         self.dependency_ranges.is_empty()
     }
+
+    /// Whether every declared range alternative requires at least this release.
+    /// Unknown versions and ranges permitting older releases cannot enable a
+    /// migration whose resulting syntax needs a newer compiler.
+    pub fn guarantees_minimum_release(&self, release: (u32, u32, u32)) -> bool {
+        !self.dependency_ranges.is_empty()
+            && self.dependency_ranges.iter().all(|range| {
+                range
+                    .split("||")
+                    .all(|segment| range_segment_requires_release(segment, release))
+            })
+    }
 }
 
 /// Context provided to lint rules during execution.
 pub struct LintContext<'a> {
+    compiler: std::cell::OnceCell<Result<crate::compiler::CompileResult, String>>,
+    pub(crate) native_rule_names: Vec<&'static str>,
     pub ast: &'a SvelteAst<'a>,
     pub source: &'a str,
     pub config: RuleConfig,
@@ -91,6 +114,8 @@ pub struct LintContext<'a> {
 impl<'a> LintContext<'a> {
     pub fn new(ast: &'a SvelteAst<'a>, source: &'a str) -> Self {
         Self {
+            compiler: std::cell::OnceCell::new(),
+            native_rule_names: Vec::new(),
             ast,
             source,
             config: RuleConfig::default(),
@@ -110,6 +135,8 @@ impl<'a> LintContext<'a> {
 
     pub fn with_config(ast: &'a SvelteAst<'a>, source: &'a str, config: RuleConfig) -> Self {
         Self {
+            compiler: std::cell::OnceCell::new(),
+            native_rule_names: Vec::new(),
             ast,
             source,
             config,
@@ -135,6 +162,31 @@ impl<'a> LintContext<'a> {
         self.instance_semantic
     }
 
+    /// Compile once for both compiler rules. Comments are removed before
+    /// compilation, then their warning suppression is resolved against the
+    /// native template and script trees.
+    pub(crate) fn compiler_result(&self) -> Result<&crate::compiler::CompileResult, &str> {
+        self.compiler.get_or_init(|| {
+            let items = crate::compiler_ignore::items(self);
+            let mut settings = self.config.settings.clone().unwrap_or_else(|| serde_json::json!({}));
+            if !settings.is_object() { settings = serde_json::json!({}); }
+            settings["_oxvelteStripRanges"] = serde_json::json!(items.iter().map(|i| [i.token_span.start, i.token_span.end]).collect::<Vec<_>>());
+            settings["_oxvelteScripts"] = serde_json::json!(self.ast.instance.iter().chain(self.ast.module.iter()).map(|s| serde_json::json!({"start":s.content_span.start,"end":s.content_span.end,"lang":s.lang})).collect::<Vec<_>>());
+            settings["_oxvelteStyles"] = serde_json::json!(self.ast.css.iter().map(|s| serde_json::json!({"start":s.content_span.start,"end":s.content_span.end,"element_start":s.span.start,"element_end":s.span.end,"lang":s.lang})).collect::<Vec<_>>());
+            let mut custom_element = false;
+            walk_template_nodes(&self.ast.html, &mut |node| {
+                if let TemplateNode::Element(element) = node {
+                    if element.name == "svelte:options" && element.attributes.iter().any(|attr| matches!(attr, Attribute::NormalAttribute { name, .. } if name == "tag" || name == "customElement")) { custom_element = true; }
+                }
+            });
+            settings["_oxvelteCustomElement"] = serde_json::json!(custom_element);
+            let mut result = crate::compiler::compile(self.source, self.file_path.as_deref(), Some(&settings))?;
+            result.ignore_items = items.into_iter().filter(|item| item.code.as_ref().is_none_or(|code| !self.native_rule_names.iter().any(|name| rule_matches(name, std::slice::from_ref(code))))).collect();
+            crate::compiler_ignore::resolve(self, &mut result);
+            Ok(result)
+        }).as_ref().map_err(String::as_str)
+    }
+
     /// Content offset paired with `primary_semantic`.
     pub fn primary_content_offset(&self) -> u32 {
         self.instance_content_offset
@@ -147,6 +199,7 @@ impl<'a> LintContext<'a> {
             message: message.into(),
             span,
             fix: None,
+            suggestions: Vec::new(),
         });
     }
 
@@ -156,6 +209,34 @@ impl<'a> LintContext<'a> {
             message: message.into(),
             span,
             fix: Some(fix),
+            suggestions: Vec::new(),
+        });
+    }
+
+    /// Report optional alternatives without offering an automatic fix.
+    pub fn diagnostic_with_suggestions(
+        &mut self,
+        message: impl Into<String>,
+        span: Span,
+        suggestions: Vec<Suggestion>,
+    ) {
+        self.diagnostic_with_fix_and_suggestions(message, span, None, suggestions);
+    }
+
+    /// Report an automatic fix and independent, user-selected alternatives.
+    pub fn diagnostic_with_fix_and_suggestions(
+        &mut self,
+        message: impl Into<String>,
+        span: Span,
+        fix: Option<Fix>,
+        suggestions: Vec<Suggestion>,
+    ) {
+        self.diagnostics.push(LintDiagnostic {
+            rule_name: self.current_rule,
+            message: message.into(),
+            span,
+            fix,
+            suggestions,
         });
     }
 
@@ -585,6 +666,7 @@ impl Linter {
 
         let mut report_unused_svelte_ignore = false;
         let mut active_rule_names = Vec::new();
+        ctx.native_rule_names = self.rules.iter().map(|r| r.name()).collect();
         for rule in &self.rules {
             let include = match script_mode {
                 ScriptMode::Full => true,
@@ -753,6 +835,72 @@ fn svelte_version_info_from_package_json(content: &str) -> SvelteVersionInfo {
     SvelteVersionInfo { dependency_ranges }
 }
 
+/// Conservative lower-bound check for common npm dependency ranges. Unknown
+/// forms never enable a migration. Whitespace around comparison operators is
+/// accepted, but an upper bound is never mistaken for a minimum release.
+fn range_segment_requires_release(segment: &str, release: (u32, u32, u32)) -> bool {
+    let mut tokens = segment.split_whitespace();
+    let mut minimum = None;
+    while let Some(token) = tokens.next() {
+        let token = token.rsplit_once('@').map_or(token, |(_, version)| version);
+        let (upper, version) = if matches!(token, "<" | "<=") {
+            let Some(version) = tokens.next() else {
+                return false;
+            };
+            (true, version)
+        } else if matches!(token, ">" | ">=" | "^" | "~" | "=") {
+            let Some(version) = tokens.next() else {
+                return false;
+            };
+            (false, version)
+        } else if let Some(version) = token.strip_prefix("<=").or_else(|| token.strip_prefix('<')) {
+            (true, version)
+        } else {
+            (false, token.trim_start_matches(['^', '~', '=', '>']))
+        };
+        if version == "*" || version.eq_ignore_ascii_case("x") {
+            continue;
+        }
+        // Prereleases and unsupported range syntax need actual version resolution.
+        if version.contains('-') {
+            return false;
+        }
+        let version = version
+            .trim_start_matches('v')
+            .split('+')
+            .next()
+            .unwrap_or(version);
+        let mut parts = version.split('.');
+        let Some(major) = parts.next().and_then(|part| part.parse::<u32>().ok()) else {
+            return false;
+        };
+        let component = |part: &str| {
+            if part == "*" || part.eq_ignore_ascii_case("x") {
+                Some(0)
+            } else {
+                part.parse::<u32>().ok()
+            }
+        };
+        let (Some(minor), Some(patch)) = (
+            component(parts.next().unwrap_or("0")),
+            component(parts.next().unwrap_or("0")),
+        ) else {
+            return false;
+        };
+        if parts.next().is_some() {
+            return false;
+        }
+        if !upper {
+            minimum = Some(
+                minimum.map_or((major, minor, patch), |current: (u32, u32, u32)| {
+                    current.max((major, minor, patch))
+                }),
+            );
+        }
+    }
+    minimum.is_some_and(|minimum| minimum >= release)
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum RangeOp {
     Any,
@@ -764,7 +912,7 @@ enum RangeOp {
     LessThanOrEqual,
 }
 
-fn npm_range_may_include_major(range: &str, major: u8) -> bool {
+pub(crate) fn npm_range_may_include_major(range: &str, major: u8) -> bool {
     range
         .split("||")
         .any(|segment| npm_range_segment_may_include_major(segment, major))
@@ -1255,6 +1403,7 @@ fn filter_suppressed(
                 message: "svelte-ignore comment is used, but not warned".to_string(),
                 span: *span,
                 fix: None,
+                suggestions: Vec::new(),
             });
         }
     }
@@ -1340,5 +1489,41 @@ where
         if let Some(a) = &ib.alternate {
             walk_alt(a, visitor);
         }
+    }
+}
+
+#[cfg(test)]
+mod minimum_release_tests {
+    use super::svelte_version_info_from_package_json;
+
+    #[test]
+    fn migration_requires_a_known_minimum_compiler_release() {
+        for (range, expected) in [
+            ("5.49.2", false),
+            ("^5.49.2", false),
+            ("5.56.0", true),
+            ("^5.56.0", true),
+            (">=5.56.0 <6", true),
+            (">= 5.56.0 < 6", true),
+            ("< 6", false),
+            ("<=5.55.9", false),
+            ("5.x", false),
+            ("*", false),
+            ("5.56.x", true),
+            ("5.56.0 || 5.49.2", false),
+            ("5.56.0-beta.1", false),
+            ("latest", false),
+            ("npm:svelte@5.56.0", true),
+        ] {
+            let info = svelte_version_info_from_package_json(
+                &serde_json::json!({"dependencies":{"svelte":range}}).to_string(),
+            );
+            assert_eq!(
+                info.guarantees_minimum_release((5, 56, 0)),
+                expected,
+                "{range}"
+            );
+        }
+        assert!(!super::SvelteVersionInfo::default().guarantees_minimum_release((5, 56, 0)));
     }
 }

@@ -21,7 +21,43 @@ impl Rule for RequireOptimizedStyleAttribute {
                 if let Attribute::NormalAttribute { name, value, span } = attr {
                     if name == "style" {
                         if let Some(reason) = unoptimized_reason(value) {
-                            ctx.diagnostic(reason, *span);
+                            let raw = &ctx.source[span.start as usize..span.end as usize];
+                            let relative = if reason.contains("comments") {
+                                raw.find("/*").unwrap_or(0)
+                            } else if reason.contains("property of") {
+                                raw.match_indices('{')
+                                    .find_map(|(start, _)| {
+                                        let end =
+                                            super::style_declarations::expression_end(raw, start);
+                                        raw[end..].trim_start().starts_with(':').then_some(start)
+                                    })
+                                    .unwrap_or(0)
+                            } else {
+                                raw.match_indices('{')
+                                    .find_map(|(start, _)| {
+                                        let prefix = &raw[..start];
+                                        let last =
+                                            prefix.rsplit(';').next().unwrap_or(prefix).trim();
+                                        (!last.contains(':')).then_some(start)
+                                    })
+                                    .unwrap_or(0)
+                            };
+                            let end = if reason.contains("comments") {
+                                raw[relative + 2..]
+                                    .find("*/")
+                                    .map_or(raw.len(), |n| relative + n + 4)
+                            } else if raw.as_bytes().get(relative) == Some(&b'{') {
+                                super::style_declarations::expression_end(raw, relative)
+                            } else {
+                                raw.len()
+                            };
+                            ctx.diagnostic(
+                                reason,
+                                oxc::span::Span::new(
+                                    span.start + relative as u32,
+                                    span.start + end as u32,
+                                ),
+                            );
                         }
                     }
                 }
@@ -77,5 +113,36 @@ fn unoptimized_reason(value: &AttributeValue) -> Option<&'static str> {
             None
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn reports_comment_and_dynamic_property_spans_after_unicode() {
+        for (source, expected) in [
+            (
+                "<div title='é' style=\"color:{value}; /* é */ padding:0\"/>",
+                "/* é */",
+            ),
+            (
+                "<div title='é' style=\"color:{value}; {key}: red\"/>",
+                "{key}",
+            ),
+            (
+                "<div title='é' style=\"color:{value}; {styles}\"/>",
+                "{styles}",
+            ),
+        ] {
+            let allocator = oxc::allocator::Allocator::default();
+            let parsed = crate::parser::parse_for_lint(source, &allocator);
+            let mut ctx = LintContext::new(&parsed.ast, source);
+            RequireOptimizedStyleAttribute.run(&mut ctx);
+            let diagnostics = ctx.into_diagnostics();
+            assert_eq!(diagnostics.len(), 1);
+            let span = diagnostics[0].span;
+            assert_eq!(&source[span.start as usize..span.end as usize], expected);
+        }
     }
 }

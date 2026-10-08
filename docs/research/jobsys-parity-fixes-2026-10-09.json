@@ -1,0 +1,500 @@
+{
+  "date": "2026-10-09",
+  "oxvelteCommit": "5659611",
+  "jobSysCommit": "c48e736e90db287e405f9b11ebf549f546d2dc48",
+  "versions": {
+    "eslint": "10.9.1",
+    "eslint-plugin-svelte": "3.23.0",
+    "svelte": "5.57.2",
+    "@sveltejs/kit": "3.0.1",
+    "typescript": "6.0.3",
+    "@typescript-eslint/parser": "8.70.0",
+    "svelte-eslint-parser": "1.8.1"
+  },
+  "files": 990,
+  "fatalFiles": [
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "messages": [
+        {
+          "ruleId": null,
+          "fatal": true,
+          "severity": 2,
+          "message": "Parsing error: Expected JS Identifier, or MemberExpression, but CallExpression found.",
+          "line": 331,
+          "column": 11
+        }
+      ]
+    }
+  ],
+  "raw": {
+    "eslint": 1030,
+    "oxvelte": 1033
+  },
+  "comparable": {
+    "eslint": 1030,
+    "oxvelte": 1029,
+    "lineMatches": 1029,
+    "exactMatches": 1029,
+    "eslintOnly": 1,
+    "oxvelteOnly": 0
+  },
+  "rules": [
+    {
+      "rule": "svelte/no-at-html-tags",
+      "eslint": 11,
+      "oxvelte": 11,
+      "comparableESLint": 11,
+      "comparableOxvelte": 11,
+      "lineMatches": 11,
+      "exactMatches": 11,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-dom-manipulating",
+      "eslint": 4,
+      "oxvelte": 4,
+      "comparableESLint": 4,
+      "comparableOxvelte": 4,
+      "lineMatches": 4,
+      "exactMatches": 4,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-inspect",
+      "eslint": 2,
+      "oxvelte": 2,
+      "comparableESLint": 2,
+      "comparableOxvelte": 2,
+      "lineMatches": 2,
+      "exactMatches": 2,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-unnecessary-state-wrap",
+      "eslint": 8,
+      "oxvelte": 8,
+      "comparableESLint": 8,
+      "comparableOxvelte": 8,
+      "lineMatches": 8,
+      "exactMatches": 8,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-unused-props",
+      "eslint": 2,
+      "oxvelte": 2,
+      "comparableESLint": 2,
+      "comparableOxvelte": 2,
+      "lineMatches": 2,
+      "exactMatches": 2,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-unused-svelte-ignore",
+      "eslint": 39,
+      "oxvelte": 39,
+      "comparableESLint": 39,
+      "comparableOxvelte": 39,
+      "lineMatches": 39,
+      "exactMatches": 39,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-useless-children-snippet",
+      "eslint": 9,
+      "oxvelte": 9,
+      "comparableESLint": 9,
+      "comparableOxvelte": 9,
+      "lineMatches": 9,
+      "exactMatches": 9,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/no-useless-mustaches",
+      "eslint": 1,
+      "oxvelte": 1,
+      "comparableESLint": 1,
+      "comparableOxvelte": 1,
+      "lineMatches": 1,
+      "exactMatches": 1,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/prefer-svelte-reactivity",
+      "eslint": 181,
+      "oxvelte": 181,
+      "comparableESLint": 181,
+      "comparableOxvelte": 180,
+      "lineMatches": 180,
+      "exactMatches": 180,
+      "eslintOnly": 1,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/prefer-writable-derived",
+      "eslint": 36,
+      "oxvelte": 37,
+      "comparableESLint": 36,
+      "comparableOxvelte": 36,
+      "lineMatches": 36,
+      "exactMatches": 36,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/require-each-key",
+      "eslint": 735,
+      "oxvelte": 737,
+      "comparableESLint": 735,
+      "comparableOxvelte": 735,
+      "lineMatches": 735,
+      "exactMatches": 735,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    },
+    {
+      "rule": "svelte/valid-prop-names-in-kit-pages",
+      "eslint": 2,
+      "oxvelte": 2,
+      "comparableESLint": 2,
+      "comparableOxvelte": 2,
+      "lineMatches": 2,
+      "exactMatches": 2,
+      "eslintOnly": 0,
+      "oxvelteOnly": 0
+    }
+  ],
+  "excludedOxvelte": [
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/require-each-key",
+      "line": 300,
+      "col": 3,
+      "endLine": 373,
+      "endCol": 10,
+      "message": "Each block should have a key",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/require-each-key",
+      "line": 377,
+      "col": 4,
+      "endLine": 411,
+      "endCol": 11,
+      "message": "Each block should have a key",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/prefer-writable-derived",
+      "line": 56,
+      "col": 6,
+      "endLine": 56,
+      "endCol": 40,
+      "message": "Prefer using writable $derived instead of $state and $effect",
+      "severity": 2
+    },
+    {
+      "file": "src/lib/components/controls/AttachmentGallery.svelte",
+      "rule": "svelte/prefer-svelte-reactivity",
+      "line": 134,
+      "col": 19,
+      "endLine": 134,
+      "endCol": 41,
+      "message": "Found a mutable instance of the built-in Set class. Use SvelteSet instead.",
+      "severity": 2
+    }
+  ],
+  "eslintRun": {
+    "seconds": 274.3421765,
+    "files": 990,
+    "groups": 1
+  },
+  "oxvelteRun": {
+    "seconds": 34.2471299,
+    "files": 990
+  },
+  "differences": {
+    "eslintOnly": [
+      {
+        "file": "src/lib/url-params.svelte.ts",
+        "rule": "svelte/prefer-svelte-reactivity",
+        "line": 41,
+        "col": 16,
+        "endLine": 41,
+        "endCol": 33,
+        "message": "Found a mutable instance of the built-in Set class. Use SvelteSet instead.",
+        "severity": 2
+      }
+    ],
+    "oxvelteOnly": [],
+    "diagnosticDifferences": [
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 44,
+          "endLine": 24,
+          "endCol": 46,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 90,
+          "endLine": 24,
+          "endCol": 97,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 47,
+          "endLine": 24,
+          "endCol": 54,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 86,
+          "endLine": 24,
+          "endCol": 89,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 55,
+          "endLine": 24,
+          "endCol": 64,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 81,
+          "endLine": 24,
+          "endCol": 85,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 65,
+          "endLine": 24,
+          "endCol": 70,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 74,
+          "endLine": 24,
+          "endCol": 80,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 74,
+          "endLine": 24,
+          "endCol": 80,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 65,
+          "endLine": 24,
+          "endCol": 70,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 81,
+          "endLine": 24,
+          "endCol": 85,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 55,
+          "endLine": 24,
+          "endCol": 64,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 86,
+          "endLine": 24,
+          "endCol": 89,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 47,
+          "endLine": 24,
+          "endCol": 54,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      },
+      {
+        "eslint": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 90,
+          "endLine": 24,
+          "endCol": 97,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        },
+        "oxvelte": {
+          "file": "src/routes/design-dash/ExpandableSection.svelte",
+          "rule": "svelte/no-unused-svelte-ignore",
+          "line": 24,
+          "col": 44,
+          "endLine": 24,
+          "endCol": 46,
+          "message": "svelte-ignore comment is used, but not warned",
+          "severity": 2
+        }
+      }
+    ]
+  },
+  "referenceDuplicate": {
+    "file": "src/lib/url-params.svelte.ts",
+    "line": 41,
+    "rule": "svelte/prefer-svelte-reactivity",
+    "eslintCount": 2,
+    "oxvelteCount": 1,
+    "explanation": "Both identical reference entries correspond to the same new Set<string>() expression. Oxvelte reports it once."
+  },
+  "validation": {
+    "localRegressionFixtures": 16,
+    "referenceCheckedUnusedPropFixtures": 10,
+    "libraryTests": 586,
+    "cliTests": 1,
+    "parserContractTests": 9,
+    "adapterTests": 13,
+    "primary": {
+      "pass": 1232,
+      "gaps": 0,
+      "versionSkip": 67
+    },
+    "matrix": {
+      "modern": {
+        "environment": {
+          "@typescript-eslint/parser": "8.70.0",
+          "eslint": "10.9.1",
+          "svelte": "5.56.0",
+          "svelte-eslint-parser": "1.8.1",
+          "typescript": "6.0.3"
+        },
+        "totals": {
+          "gaps": 0,
+          "pass": 1238,
+          "versionSkip": 61
+        }
+      },
+      "svelte4": {
+        "environment": {
+          "@typescript-eslint/parser": "8.70.0",
+          "eslint": "9.39.1",
+          "svelte": "4.2.20",
+          "svelte-eslint-parser": "1.8.1",
+          "typescript": "5.9.3"
+        },
+        "totals": {
+          "gaps": 0,
+          "pass": 1013,
+          "versionSkip": 286
+        }
+      },
+      "legacyparser": {
+        "environment": {
+          "@typescript-eslint/parser": "6.10.0",
+          "eslint": "8.57.1",
+          "svelte": "4.2.20",
+          "svelte-eslint-parser": "1.8.1",
+          "typescript": "5.2.2"
+        },
+        "totals": {
+          "gaps": 0,
+          "pass": 1013,
+          "versionSkip": 286
+        }
+      },
+      "svelte3": {
+        "environment": {
+          "@typescript-eslint/parser": "6.10.0",
+          "eslint": "8.57.1",
+          "svelte": "3.59.2",
+          "svelte-eslint-parser": "1.8.1",
+          "typescript": "5.2.2"
+        },
+        "totals": {
+          "gaps": 0,
+          "pass": 1006,
+          "versionSkip": 293
+        }
+      }
+    }
+  },
+  "binaryBuild": "release"
+}

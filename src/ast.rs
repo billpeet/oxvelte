@@ -337,8 +337,27 @@ pub struct DebugTag<'a> {
     pub _phantom: PhantomData<&'a ()>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TemplateDeclarationKind {
+    Const,
+    Let,
+}
+impl TemplateDeclarationKind {
+    pub fn keyword(self) -> &'static str {
+        match self {
+            Self::Const => "const",
+            Self::Let => "let",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ConstTag<'a> {
+    /// Declaration body without the `const` keyword, shared by legacy
+    /// `{@const ...}`, modern `{const ...}` and `{let ...}` tags. The source at `span`
+    /// distinguishes their syntax; `declaration_span` always covers the body.
+    #[serde(skip)]
+    pub kind: TemplateDeclarationKind,
     pub declaration: String,
     pub span: Span,
     #[serde(skip)]

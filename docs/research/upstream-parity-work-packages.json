@@ -1,0 +1,976 @@
+{
+  "schema": 1,
+  "baseCommit": "aa9b3ea",
+  "revision": "18339c886320151148568063c5801bf69cb51027",
+  "manifestHash": "85ef4366dc7164c1245e7536d673e20e0598adab48783c3986615f40136c34f2",
+  "totals": {
+    "pass": 762,
+    "gaps": 473,
+    "versionSkip": 64
+  },
+  "note": "Frozen dispatch inventory; see upstream-parity-parallel-plan.md. Counts describe assigned cases, not guaranteed closures. Baseline and generated reports belong to the coordinator. Foundations have no exclusive case ownership.",
+  "foundations": [
+    {
+      "id": "foundation-suggestions",
+      "dependsOn": [],
+      "ownedFiles": [
+        "src/linter/mod.rs",
+        "src/main.rs",
+        "tests/support/parity.rs",
+        "tests/upstream_parity.rs",
+        "tests/upstream_adapter.rs",
+        "scripts/summarize-parity.mjs",
+        "scripts/summarize-parity.test.mjs"
+      ]
+    },
+    {
+      "id": "foundation-parser",
+      "dependsOn": [],
+      "ownedFiles": [
+        "src/parser/",
+        "src/ast.rs"
+      ],
+      "note": "Coordinate any required src/lib.rs, linter/mod.rs or runner edits with their current owner."
+    },
+    {
+      "id": "foundation-compiler",
+      "dependsOn": [
+        "foundation-suggestions",
+        "foundation-parser",
+        "decision-compiler"
+      ],
+      "ownedFiles": [],
+      "note": "Research the integration contract first; reserve shared runtime and runner files only after design review."
+    }
+  ],
+  "packages": [
+    {
+      "id": "navigation-base",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-navigation-without-base",
+        "no-goto-without-base"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_navigation_without_base.rs",
+        "src/linter/rules/no_goto_without_base.rs"
+      ],
+      "gapCount": 18,
+      "caseIds": [
+        "no-goto-without-base/invalid/aliased-goto01-input.svelte",
+        "no-goto-without-base/invalid/base-not-prefixed01-input.svelte",
+        "no-goto-without-base/invalid/no-base01-input.svelte",
+        "no-navigation-without-base/invalid/goto-aliased01-input.svelte",
+        "no-navigation-without-base/invalid/goto-base-not-as-prefix01-input.svelte",
+        "no-navigation-without-base/invalid/goto-namespace-import01-input.svelte",
+        "no-navigation-without-base/invalid/goto-no-base01-input.svelte",
+        "no-navigation-without-base/invalid/link-base-not-as-prefix01-input.svelte",
+        "no-navigation-without-base/invalid/link-no-base01-input.svelte",
+        "no-navigation-without-base/invalid/link-with-fragment01-input.svelte",
+        "no-navigation-without-base/invalid/pushState-aliased01-input.svelte",
+        "no-navigation-without-base/invalid/pushState-base-not-as-prefix01-input.svelte",
+        "no-navigation-without-base/invalid/pushState-namespace-import01-input.svelte",
+        "no-navigation-without-base/invalid/pushState-no-base01-input.svelte",
+        "no-navigation-without-base/invalid/replaceState-aliased01-input.svelte",
+        "no-navigation-without-base/invalid/replaceState-base-not-as-prefix01-input.svelte",
+        "no-navigation-without-base/invalid/replaceState-namespace-import01-input.svelte",
+        "no-navigation-without-base/invalid/replaceState-no-base01-input.svelte"
+      ]
+    },
+    {
+      "id": "duplicate-directives",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-dupe-on-directives",
+        "no-dupe-use-directives"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_dupe_on_directives.rs",
+        "src/linter/rules/no_dupe_use_directives.rs"
+      ],
+      "gapCount": 9,
+      "caseIds": [
+        "no-dupe-on-directives/invalid/inline-expression-input.svelte",
+        "no-dupe-on-directives/invalid/modifier-input.svelte",
+        "no-dupe-on-directives/invalid/multiple-element-input.svelte",
+        "no-dupe-on-directives/invalid/test01-input.svelte",
+        "no-dupe-on-directives/invalid/test02-input.svelte",
+        "no-dupe-use-directives/invalid/inline-expression-input.svelte",
+        "no-dupe-use-directives/invalid/multiple-element-input.svelte",
+        "no-dupe-use-directives/invalid/test01-input.svelte",
+        "no-dupe-use-directives/invalid/test02-input.svelte"
+      ]
+    },
+    {
+      "id": "kit-load-exports",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-export-load-in-svelte-module-in-kit-pages"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_export_load_in_svelte_module_in_kit_pages.rs"
+      ],
+      "gapCount": 4,
+      "caseIds": [
+        "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte",
+        "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config/test01/+page.svelte",
+        "no-export-load-in-svelte-module-in-kit-pages/invalid/test01/+page.svelte",
+        "no-export-load-in-svelte-module-in-kit-pages/invalid/test02/+page.svelte"
+      ]
+    },
+    {
+      "id": "style-analysis",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "consistent-selector-style",
+        "no-dupe-style-properties",
+        "no-shorthand-style-property-overrides",
+        "no-unknown-style-directive-property",
+        "valid-style-parse",
+        "require-optimized-style-attribute"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/consistent_selector_style.rs",
+        "src/linter/rules/no_dupe_style_properties.rs",
+        "src/linter/rules/no_shorthand_style_property_overrides.rs",
+        "src/linter/rules/no_unknown_style_directive_property.rs",
+        "src/linter/rules/valid_style_parse.rs",
+        "src/linter/rules/require_optimized_style_attribute.rs"
+      ],
+      "gapCount": 16,
+      "caseIds": [
+        "consistent-selector-style/invalid/id-class-type/should-be-id-combination01-input.svelte",
+        "consistent-selector-style/invalid/type-id-class/should-be-id-with-components01-input.svelte",
+        "consistent-selector-style/invalid/type-id-class/should-be-id01-input.svelte",
+        "consistent-selector-style/invalid/type-id-class/should-be-type-with-components01-input.svelte",
+        "consistent-selector-style/invalid/type-id-class/should-be-type01-input.svelte",
+        "no-dupe-style-properties/invalid/ternary01-input.svelte",
+        "no-dupe-style-properties/invalid/test01-input.svelte",
+        "no-shorthand-style-property-overrides/invalid/ternary01-input.svelte",
+        "no-shorthand-style-property-overrides/invalid/test01-input.svelte",
+        "no-unknown-style-directive-property/invalid/ignoreProperties/test01-input.svelte",
+        "no-unknown-style-directive-property/invalid/test01-input.svelte",
+        "require-optimized-style-attribute/invalid/comment01-input.svelte",
+        "require-optimized-style-attribute/invalid/key01-input.svelte",
+        "require-optimized-style-attribute/invalid/test01-input.svelte",
+        "valid-style-parse/invalid/invalid-css01-input.svelte",
+        "valid-style-parse/invalid/invalid-scss01-input.svelte"
+      ]
+    },
+    {
+      "id": "directive-preferences",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "prefer-class-directive",
+        "prefer-style-directive"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/prefer_class_directive.rs",
+        "src/linter/rules/prefer_style_directive.rs"
+      ],
+      "gapCount": 20,
+      "caseIds": [
+        "prefer-class-directive/invalid/empty/test01-input.svelte",
+        "prefer-class-directive/invalid/simple-test01-input.svelte",
+        "prefer-class-directive/invalid/svelte-element01-input.svelte",
+        "prefer-class-directive/invalid/test01-input.svelte",
+        "prefer-class-directive/invalid/test02-input.svelte",
+        "prefer-class-directive/invalid/test03-input.svelte",
+        "prefer-class-directive/invalid/transform-test01-input.svelte",
+        "prefer-class-directive/invalid/transform-test02-input.svelte",
+        "prefer-class-directive/invalid/trim-test01-input.svelte",
+        "prefer-class-directive/invalid/trim-test01.2-input.svelte",
+        "prefer-style-directive/invalid/complex-test01-input.svelte",
+        "prefer-style-directive/invalid/svelte-element01-input.svelte",
+        "prefer-style-directive/invalid/ternary01-input.svelte",
+        "prefer-style-directive/invalid/ternary02-input.svelte",
+        "prefer-style-directive/invalid/ternary03-input.svelte",
+        "prefer-style-directive/invalid/ternary04-input.svelte",
+        "prefer-style-directive/invalid/test01-input.svelte",
+        "prefer-style-directive/invalid/test02-input.svelte",
+        "prefer-style-directive/invalid/test03-input.svelte",
+        "prefer-style-directive/invalid/test04-input.svelte"
+      ]
+    },
+    {
+      "id": "text-layout",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "mustache-spacing",
+        "html-closing-bracket-new-line",
+        "max-lines-per-block",
+        "no-object-in-text-mustaches",
+        "no-useless-mustaches",
+        "valid-each-key",
+        "shorthand-attribute",
+        "shorthand-directive"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/mustache_spacing.rs",
+        "src/linter/rules/html_closing_bracket_new_line.rs",
+        "src/linter/rules/max_lines_per_block.rs",
+        "src/linter/rules/no_object_in_text_mustaches.rs",
+        "src/linter/rules/no_useless_mustaches.rs",
+        "src/linter/rules/valid_each_key.rs",
+        "src/linter/rules/shorthand_attribute.rs",
+        "src/linter/rules/shorthand_directive.rs"
+      ],
+      "gapCount": 21,
+      "caseIds": [
+        "html-closing-bracket-new-line/invalid/singleline-always/test01-input.svelte",
+        "max-lines-per-block/invalid/all-blocks-exceed/all01-input.svelte",
+        "max-lines-per-block/invalid/template-too-long/template01-input.svelte",
+        "mustache-spacing/invalid/always-after-expression/test01-input.svelte",
+        "mustache-spacing/invalid/snippet-render01-input.svelte",
+        "mustache-spacing/invalid/test01-input.svelte",
+        "no-object-in-text-mustaches/invalid/array01-input.svelte",
+        "no-object-in-text-mustaches/invalid/class01-input.svelte",
+        "no-object-in-text-mustaches/invalid/function01-input.svelte",
+        "no-object-in-text-mustaches/invalid/object01-input.svelte",
+        "no-useless-mustaches/invalid/comments01-input.svelte",
+        "no-useless-mustaches/invalid/escape-test01-input.svelte",
+        "no-useless-mustaches/invalid/invalid-test01-input.svelte",
+        "no-useless-mustaches/invalid/quote-test01-input.svelte",
+        "no-useless-mustaches/invalid/quote-test02-input.svelte",
+        "no-useless-mustaches/invalid/spaces-test01-input.svelte",
+        "no-useless-mustaches/invalid/tag-test01-input.svelte",
+        "shorthand-attribute/invalid/always/test01-input.svelte",
+        "shorthand-directive/invalid/always/test01-input.svelte",
+        "valid-each-key/invalid/const-key01-input.svelte",
+        "valid-each-key/invalid/out-vars-key01-input.svelte"
+      ]
+    },
+    {
+      "id": "reactivity-basic",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-reactive-reassign",
+        "prefer-const",
+        "no-dupe-else-if-blocks"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_reactive_reassign.rs",
+        "src/linter/rules/prefer_const.rs",
+        "src/linter/rules/no_dupe_else_if_blocks.rs"
+      ],
+      "gapCount": 10,
+      "caseIds": [
+        "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte",
+        "no-dupe-else-if-blocks/invalid/test01-input.svelte",
+        "no-dupe-else-if-blocks/invalid/test02-input.svelte",
+        "no-reactive-reassign/invalid/delete01-input.svelte",
+        "no-reactive-reassign/invalid/destructure01-input.svelte",
+        "no-reactive-reassign/invalid/member01-input.svelte",
+        "no-reactive-reassign/invalid/props-true01-input.svelte",
+        "prefer-const/invalid/option1/test01-input.svelte",
+        "prefer-const/invalid/option2/test01-input.svelte",
+        "prefer-const/invalid/test01-input.svelte"
+      ]
+    },
+    {
+      "id": "environment-imports",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-dom-manipulating",
+        "no-svelte-internal",
+        "no-top-level-browser-globals"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_dom_manipulating.rs",
+        "src/linter/rules/no_svelte_internal.rs",
+        "src/linter/rules/no_top_level_browser_globals.rs"
+      ],
+      "gapCount": 11,
+      "caseIds": [
+        "no-dom-manipulating/invalid/chain01-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal01-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal02-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal03-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal04-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal05-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal06-input.svelte",
+        "no-svelte-internal/invalid/no-svelte-internal07-input.svelte",
+        "no-top-level-browser-globals/invalid/guards03-input.svelte",
+        "no-top-level-browser-globals/invalid/guards08-input.svelte",
+        "no-top-level-browser-globals/invalid/in-template01-input.svelte"
+      ]
+    },
+    {
+      "id": "slot-types",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "experimental-require-slot-types"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/experimental_require_slot_types.rs"
+      ],
+      "gapCount": 1,
+      "caseIds": [
+        "experimental-require-slot-types/invalid/no-slot-types01-input.svelte"
+      ]
+    },
+    {
+      "id": "handler-checks",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-parser"
+      ],
+      "rules": [
+        "no-not-function-handler"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_not_function_handler.rs"
+      ],
+      "gapCount": 11,
+      "caseIds": [
+        "no-not-function-handler/invalid/array01-input.svelte",
+        "no-not-function-handler/invalid/class01-input.svelte",
+        "no-not-function-handler/invalid/object01-input.svelte",
+        "no-not-function-handler/invalid/string01-input.svelte",
+        "no-not-function-handler/invalid/svelte5/array01-input.svelte",
+        "no-not-function-handler/invalid/svelte5/class01-input.svelte",
+        "no-not-function-handler/invalid/svelte5/object01-input.svelte",
+        "no-not-function-handler/invalid/svelte5/string01-input.svelte",
+        "no-not-function-handler/invalid/svelte5/value01-input.svelte",
+        "no-not-function-handler/invalid/value01-input.svelte",
+        "no-not-function-handler/valid/bind01-input.svelte"
+      ]
+    },
+    {
+      "id": "store-rules",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-parser",
+        "foundation-suggestions"
+      ],
+      "rules": [
+        "require-store-reactive-access",
+        "prefer-destructured-store-props",
+        "require-store-callbacks-use-set-param",
+        "no-ignored-unsubscribe"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/require_store_reactive_access.rs",
+        "src/linter/rules/prefer_destructured_store_props.rs",
+        "src/linter/rules/require_store_callbacks_use_set_param.rs",
+        "src/linter/rules/no_ignored_unsubscribe.rs"
+      ],
+      "gapCount": 36,
+      "caseIds": [
+        "no-ignored-unsubscribe/invalid/test01-input.svelte",
+        "prefer-destructured-store-props/invalid/fixer-test01-input.svelte",
+        "prefer-destructured-store-props/invalid/member01-input.svelte",
+        "prefer-destructured-store-props/invalid/member02-input.svelte",
+        "prefer-destructured-store-props/invalid/member03-input.svelte",
+        "prefer-destructured-store-props/invalid/module-input.svelte",
+        "prefer-destructured-store-props/invalid/runes-with-store01-input.svelte",
+        "prefer-destructured-store-props/invalid/test01-input.svelte",
+        "prefer-destructured-store-props/invalid/test02-input.svelte",
+        "prefer-destructured-store-props/invalid/test03-input.svelte",
+        "require-store-callbacks-use-set-param/invalid/test01-input.svelte",
+        "require-store-callbacks-use-set-param/invalid/test02-input.svelte",
+        "require-store-reactive-access/invalid/attrs-store01-input.svelte",
+        "require-store-reactive-access/invalid/await01-input.svelte",
+        "require-store-reactive-access/invalid/call01-input.svelte",
+        "require-store-reactive-access/invalid/condition01-input.svelte",
+        "require-store-reactive-access/invalid/directives-store01-input.svelte",
+        "require-store-reactive-access/invalid/for-in01-input.svelte",
+        "require-store-reactive-access/invalid/for-of01-input.svelte",
+        "require-store-reactive-access/invalid/if-block01-input.svelte",
+        "require-store-reactive-access/invalid/if-statement01-input.svelte",
+        "require-store-reactive-access/invalid/import01-input.svelte",
+        "require-store-reactive-access/invalid/properties01-input.svelte",
+        "require-store-reactive-access/invalid/props-store01-input.svelte",
+        "require-store-reactive-access/invalid/spread01-input.svelte",
+        "require-store-reactive-access/invalid/svelte-component01-input.svelte",
+        "require-store-reactive-access/invalid/svelte-element01-input.svelte",
+        "require-store-reactive-access/invalid/switch01-input.svelte",
+        "require-store-reactive-access/invalid/tagged01-input.svelte",
+        "require-store-reactive-access/invalid/test01-input.svelte",
+        "require-store-reactive-access/invalid/ts/ts-class-directives01-input.svelte",
+        "require-store-reactive-access/invalid/ts/ts-i18n-input.svelte",
+        "require-store-reactive-access/invalid/ts/ts-if-block01-input.svelte",
+        "require-store-reactive-access/invalid/ts/ts-stores01-input.svelte",
+        "require-store-reactive-access/invalid/ts/ts-test01-input.svelte",
+        "require-store-reactive-access/valid/directives-store01-input.svelte"
+      ]
+    },
+    {
+      "id": "attribute-sorting",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-parser"
+      ],
+      "rules": [
+        "sort-attributes"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/sort_attributes.rs"
+      ],
+      "gapCount": 28,
+      "caseIds": [
+        "sort-attributes/invalid/alphabetical-test-input.svelte",
+        "sort-attributes/invalid/attach-tag-input.svelte",
+        "sort-attributes/invalid/default/class-test-input.svelte",
+        "sort-attributes/invalid/default/default-test01-input.svelte",
+        "sort-attributes/invalid/default/default-test01fix1-input.svelte",
+        "sort-attributes/invalid/default/default-test01fix2-input.svelte",
+        "sort-attributes/invalid/default/default-test01fix3-input.svelte",
+        "sort-attributes/invalid/default/default-test01fix4-input.svelte",
+        "sort-attributes/invalid/default/in-out-test-input.svelte",
+        "sort-attributes/invalid/default/let-test-input.svelte",
+        "sort-attributes/invalid/default/slot-test-input.svelte",
+        "sort-attributes/invalid/default/spread-test01-input.svelte",
+        "sort-attributes/invalid/default/spread-test02-input.svelte",
+        "sort-attributes/invalid/default/spread-test03-input.svelte",
+        "sort-attributes/invalid/default/style-ptops-test-input.svelte",
+        "sort-attributes/invalid/default/use-test-input.svelte",
+        "sort-attributes/invalid/ignore-no-order-test-input.svelte",
+        "sort-attributes/invalid/ignore-no-order-with-spread-test-input.svelte",
+        "sort-attributes/invalid/order/test01-input.svelte",
+        "sort-attributes/invalid/order/test01fix1-input.svelte",
+        "sort-attributes/invalid/order/test01fix2-input.svelte",
+        "sort-attributes/invalid/order/test01fix3-input.svelte",
+        "sort-attributes/invalid/order/test01fix4-input.svelte",
+        "sort-attributes/invalid/order/test01fix5-input.svelte",
+        "sort-attributes/invalid/order/test01fix6-input.svelte",
+        "sort-attributes/invalid/order/test01fix7-input.svelte",
+        "sort-attributes/valid/default/default-test01-input.svelte",
+        "sort-attributes/valid/order/test01-input.svelte"
+      ]
+    },
+    {
+      "id": "parser-dependent-rules",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-parser"
+      ],
+      "rules": [
+        "no-dynamic-slot-name",
+        "no-restricted-html-elements",
+        "no-spaces-around-equal-signs-in-attribute"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_dynamic_slot_name.rs",
+        "src/linter/rules/no_restricted_html_elements.rs",
+        "src/linter/rules/no_spaces_around_equal_signs_in_attribute.rs"
+      ],
+      "gapCount": 9,
+      "caseIds": [
+        "no-dynamic-slot-name/invalid/bool-slot01-input.svelte",
+        "no-dynamic-slot-name/invalid/literal-slot01-input.svelte",
+        "no-dynamic-slot-name/invalid/multi-report01-input.svelte",
+        "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte",
+        "no-dynamic-slot-name/invalid/var-slot01-input.svelte",
+        "no-restricted-html-elements/valid/array-input.svelte",
+        "no-restricted-html-elements/valid/object-input.svelte",
+        "no-spaces-around-equal-signs-in-attribute/invalid/test01-input.svelte",
+        "no-spaces-around-equal-signs-in-attribute/valid/test-01-input.svelte"
+      ]
+    },
+    {
+      "id": "block-language",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-suggestions"
+      ],
+      "rules": [
+        "block-lang"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/block_lang.rs"
+      ],
+      "gapCount": 51,
+      "caseIds": [
+        "block-lang/invalid/script/enforce/no-script01-input.svelte",
+        "block-lang/invalid/script/javascript/javascript-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/javascript/js01-input.svelte",
+        "block-lang/invalid/script/javascript/null01-input.svelte",
+        "block-lang/invalid/script/javascript/ts01-input.svelte",
+        "block-lang/invalid/script/javascript/typescript01-input.svelte",
+        "block-lang/invalid/script/js/javascript01-input.svelte",
+        "block-lang/invalid/script/js/js-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/js/null01-input.svelte",
+        "block-lang/invalid/script/js/ts01-input.svelte",
+        "block-lang/invalid/script/js/typescript01-input.svelte",
+        "block-lang/invalid/script/module-context/javascript01-input.svelte",
+        "block-lang/invalid/script/module-context/js01-input.svelte",
+        "block-lang/invalid/script/module-context/null01-input.svelte",
+        "block-lang/invalid/script/module-context/ts-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/module-context/typescript01-input.svelte",
+        "block-lang/invalid/script/multiple/javascript01-input.svelte",
+        "block-lang/invalid/script/multiple/js01-input.svelte",
+        "block-lang/invalid/script/multiple/null-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/multiple/ts-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/multiple/typescript-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/null/javascript01-input.svelte",
+        "block-lang/invalid/script/null/js01-input.svelte",
+        "block-lang/invalid/script/null/null-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/null/ts01-input.svelte",
+        "block-lang/invalid/script/null/typescript01-input.svelte",
+        "block-lang/invalid/script/shorthand/javascript01-input.svelte",
+        "block-lang/invalid/script/shorthand/js01-input.svelte",
+        "block-lang/invalid/script/shorthand/null01-input.svelte",
+        "block-lang/invalid/script/shorthand/ts-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/shorthand/typescript01-input.svelte",
+        "block-lang/invalid/script/ts/javascript01-input.svelte",
+        "block-lang/invalid/script/ts/js01-input.svelte",
+        "block-lang/invalid/script/ts/null01-input.svelte",
+        "block-lang/invalid/script/ts/ts-as-style-lang01-input.svelte",
+        "block-lang/invalid/script/ts/typescript01-input.svelte",
+        "block-lang/invalid/script/typescript/javascript01-input.svelte",
+        "block-lang/invalid/script/typescript/js01-input.svelte",
+        "block-lang/invalid/script/typescript/null01-input.svelte",
+        "block-lang/invalid/script/typescript/ts01-input.svelte",
+        "block-lang/invalid/script/typescript/typescript-as-style-lang01-input.svelte",
+        "block-lang/invalid/style/enforce/no-style01-input.svelte",
+        "block-lang/invalid/style/null/null-as-script-lang01-input.svelte",
+        "block-lang/invalid/style/null/sass01-input.svelte",
+        "block-lang/invalid/style/null/scss01-input.svelte",
+        "block-lang/invalid/style/sass/null01-input.svelte",
+        "block-lang/invalid/style/sass/sass-as-script-lang01-input.svelte",
+        "block-lang/invalid/style/sass/scss01-input.svelte",
+        "block-lang/invalid/style/scss/null01-input.svelte",
+        "block-lang/invalid/style/scss/sass01-input.svelte",
+        "block-lang/invalid/style/scss/scss-as-script-lang01-input.svelte"
+      ]
+    },
+    {
+      "id": "rune-suggestions",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-suggestions"
+      ],
+      "rules": [
+        "prefer-writable-derived",
+        "no-unnecessary-state-wrap",
+        "derived-has-same-inputs-outputs"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/prefer_writable_derived.rs",
+        "src/linter/rules/no_unnecessary_state_wrap.rs",
+        "src/linter/rules/derived_has_same_inputs_outputs.rs"
+      ],
+      "gapCount": 12,
+      "caseIds": [
+        "derived-has-same-inputs-outputs/invalid/test01-input.js",
+        "no-unnecessary-state-wrap/invalid/additional-class-input.svelte",
+        "no-unnecessary-state-wrap/invalid/allow-reassign-input.svelte",
+        "no-unnecessary-state-wrap/invalid/basic-input.svelte",
+        "no-unnecessary-state-wrap/invalid/import-alias-input.svelte",
+        "prefer-writable-derived/invalid/basic1-input.svelte",
+        "prefer-writable-derived/invalid/basic2-input.svelte",
+        "prefer-writable-derived/invalid/effect-pre1-input.svelte",
+        "prefer-writable-derived/invalid/effect-pre2-input.svelte",
+        "prefer-writable-derived/invalid/multiple-reassign1-input.svelte",
+        "prefer-writable-derived/invalid/multiple-reassign2-input.svelte",
+        "prefer-writable-derived/invalid/multiple-reassign3-input.svelte"
+      ]
+    },
+    {
+      "id": "other-suggestions",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-suggestions"
+      ],
+      "rules": [
+        "no-at-debug-tags",
+        "no-extra-reactive-curlies",
+        "no-reactive-functions",
+        "no-reactive-literals",
+        "no-add-event-listener"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_at_debug_tags.rs",
+        "src/linter/rules/no_extra_reactive_curlies.rs",
+        "src/linter/rules/no_reactive_functions.rs",
+        "src/linter/rules/no_reactive_literals.rs",
+        "src/linter/rules/no_add_event_listener.rs"
+      ],
+      "gapCount": 8,
+      "caseIds": [
+        "no-add-event-listener/invalid/test01-input.svelte",
+        "no-add-event-listener/invalid/typescript01-input.svelte",
+        "no-at-debug-tags/invalid/debug01-input.svelte",
+        "no-at-debug-tags/invalid/debug02-input.svelte",
+        "no-extra-reactive-curlies/invalid/test01-input.svelte",
+        "no-extra-reactive-curlies/invalid/test02-input.svelte",
+        "no-reactive-functions/invalid/test01-input.svelte",
+        "no-reactive-literals/invalid/test01-input.svelte"
+      ]
+    },
+    {
+      "id": "new-derived-rule",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "prefer-derived-over-derived-by"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/prefer_derived_over_derived_by.rs"
+      ],
+      "gapCount": 9,
+      "caseIds": [
+        "prefer-derived-over-derived-by/invalid/arrow-block-return-input.svelte",
+        "prefer-derived-over-derived-by/invalid/arrow-concise-input.svelte",
+        "prefer-derived-over-derived-by/invalid/function-expression-return-input.svelte",
+        "prefer-derived-over-derived-by/valid/arrow-with-params-input.svelte",
+        "prefer-derived-over-derived-by/valid/async-arrow-input.svelte",
+        "prefer-derived-over-derived-by/valid/conditional-return-input.svelte",
+        "prefer-derived-over-derived-by/valid/generator-function-input.svelte",
+        "prefer-derived-over-derived-by/valid/multi-statement-input.svelte",
+        "prefer-derived-over-derived-by/valid/plain-derived-input.svelte"
+      ],
+      "localOnlyFiles": [
+        "src/linter/rules/mod.rs"
+      ]
+    },
+    {
+      "id": "new-nested-style-rule",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-nested-style-tag"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_nested_style_tag.rs"
+      ],
+      "gapCount": 4,
+      "caseIds": [
+        "no-nested-style-tag/invalid/nested-in-element-input.svelte",
+        "no-nested-style-tag/invalid/nested-in-snippet-input.svelte",
+        "no-nested-style-tag/valid/no-style-input.svelte",
+        "no-nested-style-tag/valid/top-level-style-input.svelte"
+      ],
+      "localOnlyFiles": [
+        "src/linter/rules/mod.rs"
+      ]
+    },
+    {
+      "id": "new-const-tag-rule",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-at-const-tags"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_at_const_tags.rs"
+      ],
+      "gapCount": 3,
+      "caseIds": [
+        "no-at-const-tags/invalid/const01-input.svelte",
+        "no-at-const-tags/valid/declaration-tag-input.svelte",
+        "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte"
+      ],
+      "localOnlyFiles": [
+        "src/linter/rules/mod.rs"
+      ]
+    },
+    {
+      "id": "new-checkable-bind-rule",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "no-bind-value-on-checkable-inputs"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/no_bind_value_on_checkable_inputs.rs"
+      ],
+      "gapCount": 2,
+      "caseIds": [
+        "no-bind-value-on-checkable-inputs/invalid/checkbox-bind-value-input.svelte",
+        "no-bind-value-on-checkable-inputs/invalid/radio-bind-value-input.svelte"
+      ],
+      "localOnlyFiles": [
+        "src/linter/rules/mod.rs"
+      ]
+    },
+    {
+      "id": "new-interpolation-rule",
+      "status": "ready",
+      "dependsOn": [],
+      "rules": [
+        "prefer-attribute-interpolation"
+      ],
+      "ownedFiles": [
+        "src/linter/rules/prefer_attribute_interpolation.rs"
+      ],
+      "gapCount": 2,
+      "caseIds": [
+        "prefer-attribute-interpolation/invalid/template-literal-attribute-input.svelte",
+        "prefer-attribute-interpolation/valid/boundaries-input.svelte"
+      ],
+      "localOnlyFiles": [
+        "src/linter/rules/mod.rs"
+      ]
+    },
+    {
+      "id": "compiler-rules",
+      "status": "blocked",
+      "dependsOn": [
+        "foundation-compiler"
+      ],
+      "rules": [
+        "valid-compile",
+        "no-unused-svelte-ignore"
+      ],
+      "ownedFiles": [],
+      "gapCount": 90,
+      "caseIds": [
+        "no-unused-svelte-ignore/invalid/html-comment-input.svelte",
+        "no-unused-svelte-ignore/invalid/html-comment-svelte4-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-svelte4-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-svelte4-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-input.svelte",
+        "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-svelte4-input.svelte",
+        "no-unused-svelte-ignore/invalid/missing-code-input.svelte",
+        "no-unused-svelte-ignore/invalid/script-comment01-input.svelte",
+        "no-unused-svelte-ignore/invalid/script-comment01-svelte4-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang01-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang02-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang03-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang04-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang05-input.svelte",
+        "no-unused-svelte-ignore/invalid/style-lang06-input.svelte",
+        "no-unused-svelte-ignore/invalid/transform-test-input.svelte",
+        "no-unused-svelte-ignore/invalid/transform-test-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/element-ignore01-input.svelte",
+        "no-unused-svelte-ignore/valid/element-ignore01-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/has-error-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/html-comment-input.svelte",
+        "no-unused-svelte-ignore/valid/html-comment-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/ignore-js-input.js",
+        "no-unused-svelte-ignore/valid/kebab-ignore-input.svelte",
+        "no-unused-svelte-ignore/valid/script-comment-input.svelte",
+        "no-unused-svelte-ignore/valid/style-lang07-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore-comma-separated-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore-note-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore01-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore01-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore02-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore02-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore03-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore03-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore04-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore04-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore05-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore05-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore06-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore06-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore07-input.svelte",
+        "no-unused-svelte-ignore/valid/svelte-ignore07-svelte4-input.svelte",
+        "no-unused-svelte-ignore/valid/ts-lang01-input.svelte",
+        "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte",
+        "valid-compile/invalid/a11y01-input.svelte",
+        "valid-compile/invalid/custom_element_props_identifier-input.svelte",
+        "valid-compile/invalid/experimental-async-disabled/top-level-await-input.svelte",
+        "valid-compile/invalid/invalid-svelte-ignore01-input.svelte",
+        "valid-compile/invalid/invalid-svelte-ignore02-input.svelte",
+        "valid-compile/invalid/invalid-svelte-ignore03-input.svelte",
+        "valid-compile/invalid/style-without-global-02-input.svelte",
+        "valid-compile/invalid/svelte-config-custom-warn/a11y-input.svelte",
+        "valid-compile/invalid/svelte-config-onwarn/a11y-input.svelte",
+        "valid-compile/invalid/svelte-config-warning-filter/a11y-input.svelte",
+        "valid-compile/invalid/ts/enum01-input.svelte",
+        "valid-compile/valid/babel/babel-function-bind01-input.svelte",
+        "valid-compile/valid/babel/class01-input.svelte",
+        "valid-compile/valid/global-style-input.svelte",
+        "valid-compile/valid/ignore-warnings/enum01-input.svelte",
+        "valid-compile/valid/ignore01-input.svelte",
+        "valid-compile/valid/ignore02-input.svelte",
+        "valid-compile/valid/no-false-custom_element_props_identifier-warning-without-custom-element-input.svelte",
+        "valid-compile/valid/script-comment-input.svelte",
+        "valid-compile/valid/style-lang01-input.svelte",
+        "valid-compile/valid/style-lang02-input.svelte",
+        "valid-compile/valid/style-lang03-input.svelte",
+        "valid-compile/valid/svelte-config-experimental-async/top-level-await-input.svelte",
+        "valid-compile/valid/svelte-config-onwarn/a11y-input.svelte",
+        "valid-compile/valid/svelte-config-warning-filter/a11y-input.svelte",
+        "valid-compile/valid/svelte-ignore01-input.svelte",
+        "valid-compile/valid/svelte-ignore02-input.svelte",
+        "valid-compile/valid/svelte-ignore03-input.svelte",
+        "valid-compile/valid/svelte-ignore04-input.svelte",
+        "valid-compile/valid/svelte-ignore05-input.svelte",
+        "valid-compile/valid/svelte-ignore06-input.svelte",
+        "valid-compile/valid/svelte-ignore07-input.svelte",
+        "valid-compile/valid/svelte-options-custom-element-input.svelte",
+        "valid-compile/valid/test01-input.svelte",
+        "valid-compile/valid/ts/class01-input.svelte",
+        "valid-compile/valid/ts/script-comment-input.svelte",
+        "valid-compile/valid/ts/test01-input.svelte",
+        "valid-compile/valid/ts/ts-lang01-input.svelte",
+        "valid-compile/valid/ts/ts-unused-in-script-input.svelte",
+        "valid-compile/valid/ts/type-only-import01-input.svelte",
+        "valid-compile/valid/ts/type-only-import02-input.svelte",
+        "valid-compile/valid/undef01-input.svelte",
+        "valid-compile/valid/unuse01-input.svelte",
+        "valid-compile/valid/valid-custom-element-with-props-identifier-input.svelte"
+      ]
+    },
+    {
+      "id": "indent-scope",
+      "status": "blocked",
+      "dependsOn": [
+        "decision-indent"
+      ],
+      "rules": [
+        "indent"
+      ],
+      "ownedFiles": [],
+      "gapCount": 91,
+      "caseIds": [
+        "indent/invalid/4-indent/test01-input.svelte",
+        "indent/invalid/align-attributes-vertically/attrs01-input.svelte",
+        "indent/invalid/await01-input.svelte",
+        "indent/invalid/const-tag01-input.svelte",
+        "indent/invalid/deubg-tag01-input.svelte",
+        "indent/invalid/each01-input.svelte",
+        "indent/invalid/html-text01-input.svelte",
+        "indent/invalid/html-text02-input.svelte",
+        "indent/invalid/if01-input.svelte",
+        "indent/invalid/import-declaration01-input.svelte",
+        "indent/invalid/indent-script/indent-script-input.svelte",
+        "indent/invalid/key01-input.svelte",
+        "indent/invalid/script-array01-input.svelte",
+        "indent/invalid/script-binary01-input.svelte",
+        "indent/invalid/script-binary02-input.svelte",
+        "indent/invalid/script-binary03-input.svelte",
+        "indent/invalid/script-block01-input.svelte",
+        "indent/invalid/script-break01-input.svelte",
+        "indent/invalid/script-call01-input.svelte",
+        "indent/invalid/script-class01-input.svelte",
+        "indent/invalid/script-conditional01-input.svelte",
+        "indent/invalid/script-do-while01-input.svelte",
+        "indent/invalid/script-export01-input.svelte",
+        "indent/invalid/script-export02-input.svelte",
+        "indent/invalid/script-expr01-input.svelte",
+        "indent/invalid/script-for01-input.svelte",
+        "indent/invalid/script-function01-input.svelte",
+        "indent/invalid/script-if01-input.svelte",
+        "indent/invalid/script-import01-input.svelte",
+        "indent/invalid/script-import02-input.svelte",
+        "indent/invalid/script-member01-input.svelte",
+        "indent/invalid/script-methods01-input.svelte",
+        "indent/invalid/script-prop01-input.svelte",
+        "indent/invalid/script-switch01-input.svelte",
+        "indent/invalid/script-try01-input.svelte",
+        "indent/invalid/script-unary01-input.svelte",
+        "indent/invalid/script-yield-expression01-input.svelte",
+        "indent/invalid/snippets01-input.svelte",
+        "indent/invalid/style-directive01-input.svelte",
+        "indent/invalid/switch-case/script-switch01-input.svelte",
+        "indent/invalid/tab-indent/test01-input.svelte",
+        "indent/invalid/tab-indent/test02-input.svelte",
+        "indent/invalid/test01-input.svelte",
+        "indent/invalid/ts-v5/ts-abstract-accessor-property-input.svelte",
+        "indent/invalid/ts-v5/ts-accessor-property01-input.svelte",
+        "indent/invalid/ts-v5/ts-accessor-property02-input.svelte",
+        "indent/invalid/ts-v5/ts-accessor-property03-input.svelte",
+        "indent/invalid/ts-v5/ts-accessor-property04-input.svelte",
+        "indent/invalid/ts-v5/ts-accessor-property05-input.svelte",
+        "indent/invalid/ts-v5/ts-import-assertion02-input.svelte",
+        "indent/invalid/ts-v5/ts-import-attributes01-input.svelte",
+        "indent/invalid/ts-v5/ts-import-attributes02-input.svelte",
+        "indent/invalid/ts-v5/ts-import-attributes03-input.svelte",
+        "indent/invalid/ts-v5/ts-import-attributes04-input.svelte",
+        "indent/invalid/ts-v5/ts-instantiation-expression01-input.svelte",
+        "indent/invalid/ts-v5/ts-satisfies-operators01-input.svelte",
+        "indent/invalid/ts/ts-class01-input.svelte",
+        "indent/invalid/ts/ts-class02-input.svelte",
+        "indent/invalid/ts/ts-class03-input.svelte",
+        "indent/invalid/ts/ts-conditional-type01-input.svelte",
+        "indent/invalid/ts/ts-d-ts-eslint-input.svelte",
+        "indent/invalid/ts/ts-decorator01-input.svelte",
+        "indent/invalid/ts/ts-decorator02-input.svelte",
+        "indent/invalid/ts/ts-enum01-input.svelte",
+        "indent/invalid/ts/ts-function01-input.svelte",
+        "indent/invalid/ts/ts-function02-input.svelte",
+        "indent/invalid/ts/ts-import-export01-input.svelte",
+        "indent/invalid/ts/ts-import-type01-input.svelte",
+        "indent/invalid/ts/ts-interface01-input.svelte",
+        "indent/invalid/ts/ts-interface02-input.svelte",
+        "indent/invalid/ts/ts-interface03-input.svelte",
+        "indent/invalid/ts/ts-static-block01-input.svelte",
+        "indent/invalid/ts/ts-template-literal-type01-input.svelte",
+        "indent/invalid/ts/ts-type-annotation01-input.svelte",
+        "indent/invalid/ts/ts-type-annotation02-input.svelte",
+        "indent/invalid/ts/ts-type-annotation03-input.svelte",
+        "indent/invalid/ts/ts-type-only-import-export01-input.svelte",
+        "indent/invalid/ts/ts-type-only-import-export02-input.svelte",
+        "indent/invalid/ts/ts-type-only-import-export03-input.svelte",
+        "indent/invalid/ts/ts-type-parameters01-input.svelte",
+        "indent/invalid/ts/ts-type-parameters02-input.svelte",
+        "indent/invalid/ts/ts-types01-input.svelte",
+        "indent/invalid/ts/ts-types02-input.svelte",
+        "indent/invalid/ts/ts-types03-input.svelte",
+        "indent/invalid/ts/ts-union01-input.svelte",
+        "indent/invalid/ts/ts-union02-input.svelte",
+        "indent/valid/indent-script-input.svelte",
+        "indent/valid/inline-style-tag-input.svelte",
+        "indent/valid/pug01-input.svelte",
+        "indent/valid/test01-input.svelte",
+        "indent/valid/ts/ts-import-type01-input.svelte"
+      ]
+    },
+    {
+      "id": "typescript-integration",
+      "status": "blocked",
+      "dependsOn": [
+        "decision-typescript"
+      ],
+      "rules": [
+        "@typescript-eslint/no-unnecessary-condition"
+      ],
+      "ownedFiles": [],
+      "gapCount": 7,
+      "caseIds": [
+        "@typescript-eslint/no-unnecessary-condition/invalid/binary-expression01-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/invalid/example-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/invalid/nullish-coalescing01-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/invalid/optional-chaining01-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/invalid/test01-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/valid/reactive-statement01-input.svelte",
+        "@typescript-eslint/no-unnecessary-condition/valid/template01-input.svelte"
+      ]
+    }
+  ],
+  "versionSkipCounts": {
+    "experimental-require-strict-events": 6,
+    "indent": 5,
+    "mustache-spacing": 1,
+    "no-inner-declarations": 4,
+    "no-unused-svelte-ignore": 9,
+    "require-event-dispatcher-types": 5,
+    "require-store-reactive-access": 1,
+    "valid-compile": 22,
+    "valid-prop-names-in-kit-pages": 11
+  },
+  "decisions": [
+    {
+      "id": "decision-compiler",
+      "researchFile": "docs/research/parity-compiler-integration.md",
+      "completion": "Specify compiler version/runtime, deployment and suppression contract, supported executable configs, validation strategy and downstream file ownership before implementation."
+    },
+    {
+      "id": "decision-indent",
+      "researchFile": "docs/research/parity-indent-scope.md",
+      "completion": "Record the product scope decision; keep unsupported cases explicit until implementation is authorized."
+    },
+    {
+      "id": "decision-typescript",
+      "researchFile": "docs/research/parity-typescript-integration.md",
+      "completion": "Specify type-aware template integration, host responsibility and validation strategy before implementation."
+    }
+  ]
+}

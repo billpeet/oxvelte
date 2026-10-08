@@ -2,6 +2,8 @@
 //! ⭐ Recommended
 
 use crate::linter::{LintContext, Rule};
+use oxc::ast::{ast::Expression, AstKind};
+use oxc::span::{GetSpan, Span};
 use std::collections::HashSet;
 
 pub struct NoUnusedProps;
@@ -34,32 +36,38 @@ impl Rule for NoUnusedProps {
             return;
         }
         let content = &script.content;
-        let base = script.span.start as usize;
-        let source = ctx.source;
-        let tag_text = &source[base..script.span.end as usize];
-        let content_offset = tag_text.find('>').map(|p| base + p + 1).unwrap_or(base);
 
         let props_call = match content.find("$props()") {
             Some(pos) => pos,
             None => return,
         };
+        // Upstream reports on the declarator's binding, including its type
+        // annotation, for root properties, nested properties and index signatures.
+        let Some(report_span) = props_binding_span(ctx, props_call as u32) else {
+            return;
+        };
 
         let before_props = &content[..props_call];
-        let destructured = extract_destructured_props(before_props);
-        let has_rest = before_props.contains("...");
-
+        let Some(binding) = props_declarator(ctx, props_call as u32) else {
+            return;
+        };
+        let (destructured, has_rest, uses_destructuring) = match &binding.id {
+            oxc::ast::ast::BindingPattern::ObjectPattern(object) => (
+                object
+                    .properties
+                    .iter()
+                    .filter_map(|p| p.key.static_name().map(|s| s.to_string()))
+                    .collect::<HashSet<_>>(),
+                object.rest.is_some(),
+                true,
+            ),
+            _ => (HashSet::new(), false, false),
+        };
         let decl_start = [before_props.rfind("let "), before_props.rfind("const ")]
             .into_iter()
             .flatten()
             .max()
             .unwrap_or(0);
-        let decl = &before_props[decl_start..];
-        let after_kw = decl.find('{');
-        let uses_destructuring = after_kw.is_some() && {
-            let brace_pos = after_kw.unwrap();
-            let colon_pos = decl.find(':').unwrap_or(decl.len());
-            brace_pos < colon_pos
-        };
 
         if has_rest {
             return;
@@ -108,14 +116,14 @@ impl Rule for NoUnusedProps {
             {
                 return;
             }
-            for (prop_name, prop_offset) in &all_props {
+            for (prop_name, _) in &all_props {
                 if has_prop_access(full_source, var_name, prop_name) {
                     let allow_nested =
                         get_option_bool(&ctx.config.options, "allowUnusedNestedProperties");
                     if !allow_nested {
                         check_nested_properties(
                             content,
-                            content_offset,
+                            report_span,
                             full_source,
                             var_name,
                             prop_name,
@@ -124,10 +132,9 @@ impl Rule for NoUnusedProps {
                     }
                     continue;
                 }
-                let src_pos = content_offset + prop_offset;
                 ctx.diagnostic(
                     format!("'{}' is an unused Props property.", prop_name),
-                    oxc::span::Span::new(src_pos as u32, (src_pos + prop_name.len()) as u32),
+                    report_span,
                 );
             }
             return;
@@ -140,8 +147,9 @@ impl Rule for NoUnusedProps {
             extract_option_patterns(&ctx.config.options, "ignoreTypePatterns");
         let check_imported = get_option_bool(&ctx.config.options, "checkImportedTypes");
 
+        let imported_file = ctx.file_path.clone();
         let resolve_path = if check_imported {
-            ctx.file_path.as_deref()
+            imported_file.as_deref()
         } else {
             None
         };
@@ -177,24 +185,42 @@ impl Rule for NoUnusedProps {
                         .and_then(|s| {
                             content[s..]
                                 .find('{')
-                                .map(|b| content[s + b..].contains("[key:"))
+                                .map(|b| parse_type_block(content, s + b).1)
                         })
                         .unwrap_or(false)
                 })
         });
 
-        if has_index_sig && !has_rest {
-            let decl_line_start = content[..props_call]
-                .rfind('\n')
-                .map(|p| p + 1)
-                .unwrap_or(0);
-            let src_pos = content_offset + decl_line_start;
-            ctx.diagnostic("Index signature is unused. Consider using rest operator (...) to capture remaining properties.",
-                oxc::span::Span::new(src_pos as u32, (src_pos + 10) as u32));
-        }
-
         for (prop_name, prop_offset) in &all_props {
             if destructured.contains(prop_name.as_str()) {
+                // Passing or spreading the object consumes all its properties.
+                if ctx.source.contains(&format!("{{{}}}", prop_name))
+                    || ctx.source.contains(&format!("...{}", prop_name))
+                    || property_is_consumed_whole(ctx, prop_name)
+                {
+                    continue;
+                }
+                if !get_option_bool(&ctx.config.options, "allowUnusedNestedProperties") {
+                    let nested = nested_type_properties(
+                        content,
+                        *prop_offset,
+                        resolve_path,
+                        &ignore_type_patterns,
+                    );
+                    for (sub_name, _) in nested {
+                        if ignore_patterns
+                            .iter()
+                            .any(|p| matches_pattern(&sub_name, p))
+                            || has_prop_access(ctx.source, prop_name, &sub_name)
+                        {
+                            continue;
+                        }
+                        ctx.diagnostic(
+                            format!("'{}' in '{}' is an unused property.", sub_name, prop_name),
+                            report_span,
+                        );
+                    }
+                }
                 continue;
             }
 
@@ -210,97 +236,160 @@ impl Rule for NoUnusedProps {
                 }
             }
 
-            let src_pos = content_offset + prop_offset;
             ctx.diagnostic(
                 format!("'{}' is an unused Props property.", prop_name),
-                oxc::span::Span::new(src_pos as u32, (src_pos + prop_name.len()) as u32),
+                report_span,
             );
         }
+        if has_index_sig && !has_rest {
+            ctx.diagnostic("Index signature is unused. Consider using rest operator (...) to capture remaining properties.", report_span);
+        }
     }
+}
+
+fn nested_type_properties(
+    content: &str,
+    property_offset: usize,
+    file_path: Option<&str>,
+    ignore_types: &[String],
+) -> Vec<(String, usize)> {
+    let Some(rest) = content.get(property_offset..) else {
+        return Vec::new();
+    };
+    let Some(colon) = rest.find(':') else {
+        return Vec::new();
+    };
+    let rhs = rest[colon + 1..].trim_start();
+    if rhs.starts_with('{') {
+        let mut properties = Vec::new();
+        let brace = property_offset + colon + 1 + rest[colon + 1..].find('{').unwrap();
+        // Array element fields are not properties of the array-valued prop.
+        if content[type_block_end(content, brace)..]
+            .trim_start()
+            .starts_with('[')
+        {
+            return Vec::new();
+        }
+        extract_props_from_block(content, brace, &mut properties);
+        return properties;
+    }
+    let name = rhs
+        .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
+        .next()
+        .unwrap_or("");
+    if name.is_empty() || ignore_types.iter().any(|p| matches_pattern(name, p)) {
+        return Vec::new();
+    }
+    if rhs[name.len()..].trim_start().starts_with('[') {
+        return Vec::new();
+    }
+    let local = extract_type_properties_with_file(content, name, file_path);
+    if !local.is_empty() {
+        return local;
+    }
+    file_path
+        .map(|path| resolve_imported_type_properties(content, name, path))
+        .unwrap_or_default()
+}
+
+fn props_declarator<'a>(
+    ctx: &LintContext<'a>,
+    call_start: u32,
+) -> Option<&'a oxc::ast::ast::VariableDeclarator<'a>> {
+    ctx.instance_semantic?.nodes().iter().find_map(|node| {
+        let AstKind::VariableDeclarator(decl) = node.kind() else { return None };
+        let Some(Expression::CallExpression(call)) = &decl.init else { return None };
+        matches!(&call.callee, Expression::Identifier(id) if id.name == "$props" && id.span.start == call_start).then_some(decl)
+    })
+}
+
+fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
+    let decl = props_declarator(ctx, call_start)?;
+    let content_offset = ctx.ast.instance.as_ref()?.content_span.start;
+    let binding = decl.id.span();
+    let end = decl
+        .type_annotation
+        .as_ref()
+        .map_or(binding.end, |annotation| annotation.span.end);
+    Some(Span::new(
+        content_offset + binding.start,
+        content_offset + end,
+    ))
 }
 
 fn has_prop_access(source: &str, base: &str, prop: &str) -> bool {
     source.contains(&format!("{}.{}", base, prop))
+        || source.contains(&format!("{}?.{}", base, prop))
         || source.contains(&format!("{}['{}']", base, prop))
         || source.contains(&format!("{}[\"{}\"]", base, prop))
+        || source.contains(&format!("{}?.['{}']", base, prop))
+        || source.contains(&format!("{}?.[\"{}\"]", base, prop))
 }
 
-fn extract_destructured_props(before_props: &str) -> HashSet<String> {
-    let mut props = HashSet::new();
-    let decl_start = [before_props.rfind("let "), before_props.rfind("const ")]
-        .into_iter()
-        .flatten()
-        .max()
-        .unwrap_or(0);
-    let after_decl = &before_props[decl_start..];
-    let open = match after_decl.find('{') {
-        Some(p) => decl_start + p,
-        None => return props,
+/// Like upstream's empty property path, a bare reference consumes the whole
+/// object: passing it, aliasing it, or using it in a conditional is sufficient.
+fn property_is_consumed_whole(ctx: &LintContext<'_>, property: &str) -> bool {
+    use crate::ast::{Attribute, AttributeValue, DirectiveKind, TemplateNode};
+    let mut bound = false;
+    crate::linter::walk_template_nodes(&ctx.ast.html, &mut |node| {
+        if let TemplateNode::Element(element) = node {
+            bound |= element.attributes.iter().any(|a| matches!(a,
+                Attribute::Directive {kind: DirectiveKind::Binding, name, value: AttributeValue::True, ..}
+                if name == property));
+        }
+    });
+    if bound {
+        return true;
+    }
+    let Some(semantic) = ctx.instance_semantic else {
+        return false;
     };
-    let mut depth = 0;
-    let mut close = None;
-    for (i, b) in before_props[open..].bytes().enumerate() {
-        match b {
-            b'{' => depth += 1,
-            b'}' => {
-                depth -= 1;
-                if depth == 0 {
-                    close = Some(open + i);
-                    break;
-                }
-            }
-            _ => {}
-        }
+    let Some(call) = ctx
+        .ast
+        .instance
+        .as_ref()
+        .and_then(|s| s.content.find("$props()"))
+    else {
+        return false;
+    };
+    let Some(decl) = props_declarator(ctx, call as u32) else {
+        return false;
+    };
+    let oxc::ast::ast::BindingPattern::ObjectPattern(object) = &decl.id else {
+        return false;
+    };
+    let Some(binding) = object
+        .properties
+        .iter()
+        .find(|p| p.key.static_name().as_deref() == Some(property))
+    else {
+        return false;
+    };
+    let mut pattern = &binding.value;
+    while let oxc::ast::ast::BindingPattern::AssignmentPattern(assignment) = pattern {
+        pattern = &assignment.left;
     }
-    if let Some(close) = close {
-        if open < close {
-            let inner = &before_props[open + 1..close];
-            let parts = split_at_depth0(inner, ',');
-            for part in &parts {
-                let part = part
-                    .lines()
-                    .filter(|l| !l.trim().starts_with("//"))
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                let part = part.trim();
-                if part.starts_with("...") {
-                    continue;
-                }
-                let mut name_end = part.len();
-                let mut d = 0i32;
-                let pbytes = part.as_bytes();
-                for (i, c) in part.char_indices() {
-                    match c {
-                        '{' | '(' | '[' | '<' => d += 1,
-                        '}' | ')' | ']' => {
-                            d -= 1;
-                            if d < 0 {
-                                d = 0;
-                            }
-                        }
-                        '>' => {
-                            if !(i > 0 && pbytes[i - 1] == b'=') {
-                                d -= 1;
-                                if d < 0 {
-                                    d = 0;
-                                }
-                            }
-                        }
-                        ':' | '=' if d == 0 => {
-                            name_end = i;
-                            break;
-                        }
-                        _ => {}
-                    }
-                }
-                let name = part[..name_end].trim().trim_matches('\'').trim_matches('"');
-                if !name.is_empty() {
-                    props.insert(name.to_string());
-                }
+    let oxc::ast::ast::BindingPattern::BindingIdentifier(identifier) = pattern else {
+        return false;
+    };
+    let Some(symbol) = identifier.symbol_id.get() else {
+        return false;
+    };
+    let nodes = semantic.nodes();
+    semantic
+        .scoping()
+        .get_resolved_references(symbol)
+        .any(|reference| {
+            if !reference.is_read() {
+                return false;
             }
-        }
-    }
-    props
+            let span = nodes.kind(reference.node_id()).span();
+            match nodes.parent_kind(reference.node_id()) {
+                AstKind::StaticMemberExpression(member) if member.object.span() == span => false,
+                AstKind::ComputedMemberExpression(member) if member.object.span() == span => false,
+                _ => true,
+            }
+        })
 }
 
 fn split_at_depth0(s: &str, sep: char) -> Vec<&str> {
@@ -410,6 +499,7 @@ fn extract_type_properties_with_file(
         let eq_pos = content[start..].find('=').unwrap_or(0);
         let rhs_start = start + eq_pos + 1;
         let rhs = content[rhs_start..].trim_start();
+        let rhs = &rhs[..find_type_end(rhs)];
 
         if rhs.contains('&') {
             for part in &split_at_depth0(&rhs[..find_type_end(rhs)], '&') {
@@ -433,8 +523,10 @@ fn extract_type_properties_with_file(
                     }
                 }
             }
-        } else if let Some(brace_rel) = content[start..].find('{') {
-            extract_props_from_block(content, start + brace_rel, &mut props);
+        } else if rhs.starts_with('{') {
+            let brace =
+                rhs_start + content[rhs_start..].len() - content[rhs_start..].trim_start().len();
+            extract_props_from_block(content, brace, &mut props);
         }
     }
     props
@@ -443,6 +535,9 @@ fn extract_type_properties_with_file(
 fn find_type_end(s: &str) -> usize {
     let mut depth = 0i32;
     for (i, c) in s.char_indices() {
+        if c == '>' && i > 0 && s.as_bytes()[i - 1] == b'=' {
+            continue;
+        }
         match c {
             '{' | '(' | '<' => depth += 1,
             '}' | ')' | '>' => {
@@ -537,102 +632,85 @@ fn extract_inline_type_properties(before_props: &str) -> Vec<(String, usize)> {
 }
 
 fn extract_props_from_block(content: &str, brace_start: usize, props: &mut Vec<(String, usize)>) {
-    let after = &content[brace_start + 1..];
-    let mut depth = 1;
-    let mut end = after.len();
-    for (i, b) in after.bytes().enumerate() {
-        match b {
+    props.extend(parse_type_block(content, brace_start).0);
+}
+
+/// Read TypeScript member boundaries, retaining original source offsets.
+fn parse_type_block(content: &str, brace_start: usize) -> (Vec<(String, usize)>, bool) {
+    const PREFIX: &str = "type __OxvelteProps = ";
+    let code = format!(
+        "{}{}",
+        PREFIX,
+        &content[brace_start..type_block_end(content, brace_start)]
+    );
+    let allocator = oxc::allocator::Allocator::default();
+    let parsed = oxc::parser::Parser::new(&allocator, &code, oxc::span::SourceType::ts()).parse();
+    let Some(oxc::ast::ast::Statement::TSTypeAliasDeclaration(alias)) = parsed.program.body.first()
+    else {
+        return (Vec::new(), false);
+    };
+    let oxc::ast::ast::TSType::TSTypeLiteral(literal) = &alias.type_annotation else {
+        return (Vec::new(), false);
+    };
+    let mut properties = Vec::new();
+    let mut index_signature = false;
+    for member in &literal.members {
+        let key = match member {
+            oxc::ast::ast::TSSignature::TSPropertySignature(property) => &property.key,
+            oxc::ast::ast::TSSignature::TSMethodSignature(method) => &method.key,
+            oxc::ast::ast::TSSignature::TSIndexSignature(_) => {
+                index_signature = true;
+                continue;
+            }
+            _ => continue,
+        };
+        if let Some(name) = key.static_name() {
+            let offset = brace_start + key.span().start as usize - PREFIX.len();
+            properties.push((name.to_string(), offset));
+        }
+    }
+    (properties, index_signature)
+}
+
+fn type_block_end(content: &str, start: usize) -> usize {
+    let bytes = content.as_bytes();
+    let mut i = start;
+    let mut depth = 0;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'\'' | b'"' | b'`' => {
+                let quote = bytes[i];
+                i += 1;
+                while i < bytes.len() && bytes[i] != quote {
+                    i += if bytes[i] == b'\\' { 2 } else { 1 };
+                }
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'/') => {
+                while i < bytes.len() && bytes[i] != b'\n' {
+                    i += 1;
+                }
+                continue;
+            }
+            b'/' if bytes.get(i + 1) == Some(&b'*') => {
+                i += 2;
+                while i + 1 < bytes.len() && &bytes[i..i + 2] != b"*/" {
+                    i += 1;
+                }
+                i += 2;
+                continue;
+            }
             b'{' => depth += 1,
             b'}' => {
                 depth -= 1;
                 if depth == 0 {
-                    end = i;
-                    break;
+                    return i + 1;
                 }
             }
             _ => {}
         }
+        i += 1;
     }
-    let block = &after[..end];
-
-    let stripped = strip_block_comments(block);
-    let block_ref = stripped.as_str();
-    let mut depth = 0i32;
-    let mut line_start = 0;
-    let block_bytes = block_ref.as_bytes();
-    for (i, b) in block_ref.bytes().enumerate() {
-        match b {
-            b'{' | b'(' | b'<' | b'[' => depth += 1,
-            b'}' | b')' | b']' => {
-                depth -= 1;
-                if depth < 0 {
-                    depth = 0;
-                }
-            }
-            b'>' => {
-                if !(i > 0 && block_bytes[i - 1] == b'=') {
-                    depth -= 1;
-                    if depth < 0 {
-                        depth = 0;
-                    }
-                }
-            }
-            b';' | b'\n' if depth == 0 => {
-                let segment = &block_ref[line_start..i];
-                let trimmed = segment.trim();
-                line_start = i + 1;
-                if trimmed.is_empty() || trimmed.starts_with("//") {
-                    continue;
-                }
-                if trimmed.starts_with('[') {
-                    continue;
-                }
-
-                let name = if trimmed.starts_with('\'') || trimmed.starts_with('"') {
-                    let q = trimmed.as_bytes()[0] as char;
-                    trimmed[1..].find(q).map(|end| &trimmed[1..end + 1])
-                } else {
-                    let end = trimmed
-                        .find(|c: char| c == ':' || c == '?' || c == '(' || c == '<')
-                        .unwrap_or(trimmed.len());
-                    Some(trimmed[..end].trim())
-                };
-                if let Some(name) = name {
-                    let name = name.trim();
-                    if name.is_empty() || name.starts_with("//") || name.starts_with('*') {
-                        continue;
-                    }
-                    let offset = block.find(name).map(|p| brace_start + 1 + p).unwrap_or(0);
-                    props.push((name.to_string(), offset));
-                }
-            }
-            _ => {}
-        }
-    }
-}
-
-fn strip_block_comments(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
-    let bytes = s.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        if i + 1 < bytes.len() && bytes[i] == b'/' && bytes[i + 1] == b'*' {
-            i += 2;
-            while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
-                if bytes[i] == b'\n' {
-                    result.push('\n');
-                }
-                i += 1;
-            }
-            if i + 1 < bytes.len() {
-                i += 2;
-            }
-        } else {
-            result.push(bytes[i] as char);
-            i += 1;
-        }
-    }
-    result
+    content.len()
 }
 
 fn extract_option_patterns(options: &Option<serde_json::Value>, key: &str) -> Vec<String> {
@@ -652,7 +730,7 @@ fn extract_option_patterns(options: &Option<serde_json::Value>, key: &str) -> Ve
 
 fn check_nested_properties(
     content: &str,
-    content_offset: usize,
+    report_span: Span,
     full_source: &str,
     var_name: &str,
     prop_name: &str,
@@ -673,14 +751,13 @@ fn check_nested_properties(
         return;
     }
     let prefix = format!("{}.{}", var_name, prop_name);
-    for (sub_name, sub_offset) in &nested {
+    for (sub_name, _) in &nested {
         if has_prop_access(full_source, &prefix, sub_name) {
             continue;
         }
-        let sp = content_offset + sub_offset;
         ctx.diagnostic(
             format!("'{}' in '{}' is an unused property.", sub_name, prop_name),
-            oxc::span::Span::new(sp as u32, (sp + sub_name.len()) as u32),
+            report_span,
         );
     }
 }
@@ -706,5 +783,126 @@ fn matches_pattern(name: &str, pattern: &str) -> bool {
         name.contains(inner)
     } else {
         name == pattern
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter};
+    use crate::parser;
+    use oxc::allocator::Allocator;
+
+    #[test]
+    fn destructured_named_types_respect_nested_options() {
+        let source = r#"<script lang="ts">
+            interface Details { used: string; hidden: string; _internal: string; }
+            interface Props { details: Details; ignored: Details; unused: string; }
+            let { details, ignored }: Props = $props();
+            console.log(details.used);
+        </script>"#;
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        for (options, expected) in [
+            (
+                serde_json::json!([{"ignorePropertyPatterns": ["/^_/"], "ignoreTypePatterns": ["Details"]}]),
+                vec!["'unused' is an unused Props property."],
+            ),
+            (
+                serde_json::json!([{"ignorePropertyPatterns": ["/^_/"]}]),
+                vec![
+                    "'hidden' in 'details' is an unused property.",
+                    "'used' in 'ignored' is an unused property.",
+                    "'hidden' in 'ignored' is an unused property.",
+                    "'unused' is an unused Props property.",
+                ],
+            ),
+            (
+                serde_json::json!([{"allowUnusedNestedProperties": true}]),
+                vec!["'unused' is an unused Props property."],
+            ),
+        ] {
+            let diagnostics = Linter::all().lint_with_config(
+                &parsed.ast,
+                source,
+                crate::linter::RuleConfig {
+                    options: Some(options),
+                    ..Default::default()
+                },
+            );
+            assert_eq!(
+                diagnostics
+                    .iter()
+                    .filter(|d| d.rule_name == "svelte/no-unused-props")
+                    .map(|d| d.message.as_str())
+                    .collect::<Vec<_>>(),
+                expected
+            );
+        }
+    }
+
+    fn lint(source: &str) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let result = parser::parse(source, &allocator);
+        assert!(result.errors.is_empty(), "{:?}", result.errors);
+        Linter::all()
+            .lint(&result.ast, source)
+            .into_iter()
+            .filter(|diag| diag.rule_name == "svelte/no-unused-props")
+            .collect()
+    }
+
+    #[test]
+    fn root_and_nested_findings_use_the_typed_props_binding_span() {
+        let source = r#"<!-- 😀 -->
+<script lang="ts" data-note=">">
+    interface Props {
+        unused: string;
+        user: { used: string; hidden: number; };
+    }
+    const props: Props = $props();
+    console.log(props.user.used);
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags
+                .iter()
+                .map(|diag| diag.message.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "'unused' is an unused Props property.",
+                "'hidden' in 'user' is an unused property."
+            ]
+        );
+        let start = source.find("props: Props").unwrap();
+        for diag in diags {
+            assert_eq!(diag.span.start as usize, start);
+            assert_eq!(
+                &source[diag.span.start as usize..diag.span.end as usize],
+                "props: Props"
+            );
+        }
+    }
+
+    #[test]
+    fn unused_properties_precede_index_signature_at_the_same_binding() {
+        let source = r#"<script lang="ts">
+    interface Props {
+        used: string;
+        unused: number;
+        [key: string]: unknown;
+    }
+    let /* binding */ { used }: Props = $props();
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags.iter().map(|diag| diag.message.as_str()).collect::<Vec<_>>(),
+            ["'unused' is an unused Props property.", "Index signature is unused. Consider using rest operator (...) to capture remaining properties."]
+        );
+        for diag in diags {
+            assert_eq!(
+                &source[diag.span.start as usize..diag.span.end as usize],
+                "{ used }: Props"
+            );
+        }
     }
 }

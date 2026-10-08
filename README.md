@@ -7,7 +7,9 @@
 > [!NOTE]
 > **This is a fork of [tolgaouz/oxvelte](https://github.com/tolgaouz/oxvelte).** oxvelte was created by [@tolgaouz](https://github.com/tolgaouz), and all credit for the original design and implementation goes to him. The original repository looks to be no longer actively developed, so this fork ([billpeet/oxvelte](https://github.com/billpeet/oxvelte)) continues the work. It is not affiliated with or endorsed by the original author.
 
-A Svelte linter written in Rust. Drop-in replacement for [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) — same rules, same diagnostics, **50-1000x faster**.
+A Svelte linter with native Rust rules and optional Node.js compiler and type checks. All 1,232 eligible fixtures in the pinned [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) suite match. See the [parity report](docs/research/upstream-parity-seventh-wave.md) for scope and runtime requirements.
+
+All 1,299 imported cases pass across the [pinned version matrix](docs/research/upstream-parity-version-matrix.md), including the 67 cases skipped in the primary environment.
 
 <p align="center">
   <img src="assets/compare.gif" alt="Side-by-side benchmark linting shadcn-svelte (1,603 files): eslint-plugin-svelte takes ~15s while oxvelte completes the same lint hundreds of times in the same window" width="900">
@@ -44,6 +46,10 @@ npm install -D oxlint @billpeet/oxvelte
 ```
 
 That's it. Both tools work out of the box with zero config and sensible defaults.
+
+Compiler diagnostics and unused `svelte-ignore` checks use Node.js and the project's installed Svelte compiler. `svelte/valid-compile` is opt-in; the recommended unused-ignore rule starts the compiler when it needs to check warning codes. TypeScript, Babel and stylesheet transformations use the project's corresponding packages. The compiler process is reused, and compiler results are shared between rules within each lint run. See [compiler setup and parity testing](docs/upstream-parity.md) for the pinned test runtime.
+
+The opt-in `@typescript-eslint/no-unnecessary-condition` rule uses the project's TypeScript checker to report redundant conditions and optional chains while respecting Svelte reactive variables. It runs with `--all-rules`; `settings.typescript.project` can select one tsconfig path relative to the component. See the [seventh-wave report](docs/research/upstream-parity-seventh-wave.md) for template scope limits and current test coverage.
 
 ### Agent-assisted migration
 
@@ -256,22 +262,24 @@ Full reference — AST shape, `ctx` API, auto-fix, limitations — in [`docs/cus
 
 ## What's implemented
 
-- **78 lint rules** from eslint-plugin-svelte, all ported to Rust
+Upstream compatibility is tracked separately with a pinned fixture suite and exact expectations. See [upstream parity](docs/upstream-parity.md) for current gaps and how to run it.
+
+- **Svelte lint rules** implemented in Rust, with Node.js for compiler and type checks
 - **Full Svelte 4 + Svelte 5** template parser (106/106 parser fixture tests)
-- **281 tests passing** (lint rules + parser fixtures)
+- **1,232 upstream rule fixtures match**, with 67 version skips
 - **Parallel file processing** via rayon
 - **eslint-disable** / **svelte-ignore** comment directives
 - **Auto-fix** support for fixable rules (`--fix`)
 
-### Intentionally excluded rules
+### Compiler and formatting rules
 
-A few eslint-plugin-svelte rules are **not** implemented by design:
+Compiler-backed and formatting rules are supported:
 
-- **`valid-compile`** — this rule *is* the Svelte compiler. Running it in a linter means invoking the full compiler on every file, which defeats the purpose of a fast native tool. Svelte already reports these errors at build time.
-- **`no-unused-svelte-ignore`** — requires the Svelte compiler to know which diagnostics were actually suppressed. Again, Svelte itself warns about this at build time.
-- **`indent`** — a formatting rule, not a lint rule. eslint-plugin-svelte itself marks it `recommended: false` with `conflictWithPrettier: true`. oxc tracks ESLint's `indent` as [🚫 *Not intending to implement*](https://github.com/oxc-project/oxc/issues/479) (*"Deprecated stylistic rule, can be used via the stylistic eslint plugin as a JS Plugin if necessary"*), and `@typescript-eslint/indent` is [likewise deprecated upstream](https://github.com/oxc-project/oxc/issues/503). Layout belongs in a formatter — use Prettier or `oxfmt`; don't re-encode it as lint diagnostics.
+- `valid-compile` invokes the project's Svelte compiler and remains opt-in.
+- `no-unused-svelte-ignore` is recommended and invokes the compiler when it needs to check warning codes.
+- `indent` is opt-in, matching upstream. Avoid enabling it alongside a formatter that uses different indentation settings.
 
-These rules add latency with zero incremental value — your build step (or formatter) already catches them.
+Compiler checks require Node.js and the relevant project packages. The [parity report](docs/research/upstream-parity-seventh-wave.md) records fixture coverage and implementation limits.
 
 ## Project structure
 

@@ -1,147 +1,106 @@
 //! `svelte/sort-attributes` — enforce attribute sorting order.
-//! 🔧 Fixable
-
 use crate::ast::{Attribute, DirectiveKind, TemplateNode};
-use crate::linter::{walk_template_nodes, LintContext, Rule};
+use crate::linter::{walk_template_nodes, Fix, LintContext, Rule};
+use oxc::span::Span;
+use regex::{Regex, RegexBuilder};
+use std::cmp::Ordering;
 
 pub struct SortAttributes;
-
 impl Rule for SortAttributes {
     fn name(&self) -> &'static str {
         "svelte/sort-attributes"
     }
-
     fn is_fixable(&self) -> bool {
         true
     }
-
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
-        let order_rules = parse_order_config(&ctx.config.options);
-
+        let rules = parse_order_config(&ctx.config.options);
         walk_template_nodes(&ctx.ast.html, &mut |node| {
-            if let TemplateNode::Element(el) = node {
-                let mut groups: Vec<Vec<String>> = vec![vec![]];
-                for attr in &el.attributes {
-                    match attr {
-                        Attribute::NormalAttribute { name, .. } => {
-                            groups.last_mut().unwrap().push(name.clone());
-                        }
-                        Attribute::Directive { kind, name, .. } => {
-                            let prefix = directive_prefix(kind);
-                            let full_name = format!("{}:{}", prefix, name);
-                            groups.last_mut().unwrap().push(full_name);
-                        }
-                        Attribute::Spread { .. } => {
-                            groups.push(vec![]);
-                        }
-                    }
+            let TemplateNode::Element(el) = node else {
+                return;
+            };
+            let keys: Vec<_> = el.attributes.iter().map(attribute_key).collect();
+            let mut valid_previous = Vec::new();
+            for (index, key) in keys.iter().enumerate() {
+                let Some(key) = key else { continue };
+                if !rules.iter().any(|r| r.matches(key)) {
+                    continue;
                 }
-
-                let msg = |a: &str, b: &str| format!("Attribute '{}' should go before '{}'.", a, b);
-                for group in &groups {
-                    let mut seen = std::collections::HashSet::new();
-                    if group.iter().any(|n| !seen.insert(n.as_str())) {
-                        continue;
-                    }
-
-                    if order_rules.is_empty() {
-                        fn cat(n: &str) -> u8 {
-                            if n == "this" || n == "bind:this" {
-                                return 0;
-                            }
-                            if n == "slot" || n == "name" || n == "id" {
-                                return 1;
-                            }
-                            if n.starts_with("class:") || n.starts_with("style:") {
-                                return 2;
-                            }
-                            if n.starts_with("bind:") || n.starts_with("on:") {
-                                return 3;
-                            }
-                            if n.starts_with("use:") {
-                                return 4;
-                            }
-                            if n.starts_with("transition:") {
-                                return 5;
-                            }
-                            if n.starts_with("in:") || n.starts_with("out:") {
-                                return 6;
-                            }
-                            if n.starts_with("animate:") {
-                                return 7;
-                            }
-                            if n.starts_with("let:") {
-                                return 8;
-                            }
-                            2
-                        }
-                        fn sub_cat(n: &str) -> u8 {
-                            if n.starts_with("bind:") {
-                                0
-                            } else if n.starts_with("on:") {
-                                1
-                            } else if n == "style" {
-                                2
-                            } else if n.starts_with("style:") {
-                                3
-                            } else if n == "class" {
-                                4
-                            } else if n.starts_with("class:") {
-                                5
-                            } else {
-                                0
-                            }
-                        }
-                        for w in group.windows(2) {
-                            let (c0, c1) = (cat(&w[0]), cat(&w[1]));
-                            if c0 > c1 {
-                                ctx.diagnostic(msg(&w[1], &w[0]), el.span);
-                            }
-                            if c0 == c1
-                                && sub_cat(&w[0]) == sub_cat(&w[1])
-                                && !(w[0].starts_with("style:") && w[1].starts_with("style:"))
-                                && w[0].to_lowercase() > w[1].to_lowercase()
-                            {
-                                ctx.diagnostic(msg(&w[1], &w[0]), el.span);
-                            }
-                        }
-                    } else {
-                        let positions: Vec<Option<usize>> = group
+                let invalid = valid_previous.iter().copied().find(|&previous: &usize| {
+                    compare(keys[previous].as_ref().unwrap(), key, &rules) == Ordering::Greater
+                });
+                if let Some(mut previous) = invalid {
+                    let normal = matches!(&el.attributes[index], Attribute::NormalAttribute { name, .. } if name != "@attach");
+                    if normal
+                        && el.attributes[previous..index]
                             .iter()
-                            .map(|n| find_order_position(n, &order_rules))
-                            .collect();
-                        let (mut last_pos, mut last_idx) = (None, 0);
-                        for i in 0..group.len() {
-                            if let Some(pos) = positions[i] {
-                                if last_pos.map_or(false, |p| pos < p) {
-                                    ctx.diagnostic(msg(&group[i], &group[last_idx]), el.span);
-                                }
-                                last_pos = Some(pos);
-                                last_idx = i;
-                            }
-                        }
-                        for rule in &order_rules {
-                            if rule.sort != "alphabetical" {
-                                continue;
-                            }
-                            let matched: Vec<&str> = group
-                                .iter()
-                                .filter(|n| matches_pattern(n, &rule.patterns))
-                                .map(|s| s.as_str())
-                                .collect();
-                            for w in matched.windows(2) {
-                                if w[0].to_lowercase() > w[1].to_lowercase() {
-                                    ctx.diagnostic(msg(w[1], w[0]), el.span);
-                                }
-                            }
-                        }
+                            .any(|a| matches!(a, Attribute::Spread { .. }))
+                    {
+                        let start = (0..index)
+                            .rev()
+                            .find(|&i| matches!(el.attributes[i], Attribute::Spread { .. }))
+                            .map_or(0, |i| i + 1);
+                        let Some(local) = (start..index).find(|&i| {
+                            keys[i].as_ref().is_some_and(|k| {
+                                rules.iter().any(|r| r.matches(k))
+                                    && compare(k, key, &rules) == Ordering::Greater
+                            })
+                        }) else {
+                            continue;
+                        };
+                        previous = local;
                     }
+                    let span = attribute_span(&el.attributes[index], ctx.source);
+                    let first = attribute_span(&el.attributes[previous], ctx.source);
+                    let mut replacement =
+                        ctx.source[span.start as usize..span.end as usize].to_string();
+                    // Rotate whole attributes, retaining whitespace in each original slot.
+                    for i in previous..index {
+                        let current = attribute_span(&el.attributes[i], ctx.source);
+                        let next = attribute_span(&el.attributes[i + 1], ctx.source);
+                        replacement
+                            .push_str(&ctx.source[current.end as usize..next.start as usize]);
+                        replacement
+                            .push_str(&ctx.source[current.start as usize..current.end as usize]);
+                    }
+                    ctx.diagnostic_with_fix(
+                        format!(
+                            "Attribute '{}' should go before '{}'.",
+                            key,
+                            keys[previous].as_ref().unwrap()
+                        ),
+                        span,
+                        Fix {
+                            span: Span::new(first.start, span.end),
+                            replacement,
+                        },
+                    );
+                } else {
+                    valid_previous.push(index);
                 }
             }
         });
     }
 }
-
+fn attribute_span(attribute: &Attribute, source: &str) -> Span {
+    let span = match attribute {
+        Attribute::NormalAttribute { span, .. }
+        | Attribute::Directive { span, .. }
+        | Attribute::Spread { span } => *span,
+    };
+    // Mustache attribute spans can include whitespace consumed after the closing brace.
+    let text = &source[span.start as usize..span.end as usize];
+    Span::new(span.start, span.start + text.trim_end().len() as u32)
+}
+fn attribute_key(attribute: &Attribute) -> Option<String> {
+    match attribute {
+        Attribute::NormalAttribute { name, .. } => Some(name.clone()),
+        Attribute::Spread { .. } => None,
+        Attribute::Directive { kind, name, .. } => {
+            Some(format!("{}:{}", directive_prefix(kind), name))
+        }
+    }
+}
 fn directive_prefix(kind: &DirectiveKind) -> &'static str {
     match kind {
         DirectiveKind::EventHandler => "on",
@@ -156,107 +115,202 @@ fn directive_prefix(kind: &DirectiveKind) -> &'static str {
         DirectiveKind::Let => "let",
     }
 }
-
-struct OrderRule {
-    patterns: Vec<String>,
-    sort: String,
+struct Matcher {
+    negative: bool,
+    regex: Option<Regex>,
 }
-
+struct OrderRule {
+    patterns: Vec<Matcher>,
+    alphabetical: bool,
+}
+impl OrderRule {
+    fn matches(&self, name: &str) -> bool {
+        let mut result = self.patterns.first().is_some_and(|p| p.negative);
+        for pattern in &self.patterns {
+            if result == pattern.negative
+                && pattern.regex.as_ref().is_some_and(|r| r.is_match(name))
+            {
+                result = !pattern.negative;
+            }
+        }
+        result
+    }
+}
+fn compare(a: &str, b: &str, rules: &[OrderRule]) -> Ordering {
+    for rule in rules {
+        match (rule.matches(a), rule.matches(b)) {
+            (true, true) => {
+                return if rule.alphabetical {
+                    a.encode_utf16().cmp(b.encode_utf16())
+                } else {
+                    Ordering::Equal
+                }
+            }
+            (true, false) => return Ordering::Less,
+            (false, true) => return Ordering::Greater,
+            _ => {}
+        }
+    }
+    Ordering::Equal
+}
+fn compile_matcher(pattern: &str) -> Matcher {
+    let (negative, pattern) = pattern
+        .strip_prefix('!')
+        .map_or((false, pattern), |p| (true, p));
+    let regex = if let Some(rest) = pattern.strip_prefix('/') {
+        if let Some((expression, flags)) = rest.rsplit_once('/') {
+            RegexBuilder::new(expression)
+                .case_insensitive(flags.contains('i'))
+                .multi_line(flags.contains('m'))
+                .dot_matches_new_line(flags.contains('s'))
+                .build()
+                .ok()
+        } else {
+            Regex::new(&format!("^{}$", regex::escape(pattern))).ok()
+        }
+    } else {
+        Regex::new(&format!("^{}$", regex::escape(pattern))).ok()
+    };
+    Matcher { negative, regex }
+}
 fn parse_order_config(options: &Option<serde_json::Value>) -> Vec<OrderRule> {
-    let Some(order) = options
+    let default = serde_json::json!([
+        "this", "bind:this", "id", "name", "slot",
+        {"match":"/^--/u","sort":"alphabetical"}, ["style","/^style:/u"], "class",
+        {"match":"/^class:/u","sort":"alphabetical"},
+        {"match":["!/:/u","!/^(?:this|id|name|style|class)$/u","!/^--/u"],"sort":"alphabetical"},
+        ["/^bind:/u","!bind:this","/^on:/u"],
+        {"match":"/^use:/u","sort":"alphabetical"}, {"match":"/^transition:/u","sort":"alphabetical"},
+        {"match":"/^in:/u","sort":"alphabetical"}, {"match":"/^out:/u","sort":"alphabetical"},
+        {"match":"/^animate:/u","sort":"alphabetical"}, {"match":"/^let:/u","sort":"alphabetical"}
+    ]);
+    let order = options
         .as_ref()
         .and_then(|v| v.as_array())
         .and_then(|a| a.first())
-        .and_then(|o| o.get("order"))
-        .and_then(|o| o.as_array())
-    else {
-        return vec![];
-    };
+        .and_then(|v| v.get("order"))
+        .and_then(|v| v.as_array())
+        .unwrap_or_else(|| default.as_array().unwrap());
     order
         .iter()
-        .filter_map(|entry| match entry {
-            serde_json::Value::String(p) => Some(OrderRule {
-                patterns: vec![p.clone()],
-                sort: "ignore".to_string(),
-            }),
-            serde_json::Value::Array(arr) => {
-                let pats: Vec<String> = arr
-                    .iter()
-                    .filter_map(|v| v.as_str().map(String::from))
-                    .collect();
-                Some(OrderRule {
-                    patterns: pats,
-                    sort: "ignore".to_string(),
-                })
+        .map(|entry| {
+            let patterns = entry.get("match").unwrap_or(entry);
+            let patterns: Vec<_> = if let Some(pattern) = patterns.as_str() {
+                vec![compile_matcher(pattern)]
+            } else {
+                patterns
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|v| v.as_str())
+                    .map(compile_matcher)
+                    .collect()
+            };
+            OrderRule {
+                patterns,
+                alphabetical: entry.get("sort").and_then(|v| v.as_str()) == Some("alphabetical"),
             }
-            serde_json::Value::Object(obj) => {
-                let pats = obj
-                    .get("match")
-                    .and_then(|m| m.as_array())
-                    .map(|a| {
-                        a.iter()
-                            .filter_map(|v| v.as_str().map(String::from))
-                            .collect()
-                    })
-                    .unwrap_or_default();
-                Some(OrderRule {
-                    patterns: pats,
-                    sort: obj
-                        .get("sort")
-                        .and_then(|s| s.as_str())
-                        .unwrap_or("alphabetical")
-                        .to_string(),
-                })
-            }
-            _ => None,
         })
         .collect()
 }
 
-fn find_order_position(name: &str, rules: &[OrderRule]) -> Option<usize> {
-    rules
-        .iter()
-        .position(|r| matches_pattern(name, &r.patterns))
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
 
-fn matches_pattern(name: &str, patterns: &[String]) -> bool {
-    if patterns
-        .iter()
-        .any(|p| p.starts_with('!') && matches_single_pattern(name, &p[1..]))
-    {
-        return false;
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    ..RuleConfig::default()
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/sort-attributes")
+            .collect()
     }
-    patterns
-        .iter()
-        .any(|p| !p.starts_with('!') && matches_single_pattern(name, p))
-}
 
-fn matches_single_pattern(name: &str, pattern: &str) -> bool {
-    if !pattern.starts_with('/') {
-        return pattern == name;
-    }
-    let inner = pattern.trim_start_matches('/');
-    let inner = inner.rsplit_once('/').map(|(p, _)| p).unwrap_or(inner);
-    if inner.starts_with('^') {
-        let prefix = inner[1..].trim_end_matches('$');
-        if prefix.starts_with("(?:") || prefix.contains('|') || prefix.contains('[') {
-            return inner
-                .strip_prefix("^(?:")
-                .and_then(|r| r.strip_suffix(")$"))
-                .map_or(false, |alts| alts.split('|').any(|a| a == name));
+    #[test]
+    fn insertion_diagnostics_keep_duplicate_attributes_and_case_sensitive_order() {
+        let source = "<div z a a A></div>";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 3);
+        for diagnostic in diagnostics {
+            assert!(diagnostic.message.ends_with("before 'z'."));
+            assert_eq!(
+                &source[diagnostic.span.start as usize..diagnostic.span.end as usize],
+                if diagnostic.message.starts_with("Attribute 'A'") {
+                    "A"
+                } else {
+                    "a"
+                }
+            );
         }
-        return name.starts_with(prefix);
     }
-    if inner == ":" || inner == ":/u" {
-        return name.contains(':');
+
+    #[test]
+    fn normal_attributes_stop_at_spreads_but_directives_can_cross_them() {
+        let normal = lint("<div z {...props} a></div>", serde_json::json!([]));
+        assert!(normal.is_empty());
+        let source = "<div on:click {...props} class:active></div>";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(
+            diagnostics[0].fix.as_ref().unwrap().replacement,
+            "class:active on:click {...props}"
+        );
     }
-    if inner.starts_with('!') {
-        let check = &inner[1..];
-        return if check == ":" {
-            !name.contains(':')
-        } else {
-            !name.starts_with(check)
-        };
+
+    #[test]
+    fn rotation_preserves_slot_whitespace_and_unicode_ranges() {
+        let source = "<!-- 😀 --><div z='é'\n\tignored=\"x > y\"  a={value}></div>";
+        let diagnostics = lint(
+            source,
+            serde_json::json!([{"order":[{"match":["z","a"],"sort":"alphabetical"}]}]),
+        );
+        assert_eq!(diagnostics.len(), 1);
+        let fix = diagnostics[0].fix.as_ref().unwrap();
+        assert_eq!(fix.replacement, "a={value}\n\tz='é'  ignored=\"x > y\"");
+        assert_eq!(
+            &source[fix.span.start as usize..fix.span.end as usize],
+            "z='é'\n\tignored=\"x > y\"  a={value}"
+        );
     }
-    false
+
+    #[test]
+    fn ordered_negative_patterns_can_reinclude_names_and_empty_order_ignores_all() {
+        let rules = parse_order_config(&Some(
+            serde_json::json!([{"order":[{"match":["!/^x/i","x-allowed"],"sort":"alphabetical"}]}]),
+        ));
+        assert!(!rules[0].matches("X-denied"));
+        assert!(rules[0].matches("x-allowed"));
+        assert!(rules[0].matches("other"));
+        assert!(lint("<div z a></div>", serde_json::json!([{"order":[]}])).is_empty());
+    }
+
+    #[test]
+    fn attachment_has_its_own_key_and_moves_as_one_attribute() {
+        let source = "<div foo {@attach attach}></div>";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(
+            diagnostics[0].message,
+            "Attribute '@attach' should go before 'foo'."
+        );
+        assert_eq!(
+            diagnostics[0].fix.as_ref().unwrap().replacement,
+            "{@attach attach} foo"
+        );
+    }
 }

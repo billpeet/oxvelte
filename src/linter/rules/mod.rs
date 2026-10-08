@@ -10,8 +10,10 @@ mod html_self_closing;
 mod infinite_reactive_loop;
 mod max_lines_per_block;
 mod no_add_event_listener;
+mod no_at_const_tags;
 mod no_at_debug_tags;
 mod no_at_html_tags;
+mod no_bind_value_on_checkable_inputs;
 mod no_dom_manipulating;
 mod no_dupe_else_if_blocks;
 mod no_dupe_on_directives;
@@ -24,6 +26,7 @@ mod no_immutable_reactive_statements;
 mod no_inline_styles;
 mod no_inner_declarations;
 mod no_inspect;
+mod no_nested_style_tag;
 mod no_not_function_handler;
 mod no_object_in_text_mustaches;
 mod no_raw_special_elements;
@@ -38,12 +41,15 @@ mod no_svelte_internal;
 mod no_target_blank;
 mod no_trailing_spaces;
 mod no_unknown_style_directive_property;
+mod no_unnecessary_condition;
 mod no_unnecessary_state_wrap;
 mod no_unused_props;
 mod no_unused_svelte_ignore;
 mod no_useless_children_snippet;
 mod no_useless_mustaches;
+mod prefer_attribute_interpolation;
 mod prefer_class_directive;
+mod prefer_derived_over_derived_by;
 mod prefer_style_directive;
 mod prefer_writable_derived;
 mod require_each_key;
@@ -53,6 +59,7 @@ mod require_stores_init;
 mod shorthand_attribute;
 mod shorthand_directive;
 mod spaced_html_comment;
+mod style_declarations;
 mod valid_each_key;
 
 mod no_dynamic_slot_name;
@@ -89,6 +96,21 @@ mod valid_style_parse;
 use super::Rule;
 use crate::ast::{AttributeValue, AttributeValuePart};
 
+/// Token boundaries for suggestion edits. Comments are excluded, so punctuation
+/// inside a comment cannot be mistaken for a label or call delimiter.
+pub(super) fn script_token_spans(source: &str) -> Vec<oxc::span::Span> {
+    let allocator = oxc::allocator::Allocator::default();
+    let parsed = oxc::parser::Parser::new(&allocator, source, oxc::span::SourceType::ts())
+        .with_config(oxc::parser::config::TokensParserConfig)
+        .parse();
+    parsed
+        .tokens
+        .iter()
+        .filter(|token| token.end() > token.start())
+        .map(|token| oxc::span::Span::new(token.start(), token.end()))
+        .collect()
+}
+
 pub(super) fn directive_expression_key(value: &AttributeValue) -> String {
     match value {
         AttributeValue::True => String::new(),
@@ -115,67 +137,75 @@ pub(super) fn directive_expression_key(value: &AttributeValue) -> String {
 }
 
 fn canonical_js_expression(source: &str) -> String {
-    let bytes = source.as_bytes();
-    let mut out = String::with_capacity(source.len());
-    let mut i = 0;
-
-    while i < bytes.len() {
-        match bytes[i] {
-            b'\'' | b'"' | b'`' => copy_quoted(source, &mut i, &mut out),
-            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
-                i += 2;
-                while i < bytes.len() && !matches!(bytes[i], b'\n' | b'\r') {
-                    i += 1;
-                }
-            }
-            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'*' => {
-                i += 2;
-                while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
-                    i += 1;
-                }
-                i = (i + 2).min(bytes.len());
-            }
-            b if b.is_ascii_whitespace() => i += 1,
-            _ => {
-                let ch = source[i..].chars().next().expect("valid char boundary");
-                out.push(ch);
-                i += ch.len_utf8();
-            }
-        }
+    // Upstream compares tokens, including literal spelling, without comments.
+    // Parsing an expression wrapper lets OXC distinguish regexes, templates and
+    // adjacent operators instead of joining whitespace-separated text.
+    let allocator = oxc::allocator::Allocator::default();
+    let wrapped = format!("({source}\n)");
+    let parsed = oxc::parser::Parser::new(&allocator, &wrapped, oxc::span::SourceType::ts())
+        .with_config(oxc::parser::config::TokensParserConfig)
+        .parse();
+    if !parsed.errors.is_empty() {
+        return format!("unparsed:{source}");
     }
-
+    let mut out = String::new();
+    for token in &parsed.tokens {
+        let text = &wrapped[token.start() as usize..token.end() as usize];
+        // Length prefixes preserve token boundaries even inside literal text.
+        out.push_str(&text.len().to_string());
+        out.push(':');
+        out.push_str(text);
+    }
     out
 }
 
-fn copy_quoted(source: &str, i: &mut usize, out: &mut String) {
-    let bytes = source.as_bytes();
-    let quote = bytes[*i];
+#[cfg(test)]
+mod directive_identity_tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
 
-    while *i < bytes.len() {
-        let ch = source[*i..].chars().next().expect("valid char boundary");
-        out.push(ch);
-        *i += ch.len_utf8();
+    #[test]
+    fn distinct_operators_and_literal_content_are_not_duplicate_directives() {
+        let source = r#"<button on:click={() => x++ + y} on:click={() => x + ++y} />
+<div use:foo={"a b"} use:foo={"ab"} />
+<div use:bar={/a b/} use:bar={/ab/} />
+<div use:baz={`a b`} use:baz={`ab`} />"#;
+        assert_eq!(duplicates(source), 0);
+    }
 
-        if ch == '\\' {
-            if *i < bytes.len() {
-                let escaped = source[*i..].chars().next().expect("valid char boundary");
-                out.push(escaped);
-                *i += escaped.len_utf8();
-            }
-            continue;
-        }
+    #[test]
+    fn comments_and_spacing_between_tokens_do_not_change_identity() {
+        let source = r#"<button on:click={() => x + y} on:click={() => x /* note */ + y} />
+<div use:foo={"a b"} use:foo={ /* note */ "a b"} />
+<div use:bar={/a b/} use:bar={ /a b/ } />
+<div use:baz={`a ${ x + y }`} use:baz={`a ${x+y}`} />"#;
+        assert_eq!(duplicates(source), 8);
+    }
 
-        if ch.len_utf8() == 1 && ch as u8 == quote {
-            break;
-        }
+    fn duplicates(source: &str) -> usize {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint(&parsed.ast, source)
+            .iter()
+            .filter(|d| {
+                matches!(
+                    d.rule_name,
+                    "svelte/no-dupe-on-directives" | "svelte/no-dupe-use-directives"
+                )
+            })
+            .count()
     }
 }
 
 /// Return all implemented lint rules.
 pub fn all_rules() -> Vec<Box<dyn Rule>> {
     vec![
+        Box::new(indent::Indent),
         Box::new(no_at_html_tags::NoAtHtmlTags),
         Box::new(no_at_debug_tags::NoAtDebugTags),
+        Box::new(no_at_const_tags::NoAtConstTags),
         Box::new(no_dupe_else_if_blocks::NoDupeElseIfBlocks),
         Box::new(no_dupe_style_properties::NoDupeStyleProperties),
         Box::new(no_dupe_use_directives::NoDupeUseDirectives),
@@ -191,6 +221,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_inline_styles::NoInlineStyles),
         Box::new(valid_each_key::ValidEachKey),
         Box::new(no_not_function_handler::NoNotFunctionHandler),
+        Box::new(no_nested_style_tag::NoNestedStyleTag),
         Box::new(no_ignored_unsubscribe::NoIgnoredUnsubscribe),
         Box::new(no_inner_declarations::NoInnerDeclarations),
         Box::new(spaced_html_comment::SpacedHtmlComment),
@@ -217,6 +248,9 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_unnecessary_state_wrap::NoUnnecessaryStateWrap),
         Box::new(no_unused_props::NoUnusedProps),
         Box::new(prefer_writable_derived::PreferWritableDerived),
+        Box::new(prefer_derived_over_derived_by::PreferDerivedOverDerivedBy),
+        Box::new(prefer_attribute_interpolation::PreferAttributeInterpolation),
+        Box::new(no_bind_value_on_checkable_inputs::NoBindValueOnCheckableInputs),
         Box::new(require_stores_init::RequireStoresInit),
         Box::new(no_add_event_listener::NoAddEventListener),
         Box::new(block_lang::BlockLang),
@@ -232,6 +266,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(require_store_callbacks_use_set_param::RequireStoreCallbacksUseSetParam),
         Box::new(require_store_reactive_access::RequireStoreReactiveAccess),
         Box::new(valid_compile::ValidCompile),
+        Box::new(no_unnecessary_condition::NoUnnecessaryCondition),
         Box::new(valid_style_parse::ValidStyleParse),
         Box::new(no_unused_class_name::NoUnusedClassName),
         Box::new(prefer_const::PreferConst),
@@ -265,3 +300,4 @@ pub fn recommended_rules() -> Vec<Box<dyn Rule>> {
         .filter(|r| r.is_recommended())
         .collect()
 }
+mod indent;

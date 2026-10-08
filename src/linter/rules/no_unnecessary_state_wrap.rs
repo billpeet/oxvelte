@@ -5,14 +5,13 @@
 //! and don't need `$state()` wrapping.
 
 use crate::ast::{Attribute, AttributeValue, DirectiveKind, Fragment, TemplateNode};
-use crate::linter::{walk_template_nodes, LintContext, Rule};
+use crate::linter::{walk_template_nodes, Fix, LintContext, Rule, Suggestion};
 use oxc::ast::ast::{
     Argument, Expression, ImportDeclarationSpecifier, ModuleExportName, Statement,
 };
 use oxc::ast::AstKind;
 use oxc::semantic::SymbolId;
-use oxc::span::Span;
-use rustc_hash::FxHashSet;
+use oxc::span::{GetSpan, Span};
 
 const REACTIVE_CLASSES: &[&str] = &[
     "SvelteSet",
@@ -38,7 +37,13 @@ impl Rule for NoUnnecessaryStateWrap {
         let Some(semantic) = ctx.instance_semantic else {
             return;
         };
-        let content_offset = ctx.instance_content_offset;
+        let content_offset = ctx
+            .ast
+            .instance
+            .as_ref()
+            .map_or(ctx.instance_content_offset, |script| {
+                script.content_span.start
+            });
 
         let opts = ctx
             .config
@@ -60,15 +65,10 @@ impl Rule for NoUnnecessaryStateWrap {
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
-        // Build a map: local name → original name.
-        // Seed with bare `SvelteSet` / `SvelteMap` etc. (direct use without import alias)
-        // and with any `additionalReactiveClasses` names (used directly).
-        let mut name_map: Vec<(String, String)> = REACTIVE_CLASSES
-            .iter()
-            .map(|s| (s.to_string(), s.to_string()))
-            .chain(additional.iter().cloned().map(|s| (s.clone(), s)))
-            .collect();
-        // Also aliased imports from `svelte/*` or additional classes' custom modules.
+        // Match reactive constructors by imported symbol, preserving shadows.
+        let mut imports = Vec::new();
+        let mut namespaces = Vec::new();
+        // Track named and namespace imports from the reactive classes module.
         let nodes = semantic.nodes();
         let program = nodes.program();
         for stmt in &program.body {
@@ -76,11 +76,16 @@ impl Rule for NoUnnecessaryStateWrap {
                 continue;
             };
             let src = imp.source.value.as_str();
-            let is_svelte = src.starts_with("svelte/") || src == "svelte";
+            let is_svelte = src == "svelte/reactivity";
             let Some(specifiers) = &imp.specifiers else {
                 continue;
             };
             for spec in specifiers {
+                if let ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) = spec {
+                    if is_svelte {
+                        namespaces.push(s.local.symbol_id());
+                    }
+                }
                 let ImportDeclarationSpecifier::ImportSpecifier(s) = spec else {
                     continue;
                 };
@@ -89,11 +94,8 @@ impl Rule for NoUnnecessaryStateWrap {
                     ModuleExportName::IdentifierReference(n) => n.name.as_str(),
                     ModuleExportName::StringLiteral(l) => l.value.as_str(),
                 };
-                let local = s.local.name.as_str();
-                let is_reactive = (is_svelte && REACTIVE_CLASSES.contains(&imported))
-                    || additional.iter().any(|c| c == imported);
-                if is_reactive && local != imported {
-                    name_map.push((local.to_string(), imported.to_string()));
+                if is_svelte && REACTIVE_CLASSES.contains(&imported) {
+                    imports.push((s.local.symbol_id(), imported.to_string()));
                 }
             }
         }
@@ -109,84 +111,84 @@ impl Rule for NoUnnecessaryStateWrap {
             if callee.name != "$state" {
                 continue;
             }
-            let Some(first_arg) = ce.arguments.first() else {
+            // Wrapping must be the direct initializer, rather than nested in
+            // another expression that happens to belong to a declaration.
+            let AstKind::VariableDeclarator(decl) = nodes.parent_kind(node.id()) else {
                 continue;
             };
-            let Argument::NewExpression(new_expr) = first_arg else {
+            let oxc::ast::ast::BindingPattern::BindingIdentifier(binding) = &decl.id else {
                 continue;
             };
-            let Expression::Identifier(class_id) = &new_expr.callee else {
+            let Some(Expression::CallExpression(init)) = &decl.init else {
                 continue;
             };
-            let Some((_, original)) = name_map.iter().find(|(l, _)| l == class_id.name.as_str())
-            else {
+            if init.span != ce.span {
                 continue;
-            };
-
-            // Walk up to the enclosing VariableDeclarator. If none, skip.
-            let call_node_id = node.id();
-            let mut cursor = call_node_id;
-            let mut decl_kind: Option<&'static str> = None; // "const" or "let"
-            let mut decl_symbol: Option<SymbolId> = None;
-            loop {
-                let parent_id = nodes.parent_id(cursor);
-                if parent_id == cursor {
-                    break;
-                }
-                let parent_kind = nodes.kind(parent_id);
-                if let AstKind::VariableDeclarator(_vd) = parent_kind {
-                    // Find the VariableDeclaration to get its kind.
-                    let gp_id = nodes.parent_id(parent_id);
-                    if let AstKind::VariableDeclaration(vd_decl) = nodes.kind(gp_id) {
-                        decl_kind = Some(match vd_decl.kind {
-                            oxc::ast::ast::VariableDeclarationKind::Const => "const",
-                            oxc::ast::ast::VariableDeclarationKind::Let => "let",
-                            _ => break,
-                        });
-                        // Resolve the binding symbol id.
-                        let vd = match parent_kind {
-                            AstKind::VariableDeclarator(vd) => vd,
-                            _ => break,
-                        };
-                        if let oxc::ast::ast::BindingPattern::BindingIdentifier(id) = &vd.id {
-                            decl_symbol = scoping
-                                .get_binding(scoping.root_scope_id(), id.name.as_str().into());
+            }
+            let decl_symbol = binding.symbol_id();
+            if allow_reassign
+                && is_symbol_reassigned(decl_symbol, binding.span, scoping, nodes, &ctx.ast.html)
+            {
+                continue;
+            }
+            for arg in &ce.arguments {
+                let (constructor, target_span) = match arg {
+                    Argument::NewExpression(expr) => (&expr.callee, expr.span),
+                    Argument::CallExpression(expr) => (&expr.callee, expr.span),
+                    _ => continue,
+                };
+                let original = match constructor {
+                    Expression::Identifier(id) => {
+                        if additional.iter().any(|name| name == id.name.as_str()) {
+                            Some(id.name.to_string())
+                        } else {
+                            let symbol = scoping.get_reference(id.reference_id()).symbol_id();
+                            imports
+                                .iter()
+                                .find(|(sid, _)| Some(*sid) == symbol)
+                                .map(|(_, name)| name.clone())
                         }
                     }
-                    break;
-                }
-                cursor = parent_id;
-            }
-            let Some(kind) = decl_kind else { continue };
-
-            let should_flag = match kind {
-                "const" => true,
-                "let" => {
-                    if !allow_reassign {
-                        true
-                    } else {
-                        // `let` + allowReassign: skip if the var IS reassigned.
-                        let reassigned = decl_symbol
-                            .map(|sid| is_symbol_reassigned(sid, scoping, nodes, &ctx.ast.html))
-                            .unwrap_or(false);
-                        !reassigned
+                    Expression::StaticMemberExpression(member) => {
+                        if let Expression::Identifier(id) = &member.object {
+                            let symbol = scoping.get_reference(id.reference_id()).symbol_id();
+                            if symbol.is_some_and(|sid| namespaces.contains(&sid))
+                                && REACTIVE_CLASSES.contains(&member.property.name.as_str())
+                            {
+                                Some(member.property.name.to_string())
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
                     }
-                }
-                _ => false,
-            };
-            if !should_flag {
-                continue;
+                    _ => None,
+                };
+                let Some(original) = original else { continue };
+                ctx.diagnostic_with_suggestions(
+                    format!(
+                        "{} is already reactive, $state wrapping is unnecessary.",
+                        original
+                    ),
+                    Span::new(
+                        content_offset + target_span.start,
+                        content_offset + target_span.end,
+                    ),
+                    vec![Suggestion {
+                        description: "Remove unnecessary $state wrapping".into(),
+                        fix: Fix {
+                            span: Span::new(
+                                content_offset + ce.span.start,
+                                content_offset + ce.span.end,
+                            ),
+                            replacement: ctx.source[(content_offset + target_span.start) as usize
+                                ..(content_offset + target_span.end) as usize]
+                                .to_string(),
+                        },
+                    }],
+                );
             }
-
-            let s = content_offset + callee.span.start;
-            let e = content_offset + callee.span.end + 1; // include `(`
-            ctx.diagnostic(
-                format!(
-                    "{} is already reactive, $state wrapping is unnecessary.",
-                    original
-                ),
-                Span::new(s, e),
-            );
         }
     }
 }
@@ -195,11 +197,15 @@ impl Rule for NoUnnecessaryStateWrap {
 /// `bind:` directive that would write through to this name)?
 fn is_symbol_reassigned<'a>(
     sid: SymbolId,
+    declaration_span: Span,
     scoping: &'a oxc::semantic::Scoping,
-    _nodes: &'a oxc::semantic::AstNodes<'a>,
+    nodes: &'a oxc::semantic::AstNodes<'a>,
     html: &'a Fragment,
 ) -> bool {
-    if scoping.get_resolved_references(sid).any(|r| r.is_write()) {
+    if scoping
+        .get_resolved_references(sid)
+        .any(|r| r.is_write() && nodes.kind(r.node_id()).span() != declaration_span)
+    {
         return true;
     }
     let name = scoping.symbol_name(sid);
@@ -243,8 +249,70 @@ fn is_symbol_reassigned<'a>(
     found
 }
 
-// Ensure we import FxHashSet to keep the module compile clean even when unused.
-#[allow(dead_code)]
-fn _keep_imports() -> FxHashSet<SymbolId> {
-    FxHashSet::default()
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    ..RuleConfig::default()
+                },
+            )
+            .into_iter()
+            .filter(|diagnostic| diagnostic.rule_name == "svelte/no-unnecessary-state-wrap")
+            .collect()
+    }
+
+    #[test]
+    fn import_identity_and_suggestion_ranges_survive_script_attributes() {
+        let source = "<!-- 😀 --><script data-note=\">\">import { SvelteMap as Map } from 'svelte/reactivity'; import * as reactive from 'svelte/reactivity'; const map = $state(new Map()); const set = $state(reactive.SvelteSet()); function shadow(Map) { const local = $state(new Map()); } </script>";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 2);
+        assert_eq!(
+            &source[diagnostics[0].span.start as usize..diagnostics[0].span.end as usize],
+            "new Map()"
+        );
+        let fix = &diagnostics[0].suggestions[0].fix;
+        assert_eq!(
+            &source[fix.span.start as usize..fix.span.end as usize],
+            "$state(new Map())"
+        );
+        assert_eq!(fix.replacement, "new Map()");
+        assert_eq!(
+            diagnostics[1].suggestions[0].fix.replacement,
+            "reactive.SvelteSet()"
+        );
+        assert!(lint("<script>import { SvelteSet } from 'other'; const value = $state(new SvelteSet());</script>", serde_json::json!([])).is_empty());
+    }
+
+    #[test]
+    fn allow_reassign_uses_the_declared_symbol_in_nested_scopes() {
+        let source = "<script>import { SvelteSet } from 'svelte/reactivity'; let value = $state(new SvelteSet()); function nested() { let value = $state(new SvelteSet()); value = new SvelteSet(); }</script>";
+        let diagnostics = lint(source, serde_json::json!([{"allowReassign": true}]));
+        assert_eq!(diagnostics.len(), 1);
+        assert!(diagnostics[0].span.start < source.find("function nested").unwrap() as u32);
+    }
+
+    #[test]
+    fn custom_factories_require_a_direct_binding_initializer() {
+        let source = "<script>const valid = $state(Custom()); const nested = keep($state(Custom()));</script>";
+        let diagnostics = lint(
+            source,
+            serde_json::json!([{"additionalReactiveClasses": ["Custom"]}]),
+        );
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics[0].suggestions[0].fix.replacement, "Custom()");
+    }
 }

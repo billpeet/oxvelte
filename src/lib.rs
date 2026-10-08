@@ -1,4 +1,6 @@
 pub mod ast;
+pub mod compiler;
+mod compiler_ignore;
 pub mod config;
 pub mod linter;
 pub mod parser;
@@ -21,6 +23,12 @@ mod linter_fixture_tests {
             .unwrap_or(input_filename);
         let per_file = format!("{}/{}-config.json", dir, base);
         let default_cfg = format!("{}/_config.json", dir);
+        let executable = [
+            format!("{}/{base}-config.cjs", dir),
+            format!("{dir}/_config.cjs"),
+        ]
+        .into_iter()
+        .find(|p| std::path::Path::new(p).exists());
 
         let config_path = if std::path::Path::new(&per_file).exists() {
             Some(per_file)
@@ -44,10 +52,28 @@ mod linter_fixture_tests {
                             })
                         })
                     });
-                    let settings = json.get("settings").cloned();
+                    let mut settings = json.get("settings").cloned();
+                    if let Some(parser_options) = json.pointer("/languageOptions/parserOptions") {
+                        let settings = settings.get_or_insert_with(|| serde_json::json!({}));
+                        settings["compiler"] = serde_json::json!({});
+                        if let Some(parser) = parser_options.get("parser") {
+                            settings["compiler"]["parser"] = parser.clone();
+                        }
+                        if let Some(svelte_config) = parser_options.get("svelteConfig") {
+                            settings["compiler"]["svelteConfig"] = svelte_config.clone();
+                        }
+                    }
                     return RuleConfig { options, settings };
                 }
             }
+        }
+        if let Some(path) = executable {
+            return RuleConfig {
+                options: None,
+                settings: Some(
+                    serde_json::json!({"compiler":{"executableConfigPath":std::fs::canonicalize(path).unwrap().to_string_lossy().trim_start_matches(r"\\?\").replace('\\',"/")}}),
+                ),
+            };
         }
         RuleConfig::default()
     }
@@ -140,6 +166,9 @@ mod linter_fixture_tests {
         let lint = Linter::all();
         let files = collect_fixture_files(&valid_dir);
         for path in files {
+            if !compiler_fixture_major_is_eligible(rule_name, &path) {
+                continue;
+            }
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             let source = std::fs::read_to_string(&path).unwrap();
             let parent_dir = path.parent().unwrap().to_string_lossy().to_string();
@@ -165,6 +194,9 @@ mod linter_fixture_tests {
         let lint = Linter::all();
         let files = collect_fixture_files(&invalid_dir);
         for path in files {
+            if !compiler_fixture_major_is_eligible(rule_name, &path) {
+                continue;
+            }
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             let source = std::fs::read_to_string(&path).unwrap();
             let parent_dir = path.parent().unwrap().to_string_lossy().to_string();
@@ -209,6 +241,33 @@ mod linter_fixture_tests {
             rule_name,
             path
         );
+    }
+
+    // Older local copies retain fixtures for Svelte 3/4. Compiler behavior
+    // follows the installed version, so respect their declared major ranges.
+    fn compiler_fixture_major_is_eligible(rule_name: &str, path: &std::path::Path) -> bool {
+        if !matches!(rule_name, "valid-compile" | "no-unused-svelte-ignore") {
+            return true;
+        }
+        let Some(name) = path
+            .file_name()
+            .and_then(|p| p.to_str())
+            .and_then(|p| p.strip_suffix("-input.svelte"))
+        else {
+            return true;
+        };
+        let requirements = path.with_file_name(format!("{name}-requirements.json"));
+        let Ok(text) = std::fs::read_to_string(requirements) else {
+            return true;
+        };
+        let requirements: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let Some(range) = requirements.get("svelte").and_then(|v| v.as_str()) else {
+            return true;
+        };
+        let version = crate::compiler::compile("", path.to_str(), None)
+            .expect("Compiler fixtures require Node and an installed Svelte compiler")
+            .svelte_major;
+        crate::linter::npm_range_may_include_major(range, version as u8)
     }
 
     #[test]

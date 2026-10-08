@@ -1,0 +1,121 @@
+[
+  {
+    "name": "union-property",
+    "file": "union-property.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "block-scoped-function",
+    "file": "block-scoped-function.svelte",
+    "rule": "svelte/no-inner-declarations",
+    "options": [
+      "functions",
+      {
+        "blockScopedFunctions": "allow"
+      }
+    ],
+    "messages": []
+  },
+  {
+    "name": "nested-style",
+    "file": "nested-style.svelte",
+    "rule": "svelte/system",
+    "messages": []
+  },
+  {
+    "name": "kit2_navigation_svelte",
+    "file": "kit2/navigation.svelte",
+    "rule": "svelte/no-navigation-without-resolve",
+    "messages": [
+      "Unexpected goto() call without resolve()."
+    ]
+  },
+  {
+    "name": "kit3_navigation_svelte",
+    "file": "kit3/navigation.svelte",
+    "rule": "svelte/no-navigation-without-resolve",
+    "messages": []
+  },
+  {
+    "name": "inner-disallow_svelte",
+    "file": "inner-disallow.svelte",
+    "rule": "svelte/no-inner-declarations",
+    "options": [
+      "functions",
+      {
+        "blockScopedFunctions": "disallow"
+      }
+    ],
+    "messages": [
+      "Move function declaration to program root."
+    ]
+  },
+  {
+    "name": "unused-get-id_svelte",
+    "file": "unused-get-id.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": [
+      "'getId' is an unused Props property."
+    ]
+  },
+  {
+    "name": "destructuring-comment_svelte",
+    "file": "destructuring-comment.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "destructuring-default_svelte",
+    "file": "destructuring-default.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "index-signature-boundary_svelte",
+    "file": "index-signature-boundary.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "nested-array-consumption_svelte",
+    "file": "nested-array-consumption.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "exported_mutable_set",
+    "file": "exported-mutable-set.svelte.ts",
+    "rule": "svelte/prefer-svelte-reactivity",
+    "messages": [
+      "Found a mutable instance of the built-in Set class. Use SvelteSet instead."
+    ],
+    "spanText": "new Set<T>()"
+  },
+  {
+    "name": "nested_optional",
+    "file": "nested-optional.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "nested_alias",
+    "file": "nested-alias.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "nested_bind",
+    "file": "nested-bind.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": []
+  },
+  {
+    "name": "intersection_callback",
+    "file": "intersection-callback.svelte",
+    "rule": "svelte/no-unused-props",
+    "messages": [
+      "'missing' is an unused Props property."
+    ]
+  }
+]

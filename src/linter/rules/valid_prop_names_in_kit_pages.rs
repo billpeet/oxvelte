@@ -3,16 +3,13 @@
 //! ⭐ Recommended
 
 use crate::linter::{LintContext, Rule};
-use oxc::ast::ast::{
-    BindingPattern, Declaration, ExportNamedDeclaration, Expression, Statement,
-    VariableDeclarationKind,
-};
-use oxc::span::Span;
+use oxc::ast::ast::{BindingPattern, Declaration, ExportNamedDeclaration, Expression, Statement};
+use oxc::span::{GetSpan, Span};
 
-const VALID_KIT_PROPS: &[&str] = &["data", "errors", "form", "params", "snapshot"];
-
-const VALID_KIT_PROPS_SVELTE5: &[&str] =
-    &["data", "errors", "form", "params", "snapshot", "children"];
+const PAGE_PROPS: &[&str] = &["data", "form", "params", "snapshot"];
+const LEGACY_PROPS: &[&str] = &["data", "errors", "form", "params", "snapshot"];
+const LAYOUT_PROPS: &[&str] = &["data", "form", "params", "snapshot", "children"];
+const ERROR_PROPS: &[&str] = &["error"];
 
 pub struct ValidPropNamesInKitPages;
 
@@ -52,7 +49,13 @@ impl Rule for ValidPropNamesInKitPages {
         let Some(semantic) = ctx.instance_semantic else {
             return;
         };
-        let content_offset = ctx.instance_content_offset;
+        let content_offset = ctx.ast.instance.as_ref().unwrap().content_span.start;
+        let svelte5 = ctx.svelte_version.is_unknown() || ctx.svelte_version.includes_major(5);
+        let valid_props = match (svelte5, fname) {
+            (true, "+layout.svelte") => LAYOUT_PROPS,
+            (true, "+error.svelte") => ERROR_PROPS,
+            _ => PAGE_PROPS,
+        };
 
         for stmt in &semantic.nodes().program().body {
             match stmt {
@@ -61,7 +64,7 @@ impl Rule for ValidPropNamesInKitPages {
                     check_export_named(ctx, content_offset, exp);
                 }
                 // `let { ... } = $props();` — Svelte 5 props.
-                Statement::VariableDeclaration(vd) if vd.kind == VariableDeclarationKind::Let => {
+                Statement::VariableDeclaration(vd) => {
                     for d in &vd.declarations {
                         let is_props_call = d.init.as_ref().map_or(false, |init| match init {
                             Expression::CallExpression(ce) => matches!(
@@ -71,12 +74,7 @@ impl Rule for ValidPropNamesInKitPages {
                             _ => false,
                         });
                         if is_props_call {
-                            report_pattern_names(
-                                ctx,
-                                content_offset,
-                                &d.id,
-                                VALID_KIT_PROPS_SVELTE5,
-                            );
+                            report_pattern_names(ctx, content_offset, &d.id, valid_props);
                         }
                     }
                 }
@@ -95,14 +93,14 @@ fn check_export_named<'a>(
     let Declaration::VariableDeclaration(vd) = decl else {
         return;
     };
-    if !matches!(
-        vd.kind,
-        VariableDeclarationKind::Let | VariableDeclarationKind::Var
-    ) {
-        return;
-    }
     for d in &vd.declarations {
-        report_pattern_names(ctx, content_offset, &d.id, VALID_KIT_PROPS);
+        if let BindingPattern::BindingIdentifier(id) = &d.id {
+            if !LEGACY_PROPS.contains(&id.name.as_str()) {
+                report(ctx, content_offset, d.span);
+            }
+        } else {
+            report_pattern_names(ctx, content_offset, &d.id, LEGACY_PROPS);
+        }
     }
 }
 
@@ -113,27 +111,15 @@ fn report_pattern_names<'a>(
     valid: &[&str],
 ) {
     match pat {
-        BindingPattern::BindingIdentifier(id) => {
-            if !valid.contains(&id.name.as_str()) {
-                report(ctx, content_offset, id.name.as_str(), id.span);
-            }
-        }
+        BindingPattern::BindingIdentifier(_) => {}
         BindingPattern::ObjectPattern(obj) => {
             for prop in &obj.properties {
                 let key_name = match &prop.key {
                     oxc::ast::ast::PropertyKey::StaticIdentifier(id) => id.name.as_str(),
-                    oxc::ast::ast::PropertyKey::StringLiteral(l) => l.value.as_str(),
                     _ => continue,
                 };
                 if !valid.contains(&key_name) {
-                    report(ctx, content_offset, key_name, prop.key.span());
-                }
-            }
-            if let Some(rest) = &obj.rest {
-                if let BindingPattern::BindingIdentifier(id) = &rest.argument {
-                    if !valid.contains(&id.name.as_str()) {
-                        report(ctx, content_offset, id.name.as_str(), id.span);
-                    }
+                    report(ctx, content_offset, prop.key.span());
                 }
             }
         }
@@ -147,15 +133,83 @@ fn report_pattern_names<'a>(
     }
 }
 
-fn report(ctx: &mut LintContext<'_>, content_offset: u32, _name: &str, span: Span) {
+fn report(ctx: &mut LintContext<'_>, content_offset: u32, span: Span) {
     let s = content_offset + span.start;
     let e = content_offset + span.end;
     ctx.diagnostic(
-        "disallow props other than data or errors in SvelteKit page components.",
+        "disallow invalid props in SvelteKit route components.",
         Span::new(s, e),
     );
 }
 
-// We accidentally introduced `BindingPatternKind` via oxc's re-export path;
-// if it disappears, this import needs updating.
-use oxc::span::GetSpan;
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter, RuleConfig};
+    use crate::parser;
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, path: &str) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config_and_path(&parsed.ast, source, RuleConfig::default(), path)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/valid-prop-names-in-kit-pages")
+            .collect()
+    }
+
+    #[test]
+    fn rune_props_depend_on_the_route_kind() {
+        let source = r#"<!-- 😀 -->
+        <script module>const { moduleProp } = $props();</script>
+        <script data-note=">">
+            const { data, form, params, snapshot, children, error, errors, ...rest } = $props();
+        </script>"#;
+        for (path, expected) in [
+            (
+                "src/routes/+page.svelte",
+                vec!["children", "error", "errors"],
+            ),
+            ("src/routes/+layout.svelte", vec!["error", "errors"]),
+            (
+                "src/routes/+error.svelte",
+                vec!["data", "form", "params", "snapshot", "children", "errors"],
+            ),
+            ("src/lib/Component.svelte", vec![]),
+        ] {
+            let diagnostics = lint(source, path);
+            assert_eq!(
+                diagnostics
+                    .iter()
+                    .map(|d| &source[d.span.start as usize..d.span.end as usize])
+                    .collect::<Vec<_>>(),
+                expected
+            );
+            assert!(diagnostics
+                .iter()
+                .all(|d| d.message == "disallow invalid props in SvelteKit route components."));
+        }
+    }
+
+    #[test]
+    fn rest_quoted_keys_and_whole_bindings_are_not_named_props() {
+        let source = r#"<script>
+            let { 'custom': custom, ...rest } = $props();
+            const props = $props();
+        </script>"#;
+        assert!(lint(source, "src/routes/+page.svelte").is_empty());
+    }
+
+    #[test]
+    fn legacy_exports_keep_legacy_names_and_report_the_declarator() {
+        let source = r#"<script>export let errors; export let custom = 'value';</script>"#;
+        let diagnostics = lint(source, "src/routes/+page.svelte");
+        assert_eq!(diagnostics.len(), 1);
+        let span = diagnostics[0].span;
+        assert_eq!(
+            &source[span.start as usize..span.end as usize],
+            "custom = 'value'"
+        );
+    }
+}

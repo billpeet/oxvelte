@@ -1,199 +1,204 @@
-//! `svelte/no-goto-without-base` — require goto to use base path.
-
+//! `svelte/no-goto-without-base` — the deprecated base-path check for goto.
 use crate::linter::{LintContext, Rule};
-use oxc::ast::ast::{Expression, ImportDeclarationSpecifier, ModuleExportName, Statement};
-use oxc::ast::AstKind;
+use oxc::ast::{ast::Expression, AstKind};
+use oxc::semantic::{Semantic, SymbolId};
 use oxc::span::{GetSpan, Span};
-
 pub struct NoGotoWithoutBase;
-
 impl Rule for NoGotoWithoutBase {
     fn name(&self) -> &'static str {
         "svelte/no-goto-without-base"
     }
-
     fn applies_to_scripts(&self) -> bool {
         true
     }
-
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
-        let Some(semantic) = ctx.instance_semantic else {
-            return;
-        };
-        let content_offset = ctx.instance_content_offset;
-        let program = semantic.nodes().program();
-
-        // Resolve the local names bound to `goto` (from `$app/navigation`) and
-        // `base` (from `$app/paths`). Namespace imports resolve to `ns.goto`
-        // and `ns.base` for call-callee matching.
-        let mut goto_names: Vec<String> = Vec::new();
-        let mut base_name: Option<String> = None;
-        for stmt in &program.body {
-            let Statement::ImportDeclaration(imp) = stmt else {
-                continue;
-            };
-            let src = imp.source.value.as_str();
-            let Some(specifiers) = &imp.specifiers else {
-                continue;
-            };
-            for spec in specifiers {
-                match spec {
-                    ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                        let imported_name = match &s.imported {
-                            ModuleExportName::IdentifierName(n) => n.name.as_str(),
-                            ModuleExportName::IdentifierReference(n) => n.name.as_str(),
-                            ModuleExportName::StringLiteral(l) => l.value.as_str(),
-                        };
-                        if src == "$app/navigation" && imported_name == "goto" {
-                            goto_names.push(s.local.name.to_string());
-                        }
-                        if src == "$app/paths" && imported_name == "base" {
-                            base_name = Some(s.local.name.to_string());
-                        }
-                    }
-                    ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
-                        if src == "$app/navigation" {
-                            goto_names.push(format!("{}.goto", s.local.name));
-                        }
-                        if src == "$app/paths" {
-                            base_name = Some(format!("{}.base", s.local.name));
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-        if goto_names.is_empty() {
-            return;
-        }
-
-        for node in semantic.nodes().iter() {
-            let AstKind::CallExpression(ce) = node.kind() else {
-                continue;
-            };
-            let callee_text = callee_static_name(&ce.callee);
-            let Some(callee_text) = callee_text else {
-                continue;
-            };
-            if !goto_names.iter().any(|g| g == &callee_text) {
-                continue;
-            }
-            let Some(first_arg) = ce.arguments.first().and_then(|a| a.as_expression()) else {
-                continue;
-            };
-            // `goto(base + '/foo/')` / `` goto(`${base}/foo/`) `` — prefix use is fine.
-            if let Some(bn) = &base_name {
-                if arg_uses_base(first_arg, bn) {
+        for (semantic, offset) in [
+            (
+                ctx.instance_semantic,
+                ctx.ast
+                    .instance
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
+            (
+                ctx.module_semantic,
+                ctx.ast
+                    .module
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
+        ] {
+            let Some(semantic) = semantic else { continue };
+            for node in semantic.nodes().iter() {
+                let AstKind::CallExpression(call) = node.kind() else {
+                    continue;
+                };
+                if !import_reference(
+                    &call.callee,
+                    semantic,
+                    "$app/navigation",
+                    "goto",
+                    &mut Vec::new(),
+                ) {
                     continue;
                 }
+                let Some(argument) = call.arguments.first() else {
+                    continue;
+                };
+                let safe = argument.as_expression().is_some_and(|expression| {
+                    match expression.get_inner_expression() {
+                        Expression::StringLiteral(literal) => absolute_uri(literal.value.as_str()),
+                        Expression::BinaryExpression(binary) => {
+                            matches!(&binary.left, Expression::Identifier(_))
+                                && import_reference(
+                                    &binary.left,
+                                    semantic,
+                                    "$app/paths",
+                                    "base",
+                                    &mut Vec::new(),
+                                )
+                        }
+                        Expression::TemplateLiteral(template) => {
+                            template
+                                .quasis
+                                .first()
+                                .is_some_and(|q| q.value.raw.is_empty())
+                                && template.expressions.first().is_some_and(|e| {
+                                    matches!(e, Expression::Identifier(_))
+                                        && import_reference(
+                                            e,
+                                            semantic,
+                                            "$app/paths",
+                                            "base",
+                                            &mut Vec::new(),
+                                        )
+                                })
+                        }
+                        _ => false,
+                    }
+                });
+                if !safe {
+                    let span = argument.span();
+                    ctx.diagnostic(
+                        "Found a goto() call with a url that isn't prefixed with the base path.",
+                        Span::new(offset + span.start, offset + span.end),
+                    );
+                }
             }
-            // Only flag arguments we can analyze as path literals (string, template,
-            // or binary `+` chains starting with one). Dynamic arguments like
-            // `goto(someVar)` or `goto(getPath())` are left alone.
-            let Some(leading_path) = leading_string_prefix(first_arg) else {
-                continue;
+        }
+    }
+}
+fn absolute_uri(value: &str) -> bool {
+    value.find(':').is_some_and(|colon| {
+        value[..colon]
+            .bytes()
+            .all(|b| b == b'+' || b.is_ascii_alphabetic())
+    })
+}
+fn import_reference(
+    expression: &Expression<'_>,
+    semantic: &Semantic<'_>,
+    source: &str,
+    exported: &str,
+    seen: &mut Vec<SymbolId>,
+) -> bool {
+    match expression.get_inner_expression() {
+        Expression::Identifier(id) => {
+            let Some(symbol) = semantic
+                .scoping()
+                .get_reference(id.reference_id())
+                .symbol_id()
+            else {
+                return false;
             };
-            if is_absolute_url(&leading_path) {
-                continue;
+            if seen.contains(&symbol) {
+                return false;
             }
-            let callee_span = ce.callee.span();
-            let s = content_offset + callee_span.start;
-            let e = content_offset + callee_span.end + 1; // include `(`
-            ctx.diagnostic(
-                "Use `base` from `$app/paths` when calling `goto` with an absolute path.",
-                Span::new(s, e),
-            );
-        }
-    }
-}
-
-/// Return the leading static string prefix of a path-like expression. Returns
-/// `None` if we can't statically determine a prefix (dynamic expression).
-fn leading_string_prefix(expr: &Expression<'_>) -> Option<String> {
-    match expr {
-        Expression::StringLiteral(l) => Some(l.value.to_string()),
-        Expression::TemplateLiteral(t) => t.quasis.first().map(|q| {
-            q.value
-                .cooked
-                .as_deref()
-                .unwrap_or(q.value.raw.as_str())
-                .to_string()
-        }),
-        Expression::BinaryExpression(b)
-            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
-        {
-            leading_string_prefix(&b.left)
-        }
-        _ => None,
-    }
-}
-
-/// Extract the static name of a call's callee: `foo` or `ns.foo`. Returns None
-/// for computed accesses, call chains, etc.
-fn callee_static_name(callee: &Expression<'_>) -> Option<String> {
-    match callee {
-        Expression::Identifier(id) => Some(id.name.to_string()),
-        Expression::StaticMemberExpression(mem) => {
-            if let Expression::Identifier(id) = &mem.object {
-                Some(format!("{}.{}", id.name, mem.property.name))
-            } else {
-                None
-            }
-        }
-        _ => None,
-    }
-}
-
-fn is_absolute_url(path: &str) -> bool {
-    path.starts_with("http://")
-        || path.starts_with("https://")
-        || path.starts_with("mailto:")
-        || path.starts_with("tel:")
-        || path.starts_with("//")
-}
-
-/// Does the argument expression use `base` as a PREFIX (not just somewhere)?
-/// Only the leftmost position counts — `'/foo/' + base` and `` `/foo/${base}` ``
-/// are NOT prefixed and should still be flagged.
-fn arg_uses_base(expr: &Expression<'_>, base_name: &str) -> bool {
-    match expr {
-        Expression::TemplateLiteral(t) => {
-            // Base-prefixed template: first quasi is empty and first interpolation is base.
-            if let (Some(first_quasi), Some(first_expr)) = (t.quasis.first(), t.expressions.first())
+            seen.push(symbol);
+            let declaration = semantic.scoping().symbol_declaration(symbol);
+            for node in
+                std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration))
             {
-                let first_text = first_quasi
-                    .value
-                    .cooked
-                    .as_deref()
-                    .unwrap_or(first_quasi.value.raw.as_str());
-                if first_text.is_empty() && is_base_ref(first_expr, base_name) {
-                    return true;
+                match semantic.nodes().kind(node) {
+                    AstKind::ImportDeclaration(import) => return import.source.value == source && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|specifier| matches!(specifier, oxc::ast::ast::ImportDeclarationSpecifier::ImportSpecifier(s) if s.local.symbol_id.get() == Some(symbol) && s.imported.name() == exported))),
+                    AstKind::VariableDeclarator(variable) => return variable.init.as_ref().is_some_and(|init| import_reference(init, semantic, source, exported, seen)),
+                    _ => {}
                 }
             }
             false
         }
-        Expression::BinaryExpression(b)
-            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
-        {
-            // Base-prefixed concat: leftmost operand is base (recursively).
-            arg_uses_base(&b.left, base_name) || is_base_ref(&b.left, base_name)
-        }
-        _ => is_base_ref(expr, base_name),
-    }
-}
-
-/// Is this expression a direct reference to `base`?
-fn is_base_ref(expr: &Expression<'_>, base_name: &str) -> bool {
-    match expr {
-        Expression::Identifier(id) => id.name == base_name,
-        Expression::StaticMemberExpression(mem) => {
-            if let Expression::Identifier(id) = &mem.object {
-                let composed = format!("{}.{}", id.name, mem.property.name);
-                composed == base_name
-            } else {
-                false
-            }
+        Expression::StaticMemberExpression(member) if member.property.name == exported => {
+            let Expression::Identifier(id) = member.object.get_inner_expression() else {
+                return false;
+            };
+            let Some(symbol) = semantic
+                .scoping()
+                .get_reference(id.reference_id())
+                .symbol_id()
+            else {
+                return false;
+            };
+            let declaration = semantic.scoping().symbol_declaration(symbol);
+            std::iter::once(declaration).chain(semantic.nodes().ancestor_ids(declaration)).any(|node| matches!(semantic.nodes().kind(node), AstKind::ImportDeclaration(import) if import.source.value == source && import.specifiers.as_ref().is_some_and(|specifiers| specifiers.iter().any(|s| matches!(s, oxc::ast::ast::ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) if s.local.symbol_id.get() == Some(symbol))))))
         }
         _ => false,
+    }
+}
+#[cfg(test)]
+mod tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
+
+    #[test]
+    fn argument_spans_use_parsed_script_offsets() {
+        for attributes in ["data-note=\">\"", "module data-note=\">\""] {
+            let source = format!("<!-- 😀 -->\n<script {attributes}>\nimport {{ goto }} from '$app/navigation';\ngoto('/route');\n</script>");
+            let allocator = Allocator::default();
+            let parsed = parser::parse(&source, &allocator);
+            assert!(parsed.errors.is_empty());
+            let diagnostics = Linter::all().lint(&parsed.ast, &source);
+            let finding = diagnostics
+                .iter()
+                .find(|d| d.rule_name == "svelte/no-goto-without-base")
+                .unwrap();
+            let start = source.find("'/route'").unwrap() as u32;
+            assert_eq!(
+                finding.span,
+                oxc::span::Span::new(start, start + "'/route'".len() as u32)
+            );
+        }
+    }
+    #[test]
+    fn arguments_and_import_identity_follow_the_legacy_contract() {
+        let source = r#"<script>
+import { goto as navigate } from '$app/navigation';
+import { base } from '$app/paths';
+navigate(dynamic);
+navigate(...paths);
+navigate('custom+scheme:target');
+navigate(`${base}/ok`);
+navigate(base + '/ok');
+function shadow(navigate) { navigate('/ignored'); }
+function shadowBase(base) { navigate(base + '/invalid'); }
+navigate(`${'/prefix'}${base}`);
+</script>"#;
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty());
+        let diagnostics = Linter::all().lint(&parsed.ast, source);
+        let findings: Vec<_> = diagnostics
+            .iter()
+            .filter(|d| d.rule_name == "svelte/no-goto-without-base")
+            .map(|d| &source[d.span.start as usize..d.span.end as usize])
+            .collect();
+        assert_eq!(
+            findings,
+            [
+                "dynamic",
+                "...paths",
+                "base + '/invalid'",
+                "`${'/prefix'}${base}`"
+            ]
+        );
     }
 }

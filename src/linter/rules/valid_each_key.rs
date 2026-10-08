@@ -34,7 +34,7 @@ impl Rule for ValidEachKey {
             if !uses_var {
                 ctx.diagnostic(
                     "Expected key to use the variables which are defined by the `{#each}` block.",
-                    block.span,
+                    block.key_span.unwrap_or(block.header_span),
                 );
             }
         });
@@ -42,22 +42,21 @@ impl Rule for ValidEachKey {
 }
 
 fn extract_iter_vars(context: &str) -> Vec<String> {
-    let trimmed = context.trim();
-    if trimmed.starts_with('{') || trimmed.starts_with('[') {
-        trimmed[1..trimmed.len().saturating_sub(1)]
-            .split(',')
-            .map(|s| {
-                let s = s.trim();
-                s.find(':')
-                    .map(|p| s[p + 1..].trim())
-                    .unwrap_or(s.strip_prefix("...").unwrap_or(s))
-                    .to_string()
-            })
-            .filter(|s| !s.is_empty())
-            .collect()
-    } else {
-        vec![trimmed.to_string()]
+    let alloc = Allocator::default();
+    let source = format!("let {context} = value;");
+    let parsed = oxc::parser::Parser::new(&alloc, &source, oxc::span::SourceType::ts()).parse();
+    if !parsed.errors.is_empty() {
+        return Vec::new();
     }
+    let semantic = SemanticBuilder::new().build(&parsed.program).semantic;
+    semantic
+        .nodes()
+        .iter()
+        .filter_map(|node| match node.kind() {
+            AstKind::BindingIdentifier(id) => Some(id.name.to_string()),
+            _ => None,
+        })
+        .collect()
 }
 
 fn key_references_each_var(key: &str, vars: &[String]) -> bool {
@@ -75,7 +74,55 @@ fn key_references_each_var(key: &str, vars: &[String]) -> bool {
         let AstKind::IdentifierReference(id) = node.kind() else {
             return false;
         };
-        vars.iter().any(|var| id.name == var.as_str())
+        semantic
+            .scoping()
+            .get_reference(id.reference_id())
+            .symbol_id()
+            .is_none()
+            && vars.iter().any(|var| id.name == var.as_str())
     });
     references_each_var
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/valid-each-key")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let source = "<!-- 😀 -->{#each values as {nested: {id}} ((() => {const id = 1; return id;})())}x{/each}";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(
+            &source[diagnostics[0].span.start as usize..diagnostics[0].span.end as usize],
+            "(() => {const id = 1; return id;})()"
+        );
+        assert!(lint(
+            "{#each values as {nested: {id}} (id)}x{/each}",
+            serde_json::json!([])
+        )
+        .is_empty());
+    }
 }

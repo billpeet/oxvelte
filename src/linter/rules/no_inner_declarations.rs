@@ -85,11 +85,17 @@ impl Rule for NoInnerDeclarations {
     }
 
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
-        // Options: `[mode, { blockScopedFunctions }]`. Schema mirrors ESLint
-        // core. We currently treat `blockScopedFunctions` as if it were always
-        // `"disallow"` — the legacy behavior, which is what every fixture
-        // exercises. Adding `"allow"` requires propagating strict-mode info
-        // and is left for a follow-up.
+        // Resolved ESLint configs include the core rule's version-dependent
+        // default. Without that option, retain the legacy disallow behavior.
+        let allow_block_scoped = ctx
+            .config
+            .options
+            .as_ref()
+            .and_then(|v| v.as_array())
+            .and_then(|a| a.get(1))
+            .and_then(|v| v.get("blockScopedFunctions"))
+            .and_then(|v| v.as_str())
+            == Some("allow");
         let mode = ctx
             .config
             .options
@@ -124,6 +130,14 @@ impl Rule for NoInnerDeclarations {
                 let parent_kind = nodes.parent_kind(node.id());
                 match node.kind() {
                     AstKind::Function(f) if f.is_declaration() => {
+                        if allow_block_scoped
+                            && semantic
+                                .scoping()
+                                .scope_flags(node.scope_id())
+                                .is_strict_mode()
+                        {
+                            continue;
+                        }
                         if is_root_scope_kind(parent_kind) {
                             continue;
                         }
