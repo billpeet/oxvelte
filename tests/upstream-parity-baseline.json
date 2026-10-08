@@ -1840,20 +1840,6 @@
     "valid-prop-names-in-kit-pages/invalid/svelte4-children/+page.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-prop-names-in-kit-pages/invalid/svelte5-children-in-page/+page.svelte": {
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "be649463972529b9a9fd647c4fec3f72c01da559510b9093889fd2943c0eb5ab"
-    },
-    "valid-prop-names-in-kit-pages/invalid/svelte5-error-invalid-prop/+error.svelte": {
-      "diagnostics": "a56c4138a776f125b8984ef5eb4bfe3ba49e3695fd8134e8d96e6e942d4fe6fa"
-    },
-    "valid-prop-names-in-kit-pages/invalid/svelte5/+page.svelte": {
-      "diagnostics": "052bff52ea2ec6fa5b967074235557fb72e7542621cbc396ef3d3d0e74efcdcf"
-    },
-    "valid-prop-names-in-kit-pages/valid/svelte5-error/+error.svelte": {
-      "diagnostic_count": "4af60305bf386bbd2ab96512ee17b64a9a57fc4468e57ec3e736493dadd5d1c4",
-      "diagnostics": "18c3fd9e8a6e8d6da3b85cf60fdc0970a9087ab6b8eedb947bd88484484fe726"
-    },
     "valid-prop-names-in-kit-pages/valid/test001/+page.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },

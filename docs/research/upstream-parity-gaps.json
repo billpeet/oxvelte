@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 758,
-    "gaps": 477,
+    "pass": 762,
+    "gaps": 473,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1589,7 +1589,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 35,
+      "count": 33,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1868,29 +1868,13 @@
               "fix_output"
             ]
           }
-        ],
-        "valid-prop-names-in-kit-pages": [
-          {
-            "id": "valid-prop-names-in-kit-pages/invalid/svelte5-children-in-page/+page.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "valid-prop-names-in-kit-pages/valid/svelte5-error/+error.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
         ]
       }
     },
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 26,
+      "count": 24,
       "rules": {
         "max-lines-per-block": [
           {
@@ -2038,20 +2022,6 @@
             "dimensions": [
               "diagnostics",
               "fix_output"
-            ]
-          }
-        ],
-        "valid-prop-names-in-kit-pages": [
-          {
-            "id": "valid-prop-names-in-kit-pages/invalid/svelte5-error-invalid-prop/+error.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "valid-prop-names-in-kit-pages/invalid/svelte5/+page.svelte",
-            "dimensions": [
-              "diagnostics"
             ]
           }
         ],
@@ -3367,7 +3337,7 @@
       }
     },
     "diagnostics": {
-      "count": 210,
+      "count": 206,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3408,7 +3378,6 @@
         "sort-attributes": 26,
         "valid-compile": 8,
         "valid-each-key": 2,
-        "valid-prop-names-in-kit-pages": 4,
         "valid-style-parse": 2
       }
     },
@@ -3437,7 +3406,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 71,
+      "count": 69,
       "rules": {
         "consistent-selector-style": 4,
         "derived-has-same-inputs-outputs": 1,
@@ -3456,8 +3425,7 @@
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "sort-attributes": 11,
-        "valid-compile": 8,
-        "valid-prop-names-in-kit-pages": 2
+        "valid-compile": 8
       }
     },
     "fix_output": {
