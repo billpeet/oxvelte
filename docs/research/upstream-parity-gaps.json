@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 946,
-    "gaps": 289,
+    "pass": 950,
+    "gaps": 285,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1541,7 +1541,7 @@
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 9,
+      "count": 5,
       "rules": {
         "max-lines-per-block": [
           {
@@ -1552,32 +1552,6 @@
           },
           {
             "id": "max-lines-per-block/invalid/template-too-long/template01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-export-load-in-svelte-module-in-kit-pages": [
-          {
-            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config/test01/+page.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/test01/+page.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/test02/+page.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -2007,7 +1981,7 @@
       }
     },
     "diagnostics": {
-      "count": 103,
+      "count": 99,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2017,7 +1991,6 @@
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
-        "no-export-load-in-svelte-module-in-kit-pages": 4,
         "no-object-in-text-mustaches": 4,
         "no-reactive-reassign": 4,
         "no-shorthand-style-property-overrides": 2,
