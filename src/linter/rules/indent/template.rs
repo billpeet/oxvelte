@@ -161,11 +161,26 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
             }
             TemplateNode::EachBlock(n) => {
                 region(layout, n.context_span, RegionKind::Binding);
-                for s in [Some(n.expression_span), n.index_span, n.key_span]
+                for s in [Some(n.expression_span), n.index_span]
                     .into_iter()
                     .flatten()
                 {
                     region(layout, s, RegionKind::Expression);
+                }
+                if let Some(key) = n.key_span {
+                    let before = &layout.source[n.header_span.start as usize..key.start as usize];
+                    let after = &layout.source[key.end as usize..n.header_span.end as usize];
+                    let opening = before.trim_end();
+                    let closing = after.trim_start();
+                    let full = if opening.ends_with('(') && closing.starts_with(')') {
+                        Span::new(
+                            n.header_span.start + opening.len() as u32 - 1,
+                            key.end + (after.len() - closing.len()) as u32 + 1,
+                        )
+                    } else {
+                        key
+                    };
+                    region(layout, full, RegionKind::Expression);
                 }
                 collect_nodes(&n.body.nodes, layout);
                 if let Some(f) = &n.fallback {
@@ -189,7 +204,9 @@ fn collect_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 collect_nodes(&n.body.nodes, layout);
             }
             TemplateNode::SnippetBlock(n) => {
-                if let Some(params) = n.params_span { region(layout, params, RegionKind::Parameters); }
+                if let Some(params) = n.params_span {
+                    region(layout, params, RegionKind::Parameters);
+                }
                 collect_nodes(&n.body.nodes, layout);
             }
         }
@@ -368,13 +385,6 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                     if !n.elseif && !n.test.is_empty() {
                         block_close(layout, n.span, open);
                     }
-                    // Ordinary else bodies are represented as a fragment wrapper
-                    // in our AST; its opening continuation is recovered by range.
-                    if let Some(a) = &n.alternate {
-                        if !matches!(a.as_ref(), TemplateNode::IfBlock(_)) {
-                            else_body(layout, a, open);
-                        }
-                    }
                 }
                 apply_nodes(&n.consequent.nodes, layout);
                 if let Some(a) = &n.alternate {
@@ -382,14 +392,15 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                 }
             }
             TemplateNode::EachBlock(n) => {
+                let header = Span::new(n.span.start, n.body.span.start);
                 let items: Vec<_> = [Some(n.expression_span), Some(n.context_span), n.index_span]
                     .into_iter()
                     .flatten()
                     .collect();
-                block_header(layout, n.header_span, &items);
-                if let Some(open) = layout.first(n.header_span) {
+                block_header(layout, header, &items);
+                if let Some(open) = layout.first(header) {
                     if let Some(key) = n.key_span {
-                        if let Some((t, _)) = layout.first_last(key, n.header_span.start) {
+                        if let Some((t, _)) = layout.first_last(key, header.start) {
                             if let Some(kw) = layout.after(open) {
                                 layout.set(t, 1, kw);
                             }
@@ -419,7 +430,9 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
                                 .iter()
                                 .enumerate()
                                 .find(|(_, t)| {
-                                    t.span.start >= n.params_span.map_or(layout.tokens[left].span.end, |s|s.end)
+                                    t.span.start
+                                        >= n.params_span
+                                            .map_or(layout.tokens[left].span.end, |s| s.end)
                                         && t.span.end <= header.end
                                         && &layout.source
                                             [t.span.start as usize..t.span.end as usize]
@@ -564,6 +577,9 @@ fn apply_attributes(n: &crate::ast::Element<'_>, layout: &mut Layout<'_>) {
                     apply_text(layout, value, true);
                 }
             }
+            if let (Some(m), Some(e)) = (meta.mustache_span, meta.expression_span) {
+                mustache(layout, m, &[e]);
+            }
         }
     }
 }
@@ -623,47 +639,31 @@ fn simple_block(layout: &mut Layout<'_>, s: Span, expression: Span, body: &Fragm
     apply_nodes(&body.nodes, layout);
 }
 fn branch(layout: &mut Layout<'_>, f: &Fragment<'_>, parent: usize, binding: Option<Span>) {
-    let header = layout
-        .tokens
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, t)| {
-            t.span.end <= f.span.start
-                && &layout.source[t.span.start as usize..t.span.end as usize] == "{"
-        })
-        .map(|(i, _)| i);
-    // The body starts immediately after the closing brace; search backwards
-    // over the continuation's tokens rather than using text-node whitespace.
-    let open = if let Some(last) = layout
-        .tokens
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, t)| t.span.end <= f.span.start)
-        .map(|(i, _)| i)
-    {
-        let mut cursor = last;
+    // Await continuation fragments include the header; each fallback fragments
+    // begin after it. Handle both source shapes without scanning expression text.
+    let direct = layout
+        .first(f.span)
+        .filter(|&i| layout.tokens[i].span.start == f.span.start && layout.text(i) == "{");
+    let open = direct.or_else(|| {
+        let last = layout
+            .tokens
+            .iter()
+            .rposition(|t| t.span.end <= f.span.start)?;
         let mut depth = 0;
-        loop {
-            if layout.text(cursor) == "}" {
-                depth += 1;
-            }
-            if layout.text(cursor) == "{" {
-                depth -= 1;
-                if depth == 0 {
-                    break Some(cursor);
+        for cursor in (0..=last).rev() {
+            match layout.text(cursor) {
+                "}" => depth += 1,
+                "{" => {
+                    depth -= 1;
+                    if depth == 0 {
+                        return Some(cursor);
+                    }
                 }
-            }
-            if let Some(prev) = layout.before(cursor) {
-                cursor = prev;
-            } else {
-                break None;
+                _ => {}
             }
         }
-    } else {
-        header
-    };
+        None
+    });
     if let Some(open) = open {
         if open != parent {
             layout.set(open, 0, parent);
@@ -682,27 +682,68 @@ fn branch(layout: &mut Layout<'_>, f: &Fragment<'_>, parent: usize, binding: Opt
                 }
             }
         }
-        let close = layout
-            .tokens
-            .iter()
-            .enumerate()
-            .rev()
-            .find(|(_, t)| t.span.end <= f.span.start)
-            .map(|(i, _)| i);
-        if let Some(close) = close {
-            layout.set(close, 0, open);
+        let mut depth = 0;
+        for cursor in open..layout.tokens.len() {
+            match layout.text(cursor) {
+                "{" => depth += 1,
+                "}" => {
+                    depth -= 1;
+                    if depth == 0 {
+                        layout.set(cursor, 0, open);
+                        break;
+                    }
+                }
+                _ => {}
+            }
         }
         children(layout, &f.nodes, open);
     }
 }
-fn else_body(layout: &mut Layout<'_>, node: &TemplateNode<'_>, parent: usize) {
-    // Ordinary else branches are represented by an anonymous element wrapper.
-    if let TemplateNode::Element(n) = node {
-        if n.name.is_empty() {
-            if let Some(open) = layout.first(n.span) {
-                layout.set(open, 0, parent);
-                children(layout, &n.children, open);
-            }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn collects_multiline_control_header_tokens() {
+        let source = "<div>\n{\n#if\n ok\n}\ntext\n{\n/if\n}\n</div>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let ctx = LintContext::new(&parsed.ast, source);
+        let mut layout = Layout::new(source, super::super::layout::Options::parse(None));
+        collect(&ctx, &mut layout);
+        layout.sort();
+        let tokens: Vec<_> = (0..layout.tokens.len()).map(|i| layout.text(i)).collect();
+        assert!(
+            tokens.contains(&"#if"),
+            "{tokens:?}; tags {:?}; nodes {:?}",
+            parsed.ast.html.template_tag_spans,
+            parsed.ast.html.nodes
+        );
+    }
+
+    #[test]
+    fn key_parentheses_and_preformatted_text_preserve_unicode_and_crlf() {
+        use crate::linter::Rule;
+        let source = "<!-- 😀 -->\r\n<div>\r\n{#each rows as row\r\n(\r\nrow\r\n.\r\nid\r\n)\r\n}\r\n<p>é</p>\r\n{/each}\r\n<pre>\r\nunchanged\r\n</pre>\r\n</div>";
+        let expected = "<!-- 😀 -->\r\n<div>\r\n  {#each rows as row\r\n    (\r\n      row\r\n        .\r\n        id\r\n    )\r\n  }\r\n    <p>é</p>\r\n  {/each}\r\n  <pre>\r\nunchanged\r\n  </pre>\r\n</div>";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let mut ctx = LintContext::new(&parsed.ast, source);
+        ctx.file_path = Some("Component.svelte".into());
+        super::super::Indent.run(&mut ctx);
+        let mut fixes: Vec<_> = ctx
+            .into_diagnostics()
+            .into_iter()
+            .filter_map(|d| d.fix)
+            .collect();
+        fixes.sort_by_key(|f| f.span.start);
+        let mut result = source.to_owned();
+        for fix in fixes.into_iter().rev() {
+            result.replace_range(
+                fix.span.start as usize..fix.span.end as usize,
+                &fix.replacement,
+            );
         }
+        assert_eq!(result, expected);
     }
 }
