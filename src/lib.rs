@@ -23,6 +23,12 @@ mod linter_fixture_tests {
             .unwrap_or(input_filename);
         let per_file = format!("{}/{}-config.json", dir, base);
         let default_cfg = format!("{}/_config.json", dir);
+        let executable = [
+            format!("{}/{base}-config.cjs", dir),
+            format!("{dir}/_config.cjs"),
+        ]
+        .into_iter()
+        .find(|p| std::path::Path::new(p).exists());
 
         let config_path = if std::path::Path::new(&per_file).exists() {
             Some(per_file)
@@ -46,10 +52,28 @@ mod linter_fixture_tests {
                             })
                         })
                     });
-                    let settings = json.get("settings").cloned();
+                    let mut settings = json.get("settings").cloned();
+                    if let Some(parser_options) = json.pointer("/languageOptions/parserOptions") {
+                        let settings = settings.get_or_insert_with(|| serde_json::json!({}));
+                        settings["compiler"] = serde_json::json!({});
+                        if let Some(parser) = parser_options.get("parser") {
+                            settings["compiler"]["parser"] = parser.clone();
+                        }
+                        if let Some(svelte_config) = parser_options.get("svelteConfig") {
+                            settings["compiler"]["svelteConfig"] = svelte_config.clone();
+                        }
+                    }
                     return RuleConfig { options, settings };
                 }
             }
+        }
+        if let Some(path) = executable {
+            return RuleConfig {
+                options: None,
+                settings: Some(
+                    serde_json::json!({"compiler":{"executableConfigPath":std::fs::canonicalize(path).unwrap().to_string_lossy()}}),
+                ),
+            };
         }
         RuleConfig::default()
     }
