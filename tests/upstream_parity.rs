@@ -3,7 +3,7 @@
 #[path = "support/parity.rs"]
 mod parity;
 
-use oxc::{allocator::Allocator, parser::Parser, span::SourceType};
+use oxc::allocator::Allocator;
 use oxvelte::{
     config::OxvelteConfig,
     linter::{LintDiagnostic, Linter, RuleConfig},
@@ -207,22 +207,7 @@ fn rule_config(case: &Case, issues: &mut Issues) -> RuleConfig {
 }
 
 fn script_errors(source: &str, is_ts: bool) -> Vec<String> {
-    let alloc = Allocator::default();
-    let result = Parser::new(
-        &alloc,
-        source,
-        if is_ts {
-            SourceType::ts()
-        } else {
-            SourceType::mjs()
-        },
-    )
-    .parse();
-    result
-        .errors
-        .iter()
-        .map(|error| error.to_string())
-        .collect()
+    parity::script_parse_errors(source, is_ts)
 }
 
 fn lint_case(

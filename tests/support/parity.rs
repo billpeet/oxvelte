@@ -5,6 +5,38 @@ use std::collections::BTreeMap;
 
 pub type Signatures = BTreeMap<String, BTreeMap<String, String>>;
 
+/// Match the upstream parser's distinction between parsing and checking types.
+/// typescript-estree 8.70.0 rejects SourceFile.parseDiagnostics, but modifier
+/// ordering (TS1029) is a checker diagnostic and is absent even from its opt-in
+/// semantic-error allowlist. OXC reports that check during parsing while still
+/// producing the complete AST. Keep every other diagnostic, including syntax
+/// errors recovered alongside TS1029.
+/// See https://github.com/typescript-eslint/typescript-eslint/blob/v8.70.0/packages/typescript-estree/src/ast-converter.ts
+/// and https://github.com/typescript-eslint/typescript-eslint/blob/v8.70.0/packages/typescript-estree/src/semantic-or-syntactic-errors.ts.
+pub fn script_parse_errors(source: &str, is_ts: bool) -> Vec<String> {
+    let allocator = oxc::allocator::Allocator::default();
+    let result = oxc::parser::Parser::new(
+        &allocator,
+        source,
+        if is_ts {
+            oxc::span::SourceType::ts()
+        } else {
+            oxc::span::SourceType::mjs()
+        },
+    )
+    .parse();
+    result
+        .errors
+        .iter()
+        .filter(|error| {
+            !(is_ts
+                && error.code.scope.as_deref() == Some("TS")
+                && error.code.number.as_deref() == Some("1029"))
+        })
+        .map(ToString::to_string)
+        .collect()
+}
+
 pub fn is_regression(
     baseline: &Signatures,
     id: &str,

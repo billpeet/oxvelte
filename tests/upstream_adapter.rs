@@ -7,6 +7,35 @@ use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion
 use serde_json::json;
 
 #[test]
+fn script_parse_errors_distinguish_modifier_checks_from_syntax_errors() {
+    use oxc::{allocator::Allocator, parser::Parser, span::SourceType};
+    let source = "class Box { readonly protected value: number; }";
+    let allocator = Allocator::default();
+    let parsed = Parser::new(&allocator, source, SourceType::ts()).parse();
+    assert_eq!(parsed.program.body.len(), 1);
+    assert!(parsed
+        .errors
+        .iter()
+        .any(|error| error.code.scope.as_deref() == Some("TS")
+            && error.code.number.as_deref() == Some("1029")));
+    assert!(parity::script_parse_errors(source, true).is_empty());
+    // The same sequence is not JavaScript, and invalid TS stays a parse gap.
+    assert!(!parity::script_parse_errors(source, false).is_empty());
+    for invalid in [
+        "class Box { readonly protected value: number; broken = ; }",
+        "class Box { readonly protected value: number;",
+    ] {
+        let errors = parity::script_parse_errors(invalid, true);
+        assert!(!errors.is_empty(), "{invalid}");
+        assert!(errors.iter().all(|error| !error.contains("must precede")));
+    }
+    assert!(
+        !parity::script_parse_errors("class Box { readonly readonly value: number; }", true)
+            .is_empty()
+    );
+}
+
+#[test]
 fn fixture_messages_normalize_only_the_evaluated_filename() {
     let original = "tests/fixtures/rules/example/input.svelte";
     for (absolute, cwd) in [
