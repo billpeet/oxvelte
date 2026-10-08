@@ -504,9 +504,6 @@
     "no-object-in-text-mustaches/invalid/object01-input.svelte": {
       "diagnostics": "5e7f2e925922ef6e7a179df0a1c2c85e70e1f764ee52932138f262cf452c1d96"
     },
-    "no-reactive-literals/invalid/test01-input.svelte": {
-      "suggestions": "abbc1c8ae0643aa7723361bb797bede05b6adca00fe865dbf064c5824308779e"
-    },
     "no-reactive-reassign/invalid/delete01-input.svelte": {
       "diagnostics": "ee33ada15abd00801737f3280769b47ce9601a621f989c1c130146cad18d1ba6"
     },
