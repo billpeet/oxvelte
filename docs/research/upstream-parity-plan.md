@@ -1,5 +1,7 @@
 # Upstream parity commit plan
 
+Commits 1-8 are complete. For work after `aa9b3ea`, use the [parallel work plan](upstream-parity-parallel-plan.md) and its [dispatch manifest](upstream-parity-work-packages.json). They assign the remaining 473 gaps to exclusive rule owners and record shared prerequisites. The counts below describe the original sequential plan.
+
 This plan starts from 689 matching cases, 546 gaps and 64 version skips at upstream revision `18339c886320151148568063c5801bf69cb51027`. The [generated inventory](upstream-parity-gaps.md) separates nine first-blocker groups; its [JSON companion](upstream-parity-gaps.json) contains every affected case ID and all secondary issue dimensions.
 
 ## What the categories mean
@@ -96,4 +98,4 @@ Commit 6 checks both conditional branches with independent recursion guards and 
 
 Commit 7 resolves imported ResolvedPathname annotations through semantic symbols, including aliases, parameters and typed destructuring. Optional/nullable types are accepted for links and rejected for navigation calls. Type-only imports no longer suppress link checks. All 84 navigation cases now pass in strict mode; regression tests reject wrong modules, Pathname and shadowed type names. This is annotation-based recognition, not a full TypeScript structural assignability checker. The full suite has 758 matches, 477 gaps and 64 version skips.
 
-Commit 8 separates page, layout and error rune props, checks const declarations as well as let, and aligns messages and report spans. Rest elements, quoted keys and whole-object bindings follow the upstream named-property check. All 11 eligible Kit prop cases pass in strict mode; 11 legacy cases remain explicit version skips. The full suite has 762 matches, 473 gaps and 64 version skips. Commits 3–8 close all 53 targeted gaps. See [the progress report](upstream-parity-progress.md).
+Commit 8 separates page, layout and error rune props, checks const declarations as well as let, and aligns messages and report spans. Rest elements, quoted keys and whole-object bindings follow the upstream named-property check. All 11 eligible Kit prop cases pass in strict mode; 11 legacy cases remain explicit version skips. The full suite has 762 matches, 473 gaps and 64 version skips. Commits 3-8 close all 53 targeted gaps. See [the progress report](upstream-parity-progress.md).

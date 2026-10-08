@@ -1,5 +1,7 @@
 # Upstream parity progress
 
+The next work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md), with exact case IDs and file ownership in its [dispatch manifest](upstream-parity-work-packages.json).
+
 Commits 3–8 are complete. They close all 53 targeted gaps against the pinned eslint-plugin-svelte 3.23.0 corpus at revision `18339c886320151148568063c5801bf69cb51027`.
 
 | Result | Before this batch | After this batch |
