@@ -1,8 +1,8 @@
 # Upstream parity progress
 
-The [first parallel wave](upstream-parity-first-wave.md) is now complete and integrated. Current results are 789 matches, 446 gaps and 64 version skips. The batch below records the preceding commits 3-8.
+The [second parallel wave](upstream-parity-second-wave.md) is complete and integrated. Current results are 863 matches, 372 gaps and 64 version skips. It closes 74 cases across block language, rune suggestions and parser foundations. The [first wave](upstream-parity-first-wave.md) and batch below record earlier work.
 
-The next work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md), with exact case IDs and file ownership in its [dispatch manifest](upstream-parity-work-packages.json).
+Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
 
 Commits 3–8 are complete. They close all 53 targeted gaps against the pinned eslint-plugin-svelte 3.23.0 corpus at revision `18339c886320151148568063c5801bf69cb51027`.
 
@@ -26,7 +26,7 @@ Commits 3–8 are complete. They close all 53 targeted gaps against the pinned e
 
 `no-unused-props` now matches all 76 fixtures. `no-navigation-without-resolve` matches all 84. `valid-prop-names-in-kit-pages` matches all 11 eligible fixtures, with its 11 Svelte 3/4 fixtures still skipped by the declared environment. These rules all pass strict mode.
 
-## Remaining gaps
+## Gaps after commits 3-8
 
 The groups below assign each gap to its first blocker. Secondary diagnostic, fix and suggestion differences remain recorded in the [full inventory](upstream-parity-gaps.json).
 

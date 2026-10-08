@@ -22,6 +22,8 @@ There are now 258 native gap cases and 188 capability-decision cases. Of the nat
 
 ## Shared helper follow-up
 
+This follow-up was completed as `4c13960` in the [second wave](upstream-parity-second-wave.md). The findings below record the original issue.
+
 The duplicate-directive worker found additional behavior outside the pinned gap inventory. `directive_expression_key` in `src/linter/rules/mod.rs` removes whitespace without preserving token boundaries, and its quote copier stops at the opening quote. These pairs can incorrectly receive the same key:
 
 - `on:click={() => x++ + y}` and `on:click={() => x + ++y}`.
