@@ -6,19 +6,24 @@ use oxc::span::Span;
 pub struct MaxLinesPerBlock;
 
 fn count_lines(content: &str, skip_blank: bool, skip_comments: bool) -> usize {
-    let trimmed = content.trim();
-    if trimmed.is_empty() {
+    let inner: Vec<_> = content.split('\n').collect();
+    let inner = if inner.len() >= 2 {
+        &inner[1..inner.len() - 1]
+    } else {
+        &inner[0..0]
+    };
+    if inner.is_empty() {
         return 0;
     }
     if !skip_blank && !skip_comments {
-        return trimmed.lines().count();
+        return inner.len();
     }
     if !skip_comments {
-        return trimmed.lines().filter(|l| !l.trim().is_empty()).count();
+        return inner.iter().filter(|l| !l.trim().is_empty()).count();
     }
     let mut in_block = false;
-    trimmed
-        .lines()
+    inner
+        .iter()
         .filter(|line| {
             let l = line.trim();
             !(skip_blank && l.is_empty()) && !classify_line(l, &mut in_block)
@@ -120,7 +125,7 @@ impl Rule for MaxLinesPerBlock {
                     .filter_map(|s| s.as_ref())
                     .map(|s| s.span.end)
                     .max()
-                    .map(|e| e - 1)
+                    .map(|e| e)
                     .unwrap_or(0);
                 ctx.diagnostic(
                     format!("template block has too many lines ({lc}). Maximum allowed is {max}."),
@@ -132,49 +137,107 @@ impl Rule for MaxLinesPerBlock {
 }
 
 fn extract_template_content(source: &str, ctx: &LintContext) -> String {
-    let mut regions = Vec::new();
-    for s in [&ctx.ast.instance, &ctx.ast.module]
-        .iter()
-        .filter_map(|s| s.as_ref())
-    {
-        regions.push((s.span.start as usize, s.span.end as usize));
-    }
-    if let Some(s) = &ctx.ast.css {
-        regions.push((s.span.start as usize, s.span.end as usize));
-    }
-    regions.sort_by_key(|&(s, _)| s);
-    let mut result = String::new();
-    let mut pos = 0;
-    for (start, end) in &regions {
-        if pos < *start {
-            result.push_str(&source[pos..*start]);
+    let line_at = |offset: u32| {
+        source[..offset as usize]
+            .bytes()
+            .filter(|b| *b == b'\n')
+            .count()
+    };
+    let mut excluded = std::collections::HashSet::new();
+    let mut exclude = |span: Span| {
+        for line in line_at(span.start)..=line_at(span.end) {
+            excluded.insert(line);
         }
-        pos = *end;
+    };
+    for script in [&ctx.ast.instance, &ctx.ast.module].into_iter().flatten() {
+        exclude(script.span);
     }
-    if pos < source.len() {
-        result.push_str(&source[pos..]);
+    if let Some(style) = &ctx.ast.css {
+        exclude(style.span);
     }
-    result
+    for node in &ctx.ast.html.nodes {
+        if let crate::ast::TemplateNode::Element(el) = node {
+            if el.name == "svelte:options" {
+                exclude(el.span);
+            }
+        }
+    }
+    source
+        .split('\n')
+        .enumerate()
+        .filter(|(line, _)| !excluded.contains(line))
+        .map(|(_, text)| text)
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn count_template_lines(content: &str, skip_blank: bool, skip_comments: bool) -> usize {
-    if !skip_blank && !skip_comments {
-        return content.matches('\n').count();
-    }
-    let kept = content
+    let mut in_comment = false;
+    content
         .split('\n')
         .filter(|line| {
-            let l = line.trim();
-            !(skip_blank && l.is_empty())
-                && !(skip_comments && {
-                    let mut d = false;
-                    classify_line(l, &mut d) && !d
-                })
+            let line = line.trim();
+            if skip_blank && line.is_empty() {
+                return false;
+            }
+            if skip_comments {
+                if in_comment {
+                    if let Some(end) = line.find("-->") {
+                        in_comment = false;
+                        return !line[end + 3..].trim().is_empty();
+                    }
+                    return false;
+                }
+                if line.starts_with("<!--") {
+                    if let Some(end) = line.find("-->") {
+                        return !line[end + 3..].trim().is_empty();
+                    }
+                    in_comment = true;
+                    return false;
+                }
+            }
+            true
         })
-        .count();
-    if kept <= 1 {
-        kept
-    } else {
-        kept - 1
+        .count()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/max-lines-per-block")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let source =
+            "<script>\n\nlet value = 1;\n\n</script>\n<svelte:options runes={true} />\n<p>😀</p>\n";
+        let diagnostics = lint(source, serde_json::json!([{"script":1,"template":1}]));
+        assert_eq!(diagnostics.len(), 2);
+        assert!(diagnostics
+            .iter()
+            .any(|d| d.message.contains("<script> block has too many lines (3)")));
+        assert!(diagnostics
+            .iter()
+            .any(|d| d.message.contains("template block has too many lines (2)")));
     }
 }
