@@ -35,6 +35,8 @@ The JSON report contains every case ID, status and expected/actual difference. I
 
 ## Tracking progress
 
+The [gap inventory](research/upstream-parity-gaps.md) categorizes every outstanding case. The [commit plan](research/upstream-parity-plan.md) proposes separate fixes and names the deferred capabilities. Regenerate the inventory after each fix with `node scripts/summarize-parity.mjs` using a fresh full report.
+
 ```sh
 # Focus on a rule. An unknown name fails instead of running zero tests.
 cargo test --locked --test upstream_parity -- --rule no-unused-props --report reports/props-parity.json

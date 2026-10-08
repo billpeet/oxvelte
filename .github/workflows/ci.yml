@@ -32,6 +32,7 @@ jobs:
         working-directory: scripts/upstream-parity
       - run: npm test
         working-directory: scripts/upstream-parity
+      - run: node --test scripts/summarize-parity.test.mjs
       - run: cargo test --locked --test upstream_adapter
       - run: cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
       - uses: actions/upload-artifact@v4

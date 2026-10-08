@@ -1,0 +1,4365 @@
+{
+  "revision": "18339c886320151148568063c5801bf69cb51027",
+  "manifestHash": "85ef4366dc7164c1245e7536d673e20e0598adab48783c3986615f40136c34f2",
+  "environment": {
+    "@typescript-eslint/parser": "8.70.0",
+    "eslint": "10.9.1",
+    "svelte": "5.49.2",
+    "svelte-eslint-parser": "1.8.1",
+    "typescript": "6.0.3"
+  },
+  "totals": {
+    "pass": 689,
+    "gaps": 546,
+    "versionSkip": 64
+  },
+  "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
+  "categories": [
+    {
+      "id": "missing-rule",
+      "label": "Missing rule implementations",
+      "count": 118,
+      "rules": {
+        "@typescript-eslint/no-unnecessary-condition": [
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/invalid/binary-expression01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/invalid/example-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/invalid/nullish-coalescing01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/invalid/optional-chaining01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/invalid/test01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/valid/reactive-statement01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "@typescript-eslint/no-unnecessary-condition/valid/template01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "indent": [
+          {
+            "id": "indent/invalid/4-indent/test01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/align-attributes-vertically/attrs01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/await01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/const-tag01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/deubg-tag01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/each01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/html-text01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/html-text02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/if01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/import-declaration01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/indent-script/indent-script-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/key01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-array01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-binary01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-binary02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-binary03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-block01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-break01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-call01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-class01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-conditional01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-do-while01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-export01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-export02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-expr01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-for01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-function01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-if01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-import01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-import02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-member01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-methods01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-prop01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-switch01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-try01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-unary01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/script-yield-expression01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/snippets01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/style-directive01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/switch-case/script-switch01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/tab-indent/test01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/tab-indent/test02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/test01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-abstract-accessor-property-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-accessor-property01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-accessor-property02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-accessor-property03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-accessor-property04-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-accessor-property05-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-import-assertion02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-import-attributes01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-import-attributes02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-import-attributes03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-import-attributes04-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-instantiation-expression01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts-v5/ts-satisfies-operators01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-class01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-class02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-class03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-conditional-type01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-d-ts-eslint-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-decorator01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-decorator02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-enum01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-function01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-function02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-import-export01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-import-type01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-interface01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-interface02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-interface03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-static-block01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-template-literal-type01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-annotation01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-annotation02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-annotation03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-only-import-export01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-only-import-export02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-only-import-export03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-parameters01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-type-parameters02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-types01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-types02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-types03-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-union01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/invalid/ts/ts-union02-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/valid/indent-script-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/valid/inline-style-tag-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/valid/pug01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/valid/test01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "indent/valid/ts/ts-import-type01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "no-at-const-tags": [
+          {
+            "id": "no-at-const-tags/invalid/const01-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-at-const-tags/valid/declaration-tag-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "no-bind-value-on-checkable-inputs": [
+          {
+            "id": "no-bind-value-on-checkable-inputs/invalid/checkbox-bind-value-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-bind-value-on-checkable-inputs/invalid/radio-bind-value-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "no-nested-style-tag": [
+          {
+            "id": "no-nested-style-tag/invalid/nested-in-element-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-nested-style-tag/invalid/nested-in-snippet-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-nested-style-tag/valid/no-style-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "no-nested-style-tag/valid/top-level-style-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "prefer-attribute-interpolation": [
+          {
+            "id": "prefer-attribute-interpolation/invalid/template-literal-attribute-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-attribute-interpolation/valid/boundaries-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ],
+        "prefer-derived-over-derived-by": [
+          {
+            "id": "prefer-derived-over-derived-by/invalid/arrow-block-return-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/invalid/arrow-concise-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/invalid/function-expression-return-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/arrow-with-params-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/async-arrow-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/conditional-return-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/generator-function-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/multi-statement-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          },
+          {
+            "id": "prefer-derived-over-derived-by/valid/plain-derived-input.svelte",
+            "dimensions": [
+              "unsupported_rule"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "executable-config",
+      "label": "Executable fixture configuration",
+      "count": 6,
+      "rules": {
+        "valid-compile": [
+          {
+            "id": "valid-compile/invalid/svelte-config-custom-warn/a11y-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/svelte-config-onwarn/a11y-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/svelte-config-warning-filter/a11y-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-config-experimental-async/top-level-await-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-config-onwarn/a11y-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-config-warning-filter/a11y-input.svelte",
+            "dimensions": [
+              "executable_configuration"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "compiler",
+      "label": "Svelte compiler capability",
+      "count": 84,
+      "rules": {
+        "no-unused-svelte-ignore": [
+          {
+            "id": "no-unused-svelte-ignore/invalid/html-comment-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/html-comment-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/missing-code-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/script-comment01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/script-comment01-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang02-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang03-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang04-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang05-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/style-lang06-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/transform-test-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/invalid/transform-test-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/element-ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/element-ignore01-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/has-error-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/html-comment-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/html-comment-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/ignore-js-input.js",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/kebab-ignore-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/script-comment-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/style-lang07-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore-comma-separated-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore-note-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore01-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore02-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore02-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore03-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore03-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore04-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore04-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore05-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore05-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore06-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore06-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore07-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/svelte-ignore07-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/ts-lang01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          }
+        ],
+        "valid-compile": [
+          {
+            "id": "valid-compile/invalid/a11y01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/custom_element_props_identifier-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/experimental-async-disabled/top-level-await-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/invalid-svelte-ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/invalid-svelte-ignore02-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/invalid-svelte-ignore03-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/style-without-global-02-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/invalid/ts/enum01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/babel/babel-function-bind01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "parse_errors",
+              "parser_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/babel/class01-input.svelte",
+            "dimensions": [
+              "compiler_capability",
+              "parser_configuration"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/global-style-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ignore-warnings/enum01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ignore02-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/no-false-custom_element_props_identifier-warning-without-custom-element-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/script-comment-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/style-lang01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/style-lang02-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/style-lang03-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore02-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore03-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore04-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore05-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore06-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-ignore07-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/svelte-options-custom-element-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/test01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/class01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/script-comment-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/test01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/ts-lang01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/ts-unused-in-script-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/type-only-import01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/ts/type-only-import02-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/undef01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/unuse01-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          },
+          {
+            "id": "valid-compile/valid/valid-custom-element-with-props-identifier-input.svelte",
+            "dimensions": [
+              "compiler_capability"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "parser",
+      "label": "Parser/compiler validation differences",
+      "count": 27,
+      "rules": {
+        "no-dynamic-slot-name": [
+          {
+            "id": "no-dynamic-slot-name/invalid/bool-slot01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/literal-slot01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/multi-report01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/var-slot01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          }
+        ],
+        "no-not-function-handler": [
+          {
+            "id": "no-not-function-handler/valid/bind01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          }
+        ],
+        "no-restricted-html-elements": [
+          {
+            "id": "no-restricted-html-elements/valid/array-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-restricted-html-elements/valid/object-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          }
+        ],
+        "no-spaces-around-equal-signs-in-attribute": [
+          {
+            "id": "no-spaces-around-equal-signs-in-attribute/invalid/test01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "no-spaces-around-equal-signs-in-attribute/valid/test-01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          }
+        ],
+        "require-store-reactive-access": [
+          {
+            "id": "require-store-reactive-access/invalid/svelte-element01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/valid/directives-store01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          }
+        ],
+        "sort-attributes": [
+          {
+            "id": "sort-attributes/invalid/default/default-test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix1-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix2-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix3-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix4-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix1-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix2-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix3-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix4-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix5-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix6-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix7-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/valid/default/default-test01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          },
+          {
+            "id": "sort-attributes/valid/order/test01-input.svelte",
+            "dimensions": [
+              "parse_errors"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostic-count",
+      "label": "Diagnostic count differences",
+      "count": 56,
+      "rules": {
+        "consistent-selector-style": [
+          {
+            "id": "consistent-selector-style/invalid/type-id-class/should-be-id-with-components01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "consistent-selector-style/invalid/type-id-class/should-be-id01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "consistent-selector-style/invalid/type-id-class/should-be-type-with-components01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "consistent-selector-style/invalid/type-id-class/should-be-type01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "derived-has-same-inputs-outputs": [
+          {
+            "id": "derived-has-same-inputs-outputs/invalid/test01-input.js",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "html-closing-bracket-new-line": [
+          {
+            "id": "html-closing-bracket-new-line/invalid/singleline-always/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "mustache-spacing": [
+          {
+            "id": "mustache-spacing/invalid/always-after-expression/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "mustache-spacing/invalid/snippet-render01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "mustache-spacing/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "no-dupe-else-if-blocks": [
+          {
+            "id": "no-dupe-else-if-blocks/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-else-if-blocks/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-dupe-style-properties": [
+          {
+            "id": "no-dupe-style-properties/invalid/ternary01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-navigation-without-base": [
+          {
+            "id": "no-navigation-without-base/invalid/goto-no-base01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/link-no-base01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/link-with-fragment01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/pushState-no-base01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/replaceState-no-base01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-navigation-without-resolve": [
+          {
+            "id": "no-navigation-without-resolve/invalid/link-absolute-url-invalid-operator01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/link-fragment-url-invalid-operator01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/link-nullish-like-literal01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/link-unresolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/goto-resolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/goto-resolved-pathname02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/goto-ternary-both-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-nullish02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-ternary-absolute-fragment01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-ternary-resolve-absolute01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-ternary-resolve-asset01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-ternary-resolve-fragment01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/link-ternary-resolve-nullish01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/pushState-resolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/pushState-resolved-pathname02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/pushState-ternary-resolve-empty01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/replaceState-resolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/replaceState-resolved-pathname02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/valid/replaceState-ternary-resolve-empty01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-reactive-reassign": [
+          {
+            "id": "no-reactive-reassign/invalid/member01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-shorthand-style-property-overrides": [
+          {
+            "id": "no-shorthand-style-property-overrides/invalid/ternary01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-top-level-browser-globals": [
+          {
+            "id": "no-top-level-browser-globals/invalid/guards03-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-top-level-browser-globals/invalid/guards08-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-unused-props": [
+          {
+            "id": "no-unused-props/invalid/custom-config-combination-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "prefer-class-directive": [
+          {
+            "id": "prefer-class-directive/invalid/empty/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "prefer-style-directive": [
+          {
+            "id": "prefer-style-directive/invalid/ternary01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/ternary02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "prefer-svelte-reactivity": [
+          {
+            "id": "prefer-svelte-reactivity/invalid/exports02-input.svelte.js",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ],
+        "require-store-reactive-access": [
+          {
+            "id": "require-store-reactive-access/invalid/condition01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/ts/ts-if-block01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/ts/ts-stores01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/ts/ts-test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "shorthand-attribute": [
+          {
+            "id": "shorthand-attribute/invalid/always/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "shorthand-directive": [
+          {
+            "id": "shorthand-directive/invalid/always/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "sort-attributes": [
+          {
+            "id": "sort-attributes/invalid/default/class-test-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "valid-prop-names-in-kit-pages": [
+          {
+            "id": "valid-prop-names-in-kit-pages/invalid/svelte5-children-in-page/+page.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-prop-names-in-kit-pages/valid/svelte5-error/+error.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostic-message",
+      "label": "Same count, different messages",
+      "count": 26,
+      "rules": {
+        "max-lines-per-block": [
+          {
+            "id": "max-lines-per-block/invalid/all-blocks-exceed/all01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "max-lines-per-block/invalid/template-too-long/template01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-dupe-on-directives": [
+          {
+            "id": "no-dupe-on-directives/invalid/inline-expression-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-on-directives/invalid/modifier-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-on-directives/invalid/multiple-element-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-on-directives/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-on-directives/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-dupe-use-directives": [
+          {
+            "id": "no-dupe-use-directives/invalid/inline-expression-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-use-directives/invalid/multiple-element-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-use-directives/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dupe-use-directives/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-export-load-in-svelte-module-in-kit-pages": [
+          {
+            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/svelte-config/test01/+page.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/test01/+page.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/test02/+page.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-goto-without-base": [
+          {
+            "id": "no-goto-without-base/invalid/aliased-goto01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-goto-without-base/invalid/base-not-prefixed01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-goto-without-base/invalid/no-base01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-reactive-reassign": [
+          {
+            "id": "no-reactive-reassign/invalid/props-true01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "sort-attributes": [
+          {
+            "id": "sort-attributes/invalid/alphabetical-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/let-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/ignore-no-order-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "valid-prop-names-in-kit-pages": [
+          {
+            "id": "valid-prop-names-in-kit-pages/invalid/svelte5-error-invalid-prop/+error.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-prop-names-in-kit-pages/invalid/svelte5/+page.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "valid-style-parse": [
+          {
+            "id": "valid-style-parse/invalid/invalid-css01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-style-parse/invalid/invalid-scss01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostic-location",
+      "label": "Same messages, different locations/order",
+      "count": 153,
+      "rules": {
+        "block-lang": [
+          {
+            "id": "block-lang/invalid/script/enforce/no-script01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/enforce/no-style01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "consistent-selector-style": [
+          {
+            "id": "consistent-selector-style/invalid/id-class-type/should-be-id-combination01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "experimental-require-slot-types": [
+          {
+            "id": "experimental-require-slot-types/invalid/no-slot-types01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-add-event-listener": [
+          {
+            "id": "no-add-event-listener/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-add-event-listener/invalid/typescript01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "no-dom-manipulating": [
+          {
+            "id": "no-dom-manipulating/invalid/chain01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-dupe-else-if-blocks": [
+          {
+            "id": "no-dupe-else-if-blocks/invalid/simple-test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-dupe-style-properties": [
+          {
+            "id": "no-dupe-style-properties/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-ignored-unsubscribe": [
+          {
+            "id": "no-ignored-unsubscribe/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-navigation-without-base": [
+          {
+            "id": "no-navigation-without-base/invalid/goto-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/goto-base-not-as-prefix01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/goto-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/link-base-not-as-prefix01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/pushState-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/pushState-base-not-as-prefix01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/pushState-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/replaceState-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/replaceState-base-not-as-prefix01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-base/invalid/replaceState-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-navigation-without-resolve": [
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-nullish-resolved-pathname-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-partial-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-resolved-pathname-wrong-module01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-string-prop01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-ternary-resolve-absolute01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-ternary-resolve-empty01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-ternary-resolve-plain01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-unresolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/goto-without-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-partial-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-resolved-pathname-wrong-module01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-string-prop01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-ternary-resolve-absolute01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-ternary-resolve-plain01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-unresolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/pushState-without-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-aliased01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-namespace-import01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-partial-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-resolved-pathname-wrong-module01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-string-prop01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-ternary-resolve-absolute01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-ternary-resolve-plain01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-unresolved-pathname01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-navigation-without-resolve/invalid/replaceState-without-resolve01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-not-function-handler": [
+          {
+            "id": "no-not-function-handler/invalid/array01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/class01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/object01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/string01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/svelte5/array01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/svelte5/class01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/svelte5/object01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/svelte5/string01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/svelte5/value01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-not-function-handler/invalid/value01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-object-in-text-mustaches": [
+          {
+            "id": "no-object-in-text-mustaches/invalid/array01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-object-in-text-mustaches/invalid/class01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-object-in-text-mustaches/invalid/function01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-object-in-text-mustaches/invalid/object01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-reactive-reassign": [
+          {
+            "id": "no-reactive-reassign/invalid/delete01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-reactive-reassign/invalid/destructure01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-shorthand-style-property-overrides": [
+          {
+            "id": "no-shorthand-style-property-overrides/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-svelte-internal": [
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal02-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal03-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal04-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal05-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal06-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-svelte-internal/invalid/no-svelte-internal07-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-top-level-browser-globals": [
+          {
+            "id": "no-top-level-browser-globals/invalid/in-template01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-unknown-style-directive-property": [
+          {
+            "id": "no-unknown-style-directive-property/invalid/ignoreProperties/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unknown-style-directive-property/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-unnecessary-state-wrap": [
+          {
+            "id": "no-unnecessary-state-wrap/invalid/additional-class-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-unnecessary-state-wrap/invalid/allow-reassign-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-unnecessary-state-wrap/invalid/basic-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-unnecessary-state-wrap/invalid/import-alias-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "no-unused-props": [
+          {
+            "id": "no-unused-props/invalid/alias-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/builtin-shadow-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/builtin-types-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/class-props-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/extends-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/generic-props-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/ignore-external-type-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/ignore-property-patterns-custom-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/ignored-type-patterns-custom-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/imported-type-check-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/imported-type-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/index-signature-no-rest-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/intersection-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/multiple-extends-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/nested-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/optional-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/parent-interface-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/simple-unused-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-unused-props/invalid/unused-index-signature-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "no-useless-mustaches": [
+          {
+            "id": "no-useless-mustaches/invalid/comments01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "no-useless-mustaches/invalid/escape-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "no-useless-mustaches/invalid/invalid-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "no-useless-mustaches/invalid/quote-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "no-useless-mustaches/invalid/quote-test02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "no-useless-mustaches/invalid/spaces-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "prefer-class-directive": [
+          {
+            "id": "prefer-class-directive/invalid/simple-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/svelte-element01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/test03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/transform-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/transform-test02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/trim-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-class-directive/invalid/trim-test01.2-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "prefer-destructured-store-props": [
+          {
+            "id": "prefer-destructured-store-props/invalid/fixer-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/member01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/member02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/member03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/module-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/runes-with-store01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "prefer-destructured-store-props/invalid/test03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "prefer-style-directive": [
+          {
+            "id": "prefer-style-directive/invalid/complex-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/svelte-element01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/ternary03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/ternary04-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/test03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "prefer-style-directive/invalid/test04-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "require-optimized-style-attribute": [
+          {
+            "id": "require-optimized-style-attribute/invalid/comment01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "require-optimized-style-attribute/invalid/key01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "require-optimized-style-attribute/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ],
+        "require-store-callbacks-use-set-param": [
+          {
+            "id": "require-store-callbacks-use-set-param/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "require-store-callbacks-use-set-param/invalid/test02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "require-store-reactive-access": [
+          {
+            "id": "require-store-reactive-access/invalid/attrs-store01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/directives-store01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/if-block01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/props-store01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/svelte-component01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/ts/ts-class-directives01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/ts/ts-i18n-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "sort-attributes": [
+          {
+            "id": "sort-attributes/invalid/attach-tag-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/in-out-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/slot-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/spread-test01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/spread-test02-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/spread-test03-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/style-ptops-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/use-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/ignore-no-order-with-spread-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          }
+        ],
+        "valid-each-key": [
+          {
+            "id": "valid-each-key/invalid/const-key01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "valid-each-key/invalid/out-vars-key01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fix",
+      "label": "Fix output or unexpected automatic fixes",
+      "count": 63,
+      "rules": {
+        "block-lang": [
+          {
+            "id": "block-lang/invalid/script/javascript/javascript-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/javascript/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/javascript/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/javascript/ts01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/javascript/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/js/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/js/js-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/js/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/js/ts01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/js/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/module-context/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/module-context/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/module-context/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/module-context/ts-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/module-context/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/multiple/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/multiple/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/multiple/null-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/multiple/ts-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/multiple/typescript-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/null/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/null/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/null/null-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/null/ts01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/null/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/shorthand/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/shorthand/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/shorthand/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/shorthand/ts-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/shorthand/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/ts/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/ts/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/ts/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/ts/ts-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/ts/typescript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/typescript/javascript01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/typescript/js01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/typescript/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/typescript/ts01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/script/typescript/typescript-as-style-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/null/null-as-script-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/null/sass01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/null/scss01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/sass/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/sass/sass-as-script-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/sass/scss01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/scss/null01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/scss/sass01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "block-lang/invalid/style/scss/scss-as-script-lang01-input.svelte",
+            "dimensions": [
+              "suggestion_capability",
+              "unexpected_fix"
+            ]
+          }
+        ],
+        "no-useless-mustaches": [
+          {
+            "id": "no-useless-mustaches/invalid/tag-test01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          }
+        ],
+        "prefer-const": [
+          {
+            "id": "prefer-const/invalid/option1/test01-input.svelte",
+            "dimensions": [
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "prefer-const/invalid/option2/test01-input.svelte",
+            "dimensions": [
+              "unexpected_fix"
+            ]
+          },
+          {
+            "id": "prefer-const/invalid/test01-input.svelte",
+            "dimensions": [
+              "unexpected_fix"
+            ]
+          }
+        ],
+        "require-store-reactive-access": [
+          {
+            "id": "require-store-reactive-access/invalid/await01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/call01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/for-in01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/for-of01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/if-statement01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/import01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/properties01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/spread01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/switch01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          },
+          {
+            "id": "require-store-reactive-access/invalid/tagged01-input.svelte",
+            "dimensions": [
+              "fix_output"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "suggestions",
+      "label": "Suggestions are the remaining blocker",
+      "count": 13,
+      "rules": {
+        "no-at-debug-tags": [
+          {
+            "id": "no-at-debug-tags/invalid/debug01-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-at-debug-tags/invalid/debug02-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "no-extra-reactive-curlies": [
+          {
+            "id": "no-extra-reactive-curlies/invalid/test01-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "no-extra-reactive-curlies/invalid/test02-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "no-reactive-functions": [
+          {
+            "id": "no-reactive-functions/invalid/test01-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "no-reactive-literals": [
+          {
+            "id": "no-reactive-literals/invalid/test01-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          }
+        ],
+        "prefer-writable-derived": [
+          {
+            "id": "prefer-writable-derived/invalid/basic1-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/basic2-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/effect-pre1-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/effect-pre2-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/multiple-reassign1-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/multiple-reassign2-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          },
+          {
+            "id": "prefer-writable-derived/invalid/multiple-reassign3-input.svelte",
+            "dimensions": [
+              "suggestion_capability"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dimensions": {
+    "unsupported_rule": {
+      "count": 118,
+      "rules": {
+        "@typescript-eslint/no-unnecessary-condition": 7,
+        "indent": 91,
+        "no-at-const-tags": 3,
+        "no-bind-value-on-checkable-inputs": 2,
+        "no-nested-style-tag": 4,
+        "prefer-attribute-interpolation": 2,
+        "prefer-derived-over-derived-by": 9
+      }
+    },
+    "diagnostics": {
+      "count": 279,
+      "rules": {
+        "block-lang": 2,
+        "consistent-selector-style": 5,
+        "derived-has-same-inputs-outputs": 1,
+        "experimental-require-slot-types": 1,
+        "html-closing-bracket-new-line": 1,
+        "max-lines-per-block": 2,
+        "mustache-spacing": 3,
+        "no-add-event-listener": 2,
+        "no-dom-manipulating": 1,
+        "no-dupe-else-if-blocks": 3,
+        "no-dupe-on-directives": 5,
+        "no-dupe-style-properties": 2,
+        "no-dupe-use-directives": 4,
+        "no-dynamic-slot-name": 4,
+        "no-export-load-in-svelte-module-in-kit-pages": 4,
+        "no-goto-without-base": 3,
+        "no-ignored-unsubscribe": 1,
+        "no-navigation-without-base": 15,
+        "no-navigation-without-resolve": 48,
+        "no-not-function-handler": 10,
+        "no-object-in-text-mustaches": 4,
+        "no-reactive-reassign": 4,
+        "no-shorthand-style-property-overrides": 2,
+        "no-svelte-internal": 7,
+        "no-top-level-browser-globals": 3,
+        "no-unknown-style-directive-property": 2,
+        "no-unnecessary-state-wrap": 4,
+        "no-unused-props": 20,
+        "no-unused-svelte-ignore": 18,
+        "no-useless-mustaches": 6,
+        "prefer-class-directive": 10,
+        "prefer-destructured-store-props": 9,
+        "prefer-style-directive": 10,
+        "prefer-svelte-reactivity": 1,
+        "require-optimized-style-attribute": 3,
+        "require-store-callbacks-use-set-param": 2,
+        "require-store-reactive-access": 13,
+        "shorthand-attribute": 1,
+        "shorthand-directive": 1,
+        "sort-attributes": 26,
+        "valid-compile": 8,
+        "valid-each-key": 2,
+        "valid-prop-names-in-kit-pages": 4,
+        "valid-style-parse": 2
+      }
+    },
+    "suggestion_capability": {
+      "count": 78,
+      "rules": {
+        "block-lang": 49,
+        "derived-has-same-inputs-outputs": 1,
+        "no-add-event-listener": 2,
+        "no-at-debug-tags": 2,
+        "no-extra-reactive-curlies": 2,
+        "no-reactive-functions": 1,
+        "no-reactive-literals": 1,
+        "no-unnecessary-state-wrap": 4,
+        "prefer-destructured-store-props": 7,
+        "prefer-writable-derived": 7,
+        "require-store-callbacks-use-set-param": 2
+      }
+    },
+    "unexpected_fix": {
+      "count": 54,
+      "rules": {
+        "block-lang": 49,
+        "no-useless-mustaches": 2,
+        "prefer-const": 3
+      }
+    },
+    "diagnostic_count": {
+      "count": 92,
+      "rules": {
+        "consistent-selector-style": 4,
+        "derived-has-same-inputs-outputs": 1,
+        "html-closing-bracket-new-line": 1,
+        "mustache-spacing": 3,
+        "no-dupe-else-if-blocks": 2,
+        "no-dupe-style-properties": 1,
+        "no-navigation-without-base": 5,
+        "no-navigation-without-resolve": 19,
+        "no-reactive-reassign": 1,
+        "no-shorthand-style-property-overrides": 1,
+        "no-top-level-browser-globals": 2,
+        "no-unused-props": 1,
+        "no-unused-svelte-ignore": 18,
+        "prefer-class-directive": 2,
+        "prefer-style-directive": 3,
+        "prefer-svelte-reactivity": 1,
+        "require-store-reactive-access": 4,
+        "shorthand-attribute": 1,
+        "shorthand-directive": 1,
+        "sort-attributes": 11,
+        "valid-compile": 8,
+        "valid-prop-names-in-kit-pages": 2
+      }
+    },
+    "fix_output": {
+      "count": 83,
+      "rules": {
+        "mustache-spacing": 3,
+        "no-dynamic-slot-name": 3,
+        "no-useless-mustaches": 7,
+        "prefer-class-directive": 10,
+        "prefer-style-directive": 10,
+        "require-store-reactive-access": 22,
+        "shorthand-attribute": 1,
+        "shorthand-directive": 1,
+        "sort-attributes": 26
+      }
+    },
+    "parse_errors": {
+      "count": 29,
+      "rules": {
+        "no-dynamic-slot-name": 5,
+        "no-not-function-handler": 1,
+        "no-restricted-html-elements": 2,
+        "no-spaces-around-equal-signs-in-attribute": 2,
+        "no-unused-svelte-ignore": 1,
+        "require-store-reactive-access": 2,
+        "sort-attributes": 15,
+        "valid-compile": 1
+      }
+    },
+    "compiler_capability": {
+      "count": 84,
+      "rules": {
+        "no-unused-svelte-ignore": 46,
+        "valid-compile": 38
+      }
+    },
+    "executable_configuration": {
+      "count": 6,
+      "rules": {
+        "valid-compile": 6
+      }
+    },
+    "parser_configuration": {
+      "count": 2,
+      "rules": {
+        "valid-compile": 2
+      }
+    }
+  },
+  "versionSkips": {
+    "experimental-require-strict-events": [
+      {
+        "id": "experimental-require-strict-events/invalid/no-strict-events01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "experimental-require-strict-events/valid/has-events-interface01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "experimental-require-strict-events/valid/has-events-type-alias01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "experimental-require-strict-events/valid/has-strict-events01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "experimental-require-strict-events/valid/no-typescript01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "experimental-require-strict-events/valid/script-module-context01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      }
+    ],
+    "indent": [
+      {
+        "id": "indent/invalid/declaration-tag-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy >=5.56.0"
+        ]
+      },
+      {
+        "id": "indent/invalid/ts-v5/ts-import-assertion01-input.svelte",
+        "reasons": [
+          "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+        ]
+      },
+      {
+        "id": "indent/invalid/ts-v5/ts-import-assertion03-input.svelte",
+        "reasons": [
+          "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+        ]
+      },
+      {
+        "id": "indent/invalid/ts-v5/ts-import-assertion04-input.svelte",
+        "reasons": [
+          "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+        ]
+      },
+      {
+        "id": "indent/valid/declaration-tag-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy >=5.56.0"
+        ]
+      }
+    ],
+    "mustache-spacing": [
+      {
+        "id": "mustache-spacing/invalid/declaration-tag-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy >=5.55.9"
+        ]
+      }
+    ],
+    "no-inner-declarations": [
+      {
+        "id": "no-inner-declarations/invalid/both/test01-input.svelte",
+        "reasons": [
+          "eslint 10.9.1 does not satisfy ^9.0.0-0"
+        ]
+      },
+      {
+        "id": "no-inner-declarations/invalid/test01-input.svelte",
+        "reasons": [
+          "eslint 10.9.1 does not satisfy ^9.0.0-0"
+        ]
+      },
+      {
+        "id": "no-inner-declarations/invalid/v8/both/test01-input.svelte",
+        "reasons": [
+          "eslint 10.9.1 does not satisfy <=8"
+        ]
+      },
+      {
+        "id": "no-inner-declarations/invalid/v8/test01-input.svelte",
+        "reasons": [
+          "eslint 10.9.1 does not satisfy <=8"
+        ]
+      }
+    ],
+    "no-unused-svelte-ignore": [
+      {
+        "id": "no-unused-svelte-ignore/invalid/script-comment02-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/reactive-component-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/script-comment-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang02-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang03-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang04-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang05-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      },
+      {
+        "id": "no-unused-svelte-ignore/valid/style-lang06-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^4 || ^3"
+        ]
+      }
+    ],
+    "require-event-dispatcher-types": [
+      {
+        "id": "require-event-dispatcher-types/invalid/import-alias01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "require-event-dispatcher-types/invalid/no-types01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "require-event-dispatcher-types/valid/has-types01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "require-event-dispatcher-types/valid/no-typescript01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "require-event-dispatcher-types/valid/non-svelte-dispatcher01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      }
+    ],
+    "require-store-reactive-access": [
+      {
+        "id": "require-store-reactive-access/invalid/calc01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      }
+    ],
+    "valid-compile": [
+      {
+        "id": "valid-compile/invalid/a11y01-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/dyamic-slot01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/invalid-svelte-ignore01-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/invalid-svelte-ignore02-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/invalid-svelte-ignore03-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/style-lang01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/style-without-global-01-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/svelte-config-custom-warn/a11y-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/svelte-config-onwarn/a11y-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/invalid/ts/enum01-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/ignore01-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/ignore02-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/script-comment-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore01-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore02-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore03-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore04-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore05-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore06-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte-ignore07-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/svelte3-options-custom-element-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0"
+        ]
+      },
+      {
+        "id": "valid-compile/valid/ts/script-comment-svelte4-input.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      }
+    ],
+    "valid-prop-names-in-kit-pages": [
+      {
+        "id": "valid-prop-names-in-kit-pages/invalid/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/invalid/svelte-config/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/invalid/svelte4-children/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test001/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test002-1/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test002-2/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test003-1/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test003-2/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test004-1/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      },
+      {
+        "id": "valid-prop-names-in-kit-pages/valid/test004-2/+page.svelte",
+        "reasons": [
+          "svelte 5.49.2 does not satisfy ^3.0.0 || ^4.0.0"
+        ]
+      }
+    ]
+  }
+}
