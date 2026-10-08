@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 869,
-    "gaps": 366,
+    "pass": 895,
+    "gaps": 340,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 35,
+      "count": 24,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1568,103 +1568,13 @@
               "fix_output"
             ]
           }
-        ],
-        "sort-attributes": [
-          {
-            "id": "sort-attributes/invalid/default/class-test-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix1-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix2-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix3-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix1-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix2-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix3-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix4-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix5-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          }
         ]
       }
     },
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 14,
+      "count": 9,
       "rules": {
         "max-lines-per-block": [
           {
@@ -1714,43 +1624,6 @@
             ]
           }
         ],
-        "sort-attributes": [
-          {
-            "id": "sort-attributes/invalid/alphabetical-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix4-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/let-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/ignore-no-order-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix6-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
         "valid-style-parse": [
           {
             "id": "valid-style-parse/invalid/invalid-css01-input.svelte",
@@ -1770,7 +1643,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 94,
+      "count": 84,
       "rules": {
         "consistent-selector-style": [
           {
@@ -2352,78 +2225,6 @@
             ]
           }
         ],
-        "sort-attributes": [
-          {
-            "id": "sort-attributes/invalid/attach-tag-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/in-out-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/slot-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/spread-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/spread-test02-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/spread-test03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/style-ptops-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/use-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/ignore-no-order-with-spread-test-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix7-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
         "valid-each-key": [
           {
             "id": "valid-each-key/invalid/const-key01-input.svelte",
@@ -2567,7 +2368,7 @@
       }
     },
     "diagnostics": {
-      "count": 169,
+      "count": 143,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2597,14 +2398,13 @@
         "require-store-reactive-access": 13,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
-        "sort-attributes": 26,
         "valid-compile": 8,
         "valid-each-key": 2,
         "valid-style-parse": 2
       }
     },
     "diagnostic_count": {
-      "count": 61,
+      "count": 50,
       "rules": {
         "consistent-selector-style": 4,
         "html-closing-bracket-new-line": 1,
@@ -2620,12 +2420,11 @@
         "require-store-reactive-access": 4,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
-        "sort-attributes": 11,
         "valid-compile": 8
       }
     },
     "fix_output": {
-      "count": 81,
+      "count": 55,
       "rules": {
         "mustache-spacing": 1,
         "no-dynamic-slot-name": 3,
@@ -2634,8 +2433,7 @@
         "prefer-style-directive": 10,
         "require-store-reactive-access": 22,
         "shorthand-attribute": 1,
-        "shorthand-directive": 1,
-        "sort-attributes": 26
+        "shorthand-directive": 1
       }
     },
     "suggestions": {
