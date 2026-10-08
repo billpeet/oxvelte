@@ -271,13 +271,13 @@ Upstream compatibility is tracked separately with a pinned fixture suite and exa
 
 ### Intentionally excluded rules
 
-A few eslint-plugin-svelte rules are **not** implemented by design:
+Compiler-backed and formatting rules are supported:
 
-- **`valid-compile`** — this rule *is* the Svelte compiler. Running it in a linter means invoking the full compiler on every file, which defeats the purpose of a fast native tool. Svelte already reports these errors at build time.
-- **`no-unused-svelte-ignore`** — requires the Svelte compiler to know which diagnostics were actually suppressed. Again, Svelte itself warns about this at build time.
-- **`indent`** — a formatting rule, not a lint rule. eslint-plugin-svelte itself marks it `recommended: false` with `conflictWithPrettier: true`. oxc tracks ESLint's `indent` as [🚫 *Not intending to implement*](https://github.com/oxc-project/oxc/issues/479) (*"Deprecated stylistic rule, can be used via the stylistic eslint plugin as a JS Plugin if necessary"*), and `@typescript-eslint/indent` is [likewise deprecated upstream](https://github.com/oxc-project/oxc/issues/503). Layout belongs in a formatter — use Prettier or `oxfmt`; don't re-encode it as lint diagnostics.
+- `valid-compile` invokes the project's Svelte compiler and remains opt-in.
+- `no-unused-svelte-ignore` is recommended and invokes the compiler when it needs to check warning codes.
+- `indent` is opt-in, matching upstream. Avoid enabling it alongside a formatter that uses different indentation settings.
 
-These rules add latency with zero incremental value — your build step (or formatter) already catches them.
+Compiler checks require Node.js and the relevant project packages. The [parity report](docs/research/upstream-parity-seventh-wave.md) records fixture coverage and implementation limits.
 
 ## Project structure
 

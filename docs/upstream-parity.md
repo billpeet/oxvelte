@@ -28,7 +28,7 @@ The runner checks exact diagnostic counts, messages and one-based UTF-16 line/co
 
 The corpus is pinned to [18339c886320151148568063c5801bf69cb51027](https://github.com/sveltejs/eslint-plugin-svelte/commit/18339c886320151148568063c5801bf69cb51027), plugin 3.23.0. Every imported file has a SHA-256 hash. `.gitattributes` preserves upstream bytes on Windows. Missing, changed and extra corpus files fail the check.
 
-The initial run contains 1,299 inputs for 83 rules using the upstream fixture-loader naming convention. Upstream has 84 top-level fixture directories; `no-conflicting-module-names` uses custom tests and ordinary `Foo.svelte` filenames instead of that loader. Its files are retained but its cases are not executed yet. The declared comparison environment uses JobSys's current locked Svelte 5.49.2, ESLint 10.9.1, TypeScript 6.0.3 and @typescript-eslint/parser 8.70.0. These versions control dependency eligibility; the Rust runner does not invoke ESLint or the TypeScript checker.
+The initial run contains 1,299 inputs for 83 rules using the upstream fixture-loader naming convention. Upstream has 84 top-level fixture directories; `no-conflicting-module-names` uses custom tests and ordinary `Foo.svelte` filenames instead of that loader. Its files are retained but its cases are not executed yet. The declared comparison environment uses JobSys's current locked Svelte 5.49.2, ESLint 10.9.1, TypeScript 6.0.3 and @typescript-eslint/parser 8.70.0. These versions control dependency eligibility; the Rust runner does not invoke ESLint. Compiler-backed cases invoke Svelte, and type-aware cases invoke the TypeScript checker through Node.js.
 
 ## Initial results
 
