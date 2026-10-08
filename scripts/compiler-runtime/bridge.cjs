@@ -32,7 +32,7 @@ function sourceMapRemap(output, input, mappings, decode) {
 }
 function byteToIndex(source, byte) { return Buffer.from(source).subarray(0, byte).toString('utf8').length; }
 async function run(request) {
-  const { source, filename, settings = {} } = request;
+  const { source, filename } = request; const settings = request.settings || {};
   const req = resolver(filename); let compiler;
   try { compiler = req('svelte/compiler'); }
   catch (e) { throw new Error('Cannot resolve svelte/compiler for ' + (filename || process.cwd()) + '. Install Svelte in the project or set OXVELTE_COMPILER_RUNTIME to a runtime directory. ' + e.message); }
@@ -149,5 +149,6 @@ rl.on('line', async line => {
   try { const result = await run(JSON.parse(line)); process.stdout.write(JSON.stringify({ result }) + '\n'); }
   catch (e) { process.stdout.write(JSON.stringify({ error: e.message }) + '\n'); }
 });
+
 
 

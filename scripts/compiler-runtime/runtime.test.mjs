@@ -53,3 +53,27 @@ test('missing runtime package yields an actionable error', () => {
   const child = spawnSync(process.execPath, [join(runtime, 'bridge.cjs')], { input: JSON.stringify({ source: '<div/>', filename: '/nonexistent/project/Component.svelte' }) + '\n', encoding: 'utf8', env: { ...process.env, OXVELTE_COMPILER_RUNTIME: '' } });
   assert.match(JSON.parse(child.stdout).error, /Install Svelte in the project/);
 });
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+test('executes warning callbacks and preserves source-less custom reports', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'oxvelte-compiler-'));
+  const configPath = join(directory, '_config.cjs');
+  try {
+    writeFileSync(configPath, 'module.exports = {languageOptions:{parserOptions:{svelteConfig:{onwarn(warning, report) {report({message:"Custom compiler warning"})}}}}}');
+    const result = compile('<img src="x">', { compiler: { executableConfigPath: configPath } });
+    assert.equal(result.warnings[0].code, 'a11y_missing_attribute');
+    assert.equal(result.warnings[0].filtered, false);
+    assert.equal(result.warnings[0].report.message, 'Custom compiler warning');
+    assert.equal(result.warnings[0].report.start, null);
+    writeFileSync(configPath, 'module.exports = {languageOptions:{parserOptions:{svelteConfig:{warningFilter() {return false}}}}}');
+    const filtered = compile('<img src="x">', { compiler: { executableConfigPath: configPath } });
+    assert.equal(filtered.warnings[0].filtered, true);
+  } finally { rmSync(directory, {recursive:true, force:true}); }
+});
+test('Babel parser mode transforms function-bind syntax using runtime config', () => {
+  const body = '\nlet obj = {}, func = () => 1; let bound = obj::func;\n';
+  const prefix = '<script>', source = prefix + body + '</script>\n<img src="x">';
+  const result = compile(source, { compiler: {parser:'@babel/eslint-parser'}, _oxvelteScripts:[{start:prefix.length,end:prefix.length+body.length,lang:'js'}] });
+  assert.equal(result.kind, 'warn');
+  assert.equal(result.warnings.find(w => w.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
+});
