@@ -180,7 +180,7 @@ impl Rule for NoUnusedProps {
                         .and_then(|s| {
                             content[s..]
                                 .find('{')
-                                .map(|b| content[s + b..].contains("[key:"))
+                                .map(|b| parse_type_block(content, s + b).1)
                         })
                         .unwrap_or(false)
                 })
@@ -613,102 +613,40 @@ fn extract_inline_type_properties(before_props: &str) -> Vec<(String, usize)> {
 }
 
 fn extract_props_from_block(content: &str, brace_start: usize, props: &mut Vec<(String, usize)>) {
-    let after = &content[brace_start + 1..];
-    let mut depth = 1;
-    let mut end = after.len();
-    for (i, b) in after.bytes().enumerate() {
-        match b {
-            b'{' => depth += 1,
-            b'}' => {
-                depth -= 1;
-                if depth == 0 {
-                    end = i;
-                    break;
-                }
-            }
-            _ => {}
-        }
-    }
-    let block = &after[..end];
-
-    let stripped = strip_block_comments(block);
-    let block_ref = stripped.as_str();
-    let mut depth = 0i32;
-    let mut line_start = 0;
-    let block_bytes = block_ref.as_bytes();
-    for (i, b) in block_ref.bytes().enumerate() {
-        match b {
-            b'{' | b'(' | b'<' | b'[' => depth += 1,
-            b'}' | b')' | b']' => {
-                depth -= 1;
-                if depth < 0 {
-                    depth = 0;
-                }
-            }
-            b'>' => {
-                if !(i > 0 && block_bytes[i - 1] == b'=') {
-                    depth -= 1;
-                    if depth < 0 {
-                        depth = 0;
-                    }
-                }
-            }
-            b';' | b'\n' if depth == 0 => {
-                let segment = &block_ref[line_start..i];
-                let trimmed = segment.trim();
-                line_start = i + 1;
-                if trimmed.is_empty() || trimmed.starts_with("//") {
-                    continue;
-                }
-                if trimmed.starts_with('[') {
-                    continue;
-                }
-
-                let name = if trimmed.starts_with('\'') || trimmed.starts_with('"') {
-                    let q = trimmed.as_bytes()[0] as char;
-                    trimmed[1..].find(q).map(|end| &trimmed[1..end + 1])
-                } else {
-                    let end = trimmed
-                        .find(|c: char| c == ':' || c == '?' || c == '(' || c == '<')
-                        .unwrap_or(trimmed.len());
-                    Some(trimmed[..end].trim())
-                };
-                if let Some(name) = name {
-                    let name = name.trim();
-                    if name.is_empty() || name.starts_with("//") || name.starts_with('*') {
-                        continue;
-                    }
-                    let offset = block.find(name).map(|p| brace_start + 1 + p).unwrap_or(0);
-                    props.push((name.to_string(), offset));
-                }
-            }
-            _ => {}
-        }
-    }
+    props.extend(parse_type_block(content, brace_start).0);
 }
 
-fn strip_block_comments(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
-    let bytes = s.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        if i + 1 < bytes.len() && bytes[i] == b'/' && bytes[i + 1] == b'*' {
-            i += 2;
-            while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
-                if bytes[i] == b'\n' {
-                    result.push('\n');
-                }
-                i += 1;
+/// Read TypeScript member boundaries, retaining original source offsets.
+fn parse_type_block(content: &str, brace_start: usize) -> (Vec<(String, usize)>, bool) {
+    const PREFIX: &str = "type __OxvelteProps = ";
+    let code = format!("{}{}", PREFIX, &content[brace_start..]);
+    let allocator = oxc::allocator::Allocator::default();
+    let parsed = oxc::parser::Parser::new(&allocator, &code, oxc::span::SourceType::ts()).parse();
+    let Some(oxc::ast::ast::Statement::TSTypeAliasDeclaration(alias)) = parsed.program.body.first()
+    else {
+        return (Vec::new(), false);
+    };
+    let oxc::ast::ast::TSType::TSTypeLiteral(literal) = &alias.type_annotation else {
+        return (Vec::new(), false);
+    };
+    let mut properties = Vec::new();
+    let mut index_signature = false;
+    for member in &literal.members {
+        let key = match member {
+            oxc::ast::ast::TSSignature::TSPropertySignature(property) => &property.key,
+            oxc::ast::ast::TSSignature::TSMethodSignature(method) => &method.key,
+            oxc::ast::ast::TSSignature::TSIndexSignature(_) => {
+                index_signature = true;
+                continue;
             }
-            if i + 1 < bytes.len() {
-                i += 2;
-            }
-        } else {
-            result.push(bytes[i] as char);
-            i += 1;
+            _ => continue,
+        };
+        if let Some(name) = key.static_name() {
+            let offset = brace_start + key.span().start as usize - PREFIX.len();
+            properties.push((name.to_string(), offset));
         }
     }
-    result
+    (properties, index_signature)
 }
 
 fn extract_option_patterns(options: &Option<serde_json::Value>, key: &str) -> Vec<String> {
