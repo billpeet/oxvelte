@@ -1,6 +1,6 @@
 # Upstream parity progress
 
-The [sixth parallel wave](upstream-parity-sixth-wave.md) is complete and integrated. All 90 eligible compiler/configuration cases now match, bringing the full suite to 1,225 matches, seven gaps and 67 version skips. Remaining work is TypeScript unnecessary-condition integration (7). The earlier wave reports and batch below record previous work.
+The [seventh parallel wave](upstream-parity-seventh-wave.md) is complete and integrated. All seven type-aware condition cases now match, bringing the full suite to 1,232 matches, zero gaps and 67 version skips. Every eligible fixture in the current frozen corpus matches. The wave report documents scope limits and further coverage beyond this corpus; the earlier reports and batch below record previous work.
 
 Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
 

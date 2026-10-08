@@ -9,72 +9,13 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1225,
-    "gaps": 7,
+    "pass": 1232,
+    "gaps": 0,
     "versionSkip": 67
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
-  "categories": [
-    {
-      "id": "missing-rule",
-      "label": "Missing rule implementations",
-      "count": 7,
-      "rules": {
-        "@typescript-eslint/no-unnecessary-condition": [
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/invalid/binary-expression01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/invalid/example-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/invalid/nullish-coalescing01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/invalid/optional-chaining01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/invalid/test01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/valid/reactive-statement01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "@typescript-eslint/no-unnecessary-condition/valid/template01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          }
-        ]
-      }
-    }
-  ],
-  "dimensions": {
-    "unsupported_rule": {
-      "count": 7,
-      "rules": {
-        "@typescript-eslint/no-unnecessary-condition": 7
-      }
-    }
-  },
+  "categories": [],
+  "dimensions": {},
   "versionSkips": {
     "experimental-require-strict-events": [
       {
