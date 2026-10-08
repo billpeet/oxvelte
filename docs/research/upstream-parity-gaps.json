@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 981,
-    "gaps": 254,
+    "pass": 982,
+    "gaps": 253,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 12,
+      "count": 11,
       "rules": {
         "html-closing-bracket-new-line": [
           {
@@ -1370,16 +1370,6 @@
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
-            ]
-          }
-        ],
-        "mustache-spacing": [
-          {
-            "id": "mustache-spacing/invalid/always-after-expression/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
             ]
           }
         ],
@@ -1745,10 +1735,9 @@
       }
     },
     "diagnostic_count": {
-      "count": 38,
+      "count": 37,
       "rules": {
         "html-closing-bracket-new-line": 1,
-        "mustache-spacing": 1,
         "no-dupe-else-if-blocks": 2,
         "no-dupe-style-properties": 1,
         "no-reactive-reassign": 1,
@@ -1760,11 +1749,10 @@
       }
     },
     "diagnostics": {
-      "count": 69,
+      "count": 68,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
-        "mustache-spacing": 1,
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
@@ -1780,13 +1768,6 @@
         "valid-style-parse": 2
       }
     },
-    "fix_output": {
-      "count": 11,
-      "rules": {
-        "mustache-spacing": 1,
-        "prefer-style-directive": 10
-      }
-    },
     "compiler_capability": {
       "count": 84,
       "rules": {
@@ -1798,6 +1779,12 @@
       "count": 3,
       "rules": {
         "prefer-const": 3
+      }
+    },
+    "fix_output": {
+      "count": 10,
+      "rules": {
+        "prefer-style-directive": 10
       }
     },
     "executable_configuration": {

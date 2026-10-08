@@ -337,11 +337,6 @@
     "max-lines-per-block/invalid/template-too-long/template01-input.svelte": {
       "diagnostics": "cf73196ae3208c3509910390dfa09e45d27433ab68393decdf2782094b7fd9c0"
     },
-    "mustache-spacing/invalid/always-after-expression/test01-input.svelte": {
-      "diagnostic_count": "5cb82307538a5d1d2e3da0cdfae97af41fe3f39a6edfa8724273cd1b7591a321",
-      "diagnostics": "cca333e0d1fc9889a795e023dbfdee8eda8fdef3c11d9e373257e6bd75be2f9a",
-      "fix_output": "6e9b89601d7f530cba4e8ff9fdfcc571eca730b4f8b25f06291bbffc0f1a3fd5"
-    },
     "mustache-spacing/invalid/declaration-tag-input.svelte": {
       "version_skip": "cf663011ac1149132681647835e8e7d4e8f247c148480d12a1042bad537ca39c"
     },
