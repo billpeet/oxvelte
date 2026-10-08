@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 914,
-    "gaps": 321,
+    "pass": 937,
+    "gaps": 298,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 24,
+      "count": 20,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1516,39 +1516,6 @@
             ]
           }
         ],
-        "require-store-reactive-access": [
-          {
-            "id": "require-store-reactive-access/invalid/condition01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/ts/ts-if-block01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/ts/ts-stores01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/ts/ts-test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
         "shorthand-attribute": [
           {
             "id": "shorthand-attribute/invalid/always/test01-input.svelte",
@@ -1643,7 +1610,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 66,
+      "count": 57,
       "rules": {
         "consistent-selector-style": [
           {
@@ -2037,71 +2004,6 @@
             ]
           }
         ],
-        "require-store-reactive-access": [
-          {
-            "id": "require-store-reactive-access/invalid/attrs-store01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/directives-store01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/if-block01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/props-store01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/svelte-component01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/svelte-element01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/ts/ts-class-directives01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/ts/ts-i18n-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
         "valid-each-key": [
           {
             "id": "valid-each-key/invalid/const-key01-input.svelte",
@@ -2121,7 +2023,7 @@
     {
       "id": "fix",
       "label": "Fix output or unexpected automatic fixes",
-      "count": 14,
+      "count": 4,
       "rules": {
         "no-useless-mustaches": [
           {
@@ -2150,68 +2052,6 @@
               "unexpected_fix"
             ]
           }
-        ],
-        "require-store-reactive-access": [
-          {
-            "id": "require-store-reactive-access/invalid/await01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/call01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/for-in01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/for-of01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/if-statement01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/import01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/properties01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/spread01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/switch01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          },
-          {
-            "id": "require-store-reactive-access/invalid/tagged01-input.svelte",
-            "dimensions": [
-              "fix_output"
-            ]
-          }
         ]
       }
     }
@@ -2230,7 +2070,7 @@
       }
     },
     "diagnostics": {
-      "count": 125,
+      "count": 112,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
@@ -2253,7 +2093,6 @@
         "prefer-destructured-store-props": 9,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
-        "require-store-reactive-access": 13,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "valid-compile": 8,
@@ -2262,7 +2101,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 50,
+      "count": 46,
       "rules": {
         "consistent-selector-style": 4,
         "html-closing-bracket-new-line": 1,
@@ -2275,20 +2114,18 @@
         "no-unused-svelte-ignore": 18,
         "prefer-class-directive": 2,
         "prefer-style-directive": 3,
-        "require-store-reactive-access": 4,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "valid-compile": 8
       }
     },
     "fix_output": {
-      "count": 52,
+      "count": 30,
       "rules": {
         "mustache-spacing": 1,
         "no-useless-mustaches": 7,
         "prefer-class-directive": 10,
         "prefer-style-directive": 10,
-        "require-store-reactive-access": 22,
         "shorthand-attribute": 1,
         "shorthand-directive": 1
       }
