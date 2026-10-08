@@ -17,6 +17,8 @@ function compile(source, settings = {}) {
 test('reports real Svelte warnings and compile errors', () => {
   const warn = compile('<img src="x">');
   assert.equal(warn.kind, 'warn');
+  assert.equal(warn.compiler_version, '5.49.2');
+  assert.equal(warn.svelte_major, 5);
   assert.equal(warn.warnings[0].code, 'a11y_missing_attribute');
   assert.equal(warn.warnings[0].start, 0);
   const error = compile('<div bind:invalid={x}></div>');
@@ -77,3 +79,4 @@ test('Babel parser mode transforms function-bind syntax using runtime config', (
   assert.equal(result.kind, 'warn');
   assert.equal(result.warnings.find(w => w.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
 });
+

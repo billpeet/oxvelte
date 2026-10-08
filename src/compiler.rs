@@ -31,6 +31,7 @@ pub struct IgnoreItem {
 }
 #[derive(Debug, Clone)]
 pub struct CompileResult {
+    pub compiler_version: String,
     pub svelte_major: u32,
     pub kind: String,
     pub warnings: Vec<Warning>,
@@ -54,6 +55,7 @@ struct WireWarning {
 }
 #[derive(Deserialize)]
 struct WireResult {
+    compiler_version: String,
     svelte_major: u32,
     kind: String,
     warnings: Vec<WireWarning>,
@@ -151,6 +153,7 @@ impl Runtime {
             }),
         };
         let result = CompileResult {
+            compiler_version: wire.compiler_version,
             svelte_major: wire.svelte_major,
             kind: wire.kind,
             warnings: wire

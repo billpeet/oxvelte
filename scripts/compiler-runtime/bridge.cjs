@@ -132,7 +132,7 @@ async function run(request) {
     if (settings._oxvelteCustomElement) options.customElement = true;
     result = { kind: 'warn', warnings: compiler.compile(code, options).warnings };
   } catch (e) { result = { kind: 'error', warnings: [e] }; }
-  return { svelte_major: Number.parseInt(compiler.VERSION, 10), kind: result.kind, warnings: result.warnings.map(value => {
+  return { compiler_version: compiler.VERSION, svelte_major: Number.parseInt(compiler.VERSION, 10), kind: result.kind, warnings: result.warnings.map(value => {
     const raw = warning(value); raw.filtered = false; raw.report = null;
     if (result.kind === 'warn' && value.code) {
       if (config.warningFilter) raw.filtered = !config.warningFilter(value);
@@ -149,6 +149,7 @@ rl.on('line', async line => {
   try { const result = await run(JSON.parse(line)); process.stdout.write(JSON.stringify({ result }) + '\n'); }
   catch (e) { process.stdout.write(JSON.stringify({ error: e.message }) + '\n'); }
 });
+
 
 
 
