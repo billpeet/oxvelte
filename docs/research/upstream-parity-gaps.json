@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 898,
-    "gaps": 337,
+    "pass": 900,
+    "gaps": 335,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1643,7 +1643,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 82,
+      "count": 80,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1658,22 +1658,6 @@
             "id": "experimental-require-slot-types/invalid/no-slot-types01-input.svelte",
             "dimensions": [
               "diagnostics"
-            ]
-          }
-        ],
-        "no-add-event-listener": [
-          {
-            "id": "no-add-event-listener/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
-            ]
-          },
-          {
-            "id": "no-add-event-listener/invalid/typescript01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "suggestions"
             ]
           }
         ],
@@ -2337,14 +2321,13 @@
       }
     },
     "diagnostics": {
-      "count": 141,
+      "count": 139,
       "rules": {
         "consistent-selector-style": 5,
         "experimental-require-slot-types": 1,
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
         "mustache-spacing": 1,
-        "no-add-event-listener": 2,
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
@@ -2404,13 +2387,6 @@
         "shorthand-directive": 1
       }
     },
-    "suggestions": {
-      "count": 9,
-      "rules": {
-        "no-add-event-listener": 2,
-        "prefer-destructured-store-props": 7
-      }
-    },
     "compiler_capability": {
       "count": 84,
       "rules": {
@@ -2423,6 +2399,12 @@
       "rules": {
         "no-useless-mustaches": 2,
         "prefer-const": 3
+      }
+    },
+    "suggestions": {
+      "count": 7,
+      "rules": {
+        "prefer-destructured-store-props": 7
       }
     },
     "executable_configuration": {

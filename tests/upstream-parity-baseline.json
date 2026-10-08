@@ -367,14 +367,6 @@
     "mustache-spacing/invalid/declaration-tag-input.svelte": {
       "version_skip": "cf663011ac1149132681647835e8e7d4e8f247c148480d12a1042bad537ca39c"
     },
-    "no-add-event-listener/invalid/test01-input.svelte": {
-      "diagnostics": "f37d668a190c6a3cf37d861a5714ee4b3b34bd26019ab644ba513ec78075ea1c",
-      "suggestions": "300ab72e6731f0d042c7beb40f6598ac506cf7d771a8a4689d7f34c3cda00c21"
-    },
-    "no-add-event-listener/invalid/typescript01-input.svelte": {
-      "diagnostics": "23bbd0a57adf7fb3553d729e3fab7f36b8fe61ac844f7ab974755407f43c0f13",
-      "suggestions": "d81b9e27bf35948ba48740394a16b90556d0b5b28ed3f6eee7d170bbf0678553"
-    },
     "no-at-const-tags/invalid/const01-input.svelte": {
       "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
     },
