@@ -1,7 +1,7 @@
 //! `svelte/block-lang` — enforce or disallow specific `lang` attributes on script/style blocks.
 //! 💡
 
-use crate::linter::{Fix, LintContext, Rule};
+use crate::linter::{LintContext, Rule};
 use oxc::span::Span;
 
 pub struct BlockLang;
@@ -18,11 +18,79 @@ fn pretty_print_langs(allowed: &[Option<String>]) -> String {
             format!("either omitted or one of {}", quoted.join(", "))
         }
         (false, 1) => format!("\"{}\"", named[0]),
-        (false, 2) => format!("\"{}\" or \"{}\"", named[0], named[1]),
         (false, _) => {
             let quoted: Vec<String> = named.iter().map(|s| format!("\"{}\"", s)).collect();
             format!("one of {}", quoted.join(", "))
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{linter::RuleConfig, parser};
+    use oxc::allocator::Allocator;
+
+    #[test]
+    fn language_defaults_options_and_reports_match_upstream() {
+        for (source, options, expected) in [
+            (
+                "<script lang='ts'></script>",
+                serde_json::json!([{}]),
+                "omitted",
+            ),
+            (
+                "<script lang='ts'></script>",
+                serde_json::json!([{ "script": "TS" }]),
+                "\"TS\"",
+            ),
+            (
+                "<script></script>",
+                serde_json::json!([{ "script": ["ts", "typescript"] }]),
+                "one of \"ts\", \"typescript\"",
+            ),
+        ] {
+            let allocator = Allocator::default();
+            let parsed = parser::parse(source, &allocator);
+            let mut ctx = LintContext::with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            );
+            BlockLang.run(&mut ctx);
+            assert_eq!(ctx.diagnostics.len(), 1);
+            assert_eq!(
+                ctx.diagnostics[0].message,
+                format!("The lang attribute of the <script> block should be {expected}.")
+            );
+            assert!(ctx.diagnostics[0].fix.is_none());
+        }
+    }
+
+    #[test]
+    fn missing_blocks_report_second_column() {
+        let source = "<p>Hello</p>";
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        let mut ctx = LintContext::with_config(
+            &parsed.ast,
+            source,
+            RuleConfig {
+                options: Some(
+                    serde_json::json!([{ "enforceScriptPresent": true, "enforceStylePresent": true }]),
+                ),
+                settings: None,
+            },
+        );
+        BlockLang.run(&mut ctx);
+        assert_eq!(ctx.diagnostics.len(), 2);
+        assert!(ctx
+            .diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.span == Span::new(1, 1) && diagnostic.fix.is_none()));
     }
 }
 
@@ -31,7 +99,7 @@ fn parse_langs(opts: Option<&serde_json::Value>, key: &str) -> Option<Vec<Option
         if let Some(arr) = v.as_array() {
             Some(arr.iter().map(|v| v.as_str().map(String::from)).collect())
         } else {
-            v.as_str().map(|s| vec![Some(s.to_string())])
+            Some(vec![v.as_str().map(String::from)])
         }
     })
 }
@@ -41,16 +109,11 @@ fn check_block_lang(
     span: Span,
     block_lang: Option<&str>,
     allowed: &[Option<String>],
-    source: &str,
     ctx: &mut LintContext<'_>,
 ) {
     let lang = block_lang.map(|l| l.to_lowercase());
     let lang_ref = lang.as_deref();
-    let allowed_lower: Vec<Option<String>> = allowed
-        .iter()
-        .map(|a| a.as_deref().map(|s| s.to_lowercase()))
-        .collect();
-    if allowed_lower.iter().any(|a| a.as_deref() == lang_ref) {
+    if allowed.iter().any(|a| a.as_deref() == lang_ref) {
         return;
     }
 
@@ -59,29 +122,7 @@ fn check_block_lang(
         tag,
         pretty_print_langs(allowed)
     );
-    let src = &source[span.start as usize..span.end as usize];
-    let replacement = match (allowed.iter().find_map(|a| a.as_deref()), block_lang) {
-        (Some(target), Some(l)) => src.replacen(
-            &format!("lang=\"{}\"", l),
-            &format!("lang=\"{}\"", target),
-            1,
-        ),
-        (Some(target), None) => src.replacen(
-            &format!("<{}", tag),
-            &format!("<{} lang=\"{}\"", tag, target),
-            1,
-        ),
-        (None, Some(l)) => {
-            let with_space = format!(" lang=\"{}\"", l);
-            if src.contains(&with_space) {
-                src.replacen(&with_space, "", 1)
-            } else {
-                src.replacen(&format!("lang=\"{}\"", l), "", 1)
-            }
-        }
-        (None, None) => src.to_string(),
-    };
-    ctx.diagnostic_with_fix(msg, span, Fix { span, replacement });
+    ctx.diagnostic(msg, span);
 }
 
 impl Rule for BlockLang {
@@ -97,8 +138,8 @@ impl Rule for BlockLang {
             .and_then(|v| v.as_array())
             .and_then(|arr| arr.first());
 
-        let script_langs = parse_langs(opts, "script");
-        let style_langs = parse_langs(opts, "style");
+        let script_langs = Some(parse_langs(opts, "script").unwrap_or_else(|| vec![None]));
+        let style_langs = Some(parse_langs(opts, "style").unwrap_or_else(|| vec![None]));
         let enforce_script = opts
             .and_then(|o| o.get("enforceScriptPresent"))
             .and_then(|v| v.as_bool())
@@ -117,7 +158,7 @@ impl Rule for BlockLang {
                     "The <script> block should be present and its lang attribute should be {}.",
                     desc
                 ),
-                Span::new(0, 0),
+                Span::new(1, 1),
             );
         }
         if let Some(allowed) = &script_langs {
@@ -125,14 +166,7 @@ impl Rule for BlockLang {
                 .iter()
                 .filter_map(|s| s.as_ref())
             {
-                check_block_lang(
-                    "script",
-                    script.span,
-                    script.lang.as_deref(),
-                    allowed,
-                    ctx.source,
-                    ctx,
-                );
+                check_block_lang("script", script.span, script.lang.as_deref(), allowed, ctx);
             }
         }
 
@@ -145,19 +179,12 @@ impl Rule for BlockLang {
                     "The <style> block should be present and its lang attribute should be {}.",
                     desc
                 ),
-                Span::new(0, 0),
+                Span::new(1, 1),
             );
         }
         if let Some(allowed) = &style_langs {
             if let Some(style) = &ctx.ast.css {
-                check_block_lang(
-                    "style",
-                    style.span,
-                    style.lang.as_deref(),
-                    allowed,
-                    ctx.source,
-                    ctx,
-                );
+                check_block_lang("style", style.span, style.lang.as_deref(), allowed, ctx);
             }
         }
     }
