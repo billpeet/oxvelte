@@ -17,6 +17,7 @@ pub(crate) fn resolve(ctx: &LintContext<'_>, result: &mut crate::compiler::Compi
         return;
     }
     let mut targets: Vec<(Span, bool)> = Vec::new();
+    let mut barriers = Vec::new();
     let mut comments = Vec::new();
     walk_template_nodes(&ctx.ast.html, &mut |node| match node {
         TemplateNode::Comment(node) => comments.push(node.span),
@@ -25,6 +26,7 @@ pub(crate) fn resolve(ctx: &LintContext<'_>, result: &mut crate::compiler::Compi
         TemplateNode::EachBlock(node) => targets.push((node.span, false)),
         TemplateNode::AwaitBlock(node) => targets.push((node.span, false)),
         TemplateNode::KeyBlock(node) => targets.push((node.span, false)),
+        TemplateNode::SnippetBlock(node) => barriers.push(node.span),
         _ => {}
     });
     if let Some(style) = &ctx.ast.css {
@@ -68,6 +70,14 @@ pub(crate) fn resolve(ctx: &LintContext<'_>, result: &mut crate::compiler::Compi
         };
         let mut used = false;
         for (target, _) in &containing[first..] {
+            if barriers.iter().any(|barrier| {
+                barrier.start <= span.start
+                    && span.start < barrier.end
+                    && target.start < barrier.start
+                    && barrier.end < target.end
+            }) {
+                break;
+            }
             used |= consume_ignore(
                 ctx.source,
                 *target,
@@ -331,5 +341,39 @@ mod tests {
         ));
         assert_eq!(unused.len(), 1);
         assert_eq!(unused[0].token_span, comments[0]);
+    }
+
+    #[test]
+    fn warnings_in_snippets_do_not_use_an_outer_element_ignore() {
+        use crate::compiler::{CompileResult, Warning};
+        for (body, consumed) in [
+            ("<img />", true),
+            ("{#snippet example()}<img />{/snippet}", false),
+        ] {
+            let source =
+                format!("<!-- svelte-ignore a11y_missing_attribute -->\n<div>{body}</div>");
+            let allocator = oxc::allocator::Allocator::default();
+            let parsed = crate::parser::parse_for_lint(&source, &allocator);
+            let ctx = LintContext::new(&parsed.ast, &source);
+            let start = source.find("<img").unwrap() as u32;
+            let mut result = CompileResult {
+                compiler_version: "5.49.2".into(),
+                svelte_major: 5,
+                kind: "warn".into(),
+                warnings: vec![Warning {
+                    code: Some("a11y_missing_attribute".into()),
+                    message: "missing attribute".into(),
+                    span: Some(Span::new(start, start + 7)),
+                    filtered: false,
+                    report: None,
+                }],
+                ignore_items: items(&ctx),
+                unused_ignores: vec![],
+                strip_style_elements: vec![],
+            };
+            resolve(&ctx, &mut result);
+            assert_eq!(result.warnings.is_empty(), consumed);
+            assert_eq!(result.unused_ignores.is_empty(), consumed);
+        }
     }
 }
