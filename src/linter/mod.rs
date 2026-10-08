@@ -56,6 +56,18 @@ impl SvelteVersionInfo {
     pub fn is_unknown(&self) -> bool {
         self.dependency_ranges.is_empty()
     }
+
+    /// Whether every declared range alternative requires at least this release.
+    /// Unknown versions and ranges permitting older releases cannot enable a
+    /// migration whose resulting syntax needs a newer compiler.
+    pub fn guarantees_minimum_release(&self, release: (u32, u32, u32)) -> bool {
+        !self.dependency_ranges.is_empty()
+            && self.dependency_ranges.iter().all(|range| {
+                range
+                    .split("||")
+                    .all(|segment| range_segment_requires_release(segment, release))
+            })
+    }
 }
 
 /// Context provided to lint rules during execution.
@@ -791,6 +803,72 @@ fn svelte_version_info_from_package_json(content: &str) -> SvelteVersionInfo {
     SvelteVersionInfo { dependency_ranges }
 }
 
+/// Conservative lower-bound check for common npm dependency ranges. Unknown
+/// forms never enable a migration. Whitespace around comparison operators is
+/// accepted, but an upper bound is never mistaken for a minimum release.
+fn range_segment_requires_release(segment: &str, release: (u32, u32, u32)) -> bool {
+    let mut tokens = segment.split_whitespace();
+    let mut minimum = None;
+    while let Some(token) = tokens.next() {
+        let token = token.rsplit_once('@').map_or(token, |(_, version)| version);
+        let (upper, version) = if matches!(token, "<" | "<=") {
+            let Some(version) = tokens.next() else {
+                return false;
+            };
+            (true, version)
+        } else if matches!(token, ">" | ">=" | "^" | "~" | "=") {
+            let Some(version) = tokens.next() else {
+                return false;
+            };
+            (false, version)
+        } else if let Some(version) = token.strip_prefix("<=").or_else(|| token.strip_prefix('<')) {
+            (true, version)
+        } else {
+            (false, token.trim_start_matches(['^', '~', '=', '>']))
+        };
+        if version == "*" || version.eq_ignore_ascii_case("x") {
+            continue;
+        }
+        // Prereleases and unsupported range syntax need actual version resolution.
+        if version.contains('-') {
+            return false;
+        }
+        let version = version
+            .trim_start_matches('v')
+            .split('+')
+            .next()
+            .unwrap_or(version);
+        let mut parts = version.split('.');
+        let Some(major) = parts.next().and_then(|part| part.parse::<u32>().ok()) else {
+            return false;
+        };
+        let component = |part: &str| {
+            if part == "*" || part.eq_ignore_ascii_case("x") {
+                Some(0)
+            } else {
+                part.parse::<u32>().ok()
+            }
+        };
+        let (Some(minor), Some(patch)) = (
+            component(parts.next().unwrap_or("0")),
+            component(parts.next().unwrap_or("0")),
+        ) else {
+            return false;
+        };
+        if parts.next().is_some() {
+            return false;
+        }
+        if !upper {
+            minimum = Some(
+                minimum.map_or((major, minor, patch), |current: (u32, u32, u32)| {
+                    current.max((major, minor, patch))
+                }),
+            );
+        }
+    }
+    minimum.is_some_and(|minimum| minimum >= release)
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum RangeOp {
     Any,
@@ -1379,5 +1457,41 @@ where
         if let Some(a) = &ib.alternate {
             walk_alt(a, visitor);
         }
+    }
+}
+
+#[cfg(test)]
+mod minimum_release_tests {
+    use super::svelte_version_info_from_package_json;
+
+    #[test]
+    fn migration_requires_a_known_minimum_compiler_release() {
+        for (range, expected) in [
+            ("5.49.2", false),
+            ("^5.49.2", false),
+            ("5.56.0", true),
+            ("^5.56.0", true),
+            (">=5.56.0 <6", true),
+            (">= 5.56.0 < 6", true),
+            ("< 6", false),
+            ("<=5.55.9", false),
+            ("5.x", false),
+            ("*", false),
+            ("5.56.x", true),
+            ("5.56.0 || 5.49.2", false),
+            ("5.56.0-beta.1", false),
+            ("latest", false),
+            ("npm:svelte@5.56.0", true),
+        ] {
+            let info = svelte_version_info_from_package_json(
+                &serde_json::json!({"dependencies":{"svelte":range}}).to_string(),
+            );
+            assert_eq!(
+                info.guarantees_minimum_release((5, 56, 0)),
+                expected,
+                "{range}"
+            );
+        }
+        assert!(!super::SvelteVersionInfo::default().guarantees_minimum_release((5, 56, 0)));
     }
 }
