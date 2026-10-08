@@ -115,59 +115,65 @@ pub(super) fn directive_expression_key(value: &AttributeValue) -> String {
 }
 
 fn canonical_js_expression(source: &str) -> String {
-    let bytes = source.as_bytes();
-    let mut out = String::with_capacity(source.len());
-    let mut i = 0;
-
-    while i < bytes.len() {
-        match bytes[i] {
-            b'\'' | b'"' | b'`' => copy_quoted(source, &mut i, &mut out),
-            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
-                i += 2;
-                while i < bytes.len() && !matches!(bytes[i], b'\n' | b'\r') {
-                    i += 1;
-                }
-            }
-            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'*' => {
-                i += 2;
-                while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
-                    i += 1;
-                }
-                i = (i + 2).min(bytes.len());
-            }
-            b if b.is_ascii_whitespace() => i += 1,
-            _ => {
-                let ch = source[i..].chars().next().expect("valid char boundary");
-                out.push(ch);
-                i += ch.len_utf8();
-            }
-        }
+    // Upstream compares tokens, including literal spelling, without comments.
+    // Parsing an expression wrapper lets OXC distinguish regexes, templates and
+    // adjacent operators instead of joining whitespace-separated text.
+    let allocator = oxc::allocator::Allocator::default();
+    let wrapped = format!("({source}\n)");
+    let parsed = oxc::parser::Parser::new(&allocator, &wrapped, oxc::span::SourceType::ts())
+        .with_config(oxc::parser::config::TokensParserConfig)
+        .parse();
+    if !parsed.errors.is_empty() {
+        return format!("unparsed:{source}");
     }
-
+    let mut out = String::new();
+    for token in &parsed.tokens {
+        let text = &wrapped[token.start() as usize..token.end() as usize];
+        // Length prefixes preserve token boundaries even inside literal text.
+        out.push_str(&text.len().to_string());
+        out.push(':');
+        out.push_str(text);
+    }
     out
 }
 
-fn copy_quoted(source: &str, i: &mut usize, out: &mut String) {
-    let bytes = source.as_bytes();
-    let quote = bytes[*i];
+#[cfg(test)]
+mod directive_identity_tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
 
-    while *i < bytes.len() {
-        let ch = source[*i..].chars().next().expect("valid char boundary");
-        out.push(ch);
-        *i += ch.len_utf8();
+    #[test]
+    fn distinct_operators_and_literal_content_are_not_duplicate_directives() {
+        let source = r#"<button on:click={() => x++ + y} on:click={() => x + ++y} />
+<div use:foo={"a b"} use:foo={"ab"} />
+<div use:bar={/a b/} use:bar={/ab/} />
+<div use:baz={`a b`} use:baz={`ab`} />"#;
+        assert_eq!(duplicates(source), 0);
+    }
 
-        if ch == '\\' {
-            if *i < bytes.len() {
-                let escaped = source[*i..].chars().next().expect("valid char boundary");
-                out.push(escaped);
-                *i += escaped.len_utf8();
-            }
-            continue;
-        }
+    #[test]
+    fn comments_and_spacing_between_tokens_do_not_change_identity() {
+        let source = r#"<button on:click={() => x + y} on:click={() => x /* note */ + y} />
+<div use:foo={"a b"} use:foo={ /* note */ "a b"} />
+<div use:bar={/a b/} use:bar={ /a b/ } />
+<div use:baz={`a ${ x + y }`} use:baz={`a ${x+y}`} />"#;
+        assert_eq!(duplicates(source), 8);
+    }
 
-        if ch.len_utf8() == 1 && ch as u8 == quote {
-            break;
-        }
+    fn duplicates(source: &str) -> usize {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint(&parsed.ast, source)
+            .iter()
+            .filter(|d| {
+                matches!(
+                    d.rule_name,
+                    "svelte/no-dupe-on-directives" | "svelte/no-dupe-use-directives"
+                )
+            })
+            .count()
     }
 }
 
