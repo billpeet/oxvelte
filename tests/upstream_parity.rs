@@ -165,31 +165,39 @@ fn isolated_linter(rule_name: &str) -> Linter {
     lint
 }
 
-fn rule_config(case: &Case, issues: &mut Issues) -> RuleConfig {
-    let mut settings = case.config.get("settings").cloned();
+fn rule_config(root: &Path, case: &Case, issues: &mut Issues) -> Result<RuleConfig, String> {
+    let compiler_rule = ["valid-compile", "no-unused-svelte-ignore"].contains(&case.rule.as_str());
+    let executable_path = if case.executable_config {
+        let path = case
+            .config_file
+            .as_deref()
+            .ok_or("Executable fixture has no module path")?;
+        Some(
+            checked_path(root, path)?
+                .to_string_lossy()
+                .replace('\\', "/"),
+        )
+    } else {
+        None
+    };
+    let settings = parity::compiler_settings(&case.config, executable_path.as_deref());
     if let Some(language) = case.config.get("languageOptions") {
         if let Some(parser_options) = language.get("parserOptions") {
             if let Some(svelte_config) = parser_options.get("svelteConfig") {
-                // These two forms specify the same route context. Keep the
-                // original test filename and relative tests/fixtures path.
-                if let Some(kit) = svelte_config.get("kit") {
-                    let effective = settings.get_or_insert_with(|| json!({}));
-                    if effective.get("svelte").is_none() {
-                        effective["svelte"] = json!({});
-                    }
-                    effective["svelte"]["kit"] = kit.clone();
-                }
-                if svelte_config
-                    .as_object()
-                    .is_none_or(|o| o.keys().any(|key| key != "kit"))
+                if !compiler_rule
+                    && svelte_config
+                        .as_object()
+                        .is_none_or(|o| o.keys().any(|key| key != "kit"))
                 {
                     issues.insert("parser_configuration".into(), svelte_config.clone());
                 }
             }
-            if parser_options
-                .as_object()
-                .is_none_or(|o| o.keys().any(|key| key != "svelteConfig"))
-            {
+            if parser_options.as_object().is_none_or(|o| {
+                o.iter().any(|(key, value)| {
+                    key != "svelteConfig"
+                        && !(compiler_rule && key == "parser" && value == "@babel/eslint-parser")
+                })
+            }) {
                 issues.insert("parser_configuration".into(), parser_options.clone());
             }
         }
@@ -200,10 +208,10 @@ fn rule_config(case: &Case, issues: &mut Issues) -> RuleConfig {
             issues.insert("language_configuration".into(), language.clone());
         }
     }
-    RuleConfig {
+    Ok(RuleConfig {
         options: case.config.get("options").cloned(),
         settings,
-    }
+    })
 }
 
 fn script_errors(source: &str, is_ts: bool) -> Vec<String> {
@@ -225,10 +233,19 @@ fn lint_case(
             .iter()
             .map(|error| error.to_string())
             .collect();
+        // The configured Babel parser validates syntax in the compiler bridge.
+        let external_parser = config
+            .settings
+            .as_ref()
+            .and_then(|settings| settings.pointer("/compiler/parser"))
+            .is_some_and(|parser| parser == "@babel/eslint-parser");
         for script in [&result.ast.instance, &result.ast.module]
             .into_iter()
             .flatten()
         {
+            if external_parser {
+                continue;
+            }
             errors.extend(script_errors(
                 &script.content,
                 matches!(script.lang.as_deref(), Some("ts" | "typescript")),
@@ -262,10 +279,6 @@ fn evaluate(root: &Path, case: &Case) -> Result<Issues, String> {
         issues.insert("version_skip".into(), json!(case.ineligible));
         return Ok(issues);
     }
-    if case.executable_config {
-        issues.insert("executable_configuration".into(), json!(case.config_file));
-        return Ok(issues);
-    }
     let target = if case.rule.starts_with('@') {
         case.rule.clone()
     } else {
@@ -276,13 +289,7 @@ fn evaluate(root: &Path, case: &Case) -> Result<Issues, String> {
         issues.insert("unsupported_rule".into(), json!(target));
         return Ok(issues);
     }
-    if ["valid-compile", "no-unused-svelte-ignore"].contains(&case.rule.as_str()) {
-        issues.insert(
-            "compiler_capability".into(),
-            json!("Upstream expectations depend on Svelte compiler warnings"),
-        );
-    }
-    let config = rule_config(case, &mut issues);
+    let config = rule_config(root, case, &mut issues)?;
     let source_path = checked_path(root, &case.filename)?;
     let source = fs::read_to_string(&source_path).map_err(|e| e.to_string())?;
     // Forward slashes give the same route/path behavior on Windows and Linux.

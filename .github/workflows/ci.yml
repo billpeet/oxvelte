@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: scripts/compiler-runtime
       - run: cargo test --lib
       - run: cargo build --release
 
@@ -32,6 +37,10 @@ jobs:
         working-directory: scripts/upstream-parity
       - run: npm test
         working-directory: scripts/upstream-parity
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: scripts/compiler-runtime
+      - run: npm test
+        working-directory: scripts/compiler-runtime
       - run: node --test scripts/summarize-parity.test.mjs
       - run: cargo test --locked --test upstream_adapter
       - run: cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
