@@ -469,12 +469,6 @@
     "no-top-level-browser-globals/invalid/in-template01-input.svelte": {
       "diagnostics": "f9c95240c72559d240364c5f6e856e5e8470ee010f42e6b54ebc8fafb87101c6"
     },
-    "no-unknown-style-directive-property/invalid/ignoreProperties/test01-input.svelte": {
-      "diagnostics": "c1c25fe9bb0d4b885b2dde9dc5d4a61f4873693c1ef85238347814d0221e070d"
-    },
-    "no-unknown-style-directive-property/invalid/test01-input.svelte": {
-      "diagnostics": "f8e1f54121e0e8d3ed665cd53f8d7e08a0ec6a10c139215e329aff77d68fb364"
-    },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
       "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",

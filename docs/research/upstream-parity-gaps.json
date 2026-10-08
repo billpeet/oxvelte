@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 956,
-    "gaps": 279,
+    "pass": 958,
+    "gaps": 277,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1554,7 +1554,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 46,
+      "count": 44,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1675,20 +1675,6 @@
         "no-top-level-browser-globals": [
           {
             "id": "no-top-level-browser-globals/invalid/in-template01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-unknown-style-directive-property": [
-          {
-            "id": "no-unknown-style-directive-property/invalid/ignoreProperties/test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unknown-style-directive-property/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -1953,7 +1939,7 @@
       }
     },
     "diagnostics": {
-      "count": 93,
+      "count": 91,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -1966,7 +1952,6 @@
         "no-shorthand-style-property-overrides": 2,
         "no-svelte-internal": 7,
         "no-top-level-browser-globals": 3,
-        "no-unknown-style-directive-property": 2,
         "no-unused-svelte-ignore": 18,
         "no-useless-mustaches": 6,
         "prefer-class-directive": 10,
