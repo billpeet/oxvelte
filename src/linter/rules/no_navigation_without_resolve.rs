@@ -33,6 +33,9 @@ impl Rule for NoNavigationWithoutResolve {
     }
 
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
+        if !kit_version_is_eligible(ctx.file_path.as_deref()) {
+            return;
+        }
         let opts = ctx
             .config
             .options
@@ -203,6 +206,46 @@ impl Rule for NoNavigationWithoutResolve {
             }
         });
     }
+}
+
+/// Upstream's rule conditions accept Kit 1/2. Prefer installed dependencies,
+/// then a declared major for fixtures and projects without node_modules.
+fn kit_version_is_eligible(filename: Option<&str>) -> bool {
+    let Some(filename) = filename else {
+        return true;
+    };
+    let mut directory = std::path::Path::new(filename).parent();
+    while let Some(dir) = directory {
+        for (path, installed) in [
+            (dir.join("node_modules/@sveltejs/kit/package.json"), true),
+            (dir.join("package.json"), false),
+        ] {
+            let Some(package) = std::fs::read_to_string(path)
+                .ok()
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+            else {
+                continue;
+            };
+            let version = if installed {
+                package.get("version")
+            } else {
+                ["dependencies", "devDependencies", "peerDependencies"]
+                    .iter()
+                    .find_map(|section| package.get(section)?.get("@sveltejs/kit"))
+            };
+            if let Some(major) = version.and_then(|v| v.as_str()).and_then(|s| {
+                s.trim_start_matches(['^', '~', '=', ' '])
+                    .split('.')
+                    .next()?
+                    .parse::<u32>()
+                    .ok()
+            }) {
+                return major == 1 || major == 2;
+            }
+        }
+        directory = dir.parent();
+    }
+    true
 }
 
 #[cfg(test)]
