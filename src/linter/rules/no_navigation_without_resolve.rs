@@ -119,7 +119,7 @@ impl Rule for NoNavigationWithoutResolve {
         // Walk script nav calls.
         if !nav_locals.is_empty() {
             if let Some(sem) = ctx.instance_semantic {
-                let content_offset = ctx.instance_content_offset;
+                let content_offset = ctx.ast.instance.as_ref().unwrap().content_span.start;
                 for node in sem.nodes().iter() {
                     let AstKind::CallExpression(ce) = node.kind() else {
                         continue;
@@ -139,9 +139,9 @@ impl Rule for NoNavigationWithoutResolve {
                     let safe =
                         is_safe_nav_arg(first_arg, &resolve_locals, sem, &mut FxHashSet::default());
                     if !safe {
-                        let callee_span = ce.callee.span();
-                        let s = content_offset + callee_span.start;
-                        let e = content_offset + callee_span.end + 1;
+                        let argument_span = first_arg.span();
+                        let s = content_offset + argument_span.start;
+                        let e = content_offset + argument_span.end;
                         ctx.diagnostic(
                             format!("Unexpected {}() call without resolve().", orig_name),
                             Span::new(s, e),
@@ -206,6 +206,44 @@ impl Rule for NoNavigationWithoutResolve {
                 }
             }
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter};
+    use crate::parser;
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-navigation-without-resolve")
+            .collect()
+    }
+
+    #[test]
+    fn navigation_reports_the_first_argument() {
+        let source = r#"<!-- 😀 -->
+<script data-note=">">
+import { goto as go, pushState } from '$app/navigation';
+import * as nav from '$app/navigation';
+go('/jobs');
+pushState(`/jobs/${id}`, {});
+nav.replaceState(url, {});
+</script>"#;
+        let diagnostics = lint(source);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .map(|d| &source[d.span.start as usize..d.span.end as usize])
+                .collect::<Vec<_>>(),
+            ["'/jobs'", "`/jobs/${id}`", "url"]
+        );
     }
 }
 
