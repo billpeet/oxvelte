@@ -38,7 +38,7 @@ impl Rule for PreferAttributeInterpolation {
                     continue;
                 }
                 let Some(Expression::TemplateLiteral(template)) =
-                    unwrap_template_expression(&parsed).map(Expression::get_inner_expression)
+                    unwrap_template_expression(&parsed).map(Expression::without_parentheses)
                 else {
                     continue;
                 };
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn flags_only_single_template_values_without_comments_or_useful_escapes() {
-        let source = "<!-- 😀 --><div a={`prefix${value}`} b=\"{`text${value}`}\" c=\"prefix {`text${value}`}\" d={`text${/* keep */ value}`} e={`line\\n${value}`} f={`text{${value}`} style:color={`rgb(${value})`} />";
+        let source = "<!-- 😀 --><div a={`prefix${value}`} b=\"{`text${value}`}\" c=\"prefix {`text${value}`}\" d={`text${/* keep */ value}`} e={`line\\n${value}`} f={`text{${value}`} style:color={`rgb(${value})`} typed={(`text${value}` as string)} />";
         let alloc = Allocator::default();
         let parsed = parser::parse_for_lint(source, &alloc);
         assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);

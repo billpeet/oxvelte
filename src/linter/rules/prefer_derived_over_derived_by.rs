@@ -122,7 +122,7 @@ fn check_call(call: &CallExpression<'_>, offset: i64, ctx: &mut LintContext<'_>)
     let Some(argument) = call.arguments[0].as_expression() else {
         return;
     };
-    let expression = match argument.get_inner_expression() {
+    let expression = match argument.without_parentheses() {
         Expression::ArrowFunctionExpression(function)
             if !function.r#async
                 && function.params.items.is_empty()
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn retains_callbacks_with_effects_or_function_semantics() {
-        let source = "<script>let value = $derived.by(() => { log(); return count; }); let second = $derived.by(async () => count); let third = $derived.by(function*() { return count; }); let fourth = $derived.by((count) => count); let fifth = $derived['by'](() => count);</script>";
+        let source = "<script lang=\"ts\">let value = $derived.by(() => { log(); return count; }); let second = $derived.by(async () => count); let third = $derived.by(function*() { return count; }); let fourth = $derived.by((count) => count); let fifth = $derived['by'](() => count); let sixth = $derived.by((() => count) as () => number);</script>";
         let alloc = Allocator::default();
         let parsed = parser::parse_for_lint(source, &alloc);
         assert!(parsed.errors.is_empty());

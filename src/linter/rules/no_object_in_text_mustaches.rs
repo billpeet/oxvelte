@@ -58,7 +58,7 @@ impl Rule for NoObjectInTextMustaches {
 
 fn detect_expression_kind(expr: &oxc::ast::ast::Expression<'_>) -> Option<&'static str> {
     use oxc::ast::ast::Expression;
-    match expr.get_inner_expression() {
+    match expr.without_parentheses() {
         Expression::ObjectExpression(_) => Some("object"),
         Expression::ArrayExpression(_) => Some("array"),
         Expression::ArrowFunctionExpression(_) | Expression::FunctionExpression(_) => {
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn reports_each_concatenated_expression_at_its_own_span() {
         let source =
-            "<!-- 😀 --><div text=\"prefix {[1]} {({a: 1})}\" prop={{a: 1}} />{[1].length}";
+            "<!-- 😀 --><div text=\"prefix {[1]} {({a: 1})}\" prop={{a: 1}} />{[1].length}{({a: 1} as unknown)}";
         let allocator = Allocator::default();
         let parsed = parser::parse_for_lint(source, &allocator);
         assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);

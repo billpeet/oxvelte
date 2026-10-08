@@ -103,11 +103,11 @@ fn static_string<'a>(
         return None;
     }
     let expression = super::no_not_function_handler::resolve_handler_expression(
-        expression.get_inner_expression(),
+        expression.without_parentheses(),
         ctx,
         span,
     );
-    match expression.get_inner_expression() {
+    match expression.without_parentheses() {
         Expression::StringLiteral(literal) => Some(literal.value.to_string()),
         Expression::TemplateLiteral(template) if template.expressions.is_empty() => template
             .quasis
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn offers_independent_suggestions_preserving_binding_trivia() {
-        let source = "<!-- 😀 --><script>const checkType = 'checkbox'; const radioType = 'radio'; const aliasType = radioType;</script><input TYPE={'CHECK' + 'BOX'} bind:value = \"{value}\" /><input type={`radio`} bind:value /><input type={dynamic} bind:value /><input type={checkType} bind:value /><input type={aliasType} bind:value />{#each types as checkType}<input type={checkType} bind:value />{/each}";
+        let source = "<!-- 😀 --><script>const checkType = 'checkbox'; const radioType = 'radio'; const aliasType = radioType;</script><input TYPE={'CHECK' + 'BOX'} bind:value = \"{value}\" /><input type={`radio`} bind:value /><input type={dynamic} bind:value /><input type={('checkbox' as string)} bind:value /><input type={checkType} bind:value /><input type={aliasType} bind:value />{#each types as checkType}<input type={checkType} bind:value />{/each}";
         let alloc = Allocator::default();
         let parsed = parser::parse_for_lint(source, &alloc);
         assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
