@@ -585,33 +585,6 @@
     "prefer-const/invalid/test01-input.svelte": {
       "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
     },
-    "prefer-derived-over-derived-by/invalid/arrow-block-return-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/invalid/arrow-concise-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/invalid/function-expression-return-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/arrow-with-params-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/async-arrow-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/conditional-return-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/generator-function-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/multi-statement-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
-    "prefer-derived-over-derived-by/valid/plain-derived-input.svelte": {
-      "unsupported_rule": "0e0e39282be886e4e3fc57bfbf8ca660e56ece07cb768f47fda8f15948f66e96"
-    },
     "prefer-style-directive/invalid/complex-test01-input.svelte": {
       "diagnostics": "f6f9aec524a0c11c09be39cab062b07463503b23b7bf71b2912e46f1be30480d",
       "fix_output": "49ea450164ae912d9e657f4be6faea24345956cacca63117d1f71463e7c8e564"

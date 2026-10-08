@@ -44,6 +44,7 @@ mod no_unused_svelte_ignore;
 mod no_useless_children_snippet;
 mod no_useless_mustaches;
 mod prefer_class_directive;
+mod prefer_derived_over_derived_by;
 mod prefer_style_directive;
 mod prefer_writable_derived;
 mod require_each_key;
@@ -239,6 +240,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_unnecessary_state_wrap::NoUnnecessaryStateWrap),
         Box::new(no_unused_props::NoUnusedProps),
         Box::new(prefer_writable_derived::PreferWritableDerived),
+        Box::new(prefer_derived_over_derived_by::PreferDerivedOverDerivedBy),
         Box::new(require_stores_init::RequireStoresInit),
         Box::new(no_add_event_listener::NoAddEventListener),
         Box::new(block_lang::BlockLang),
