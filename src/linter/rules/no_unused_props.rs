@@ -2,6 +2,8 @@
 //! ⭐ Recommended
 
 use crate::linter::{LintContext, Rule};
+use oxc::ast::{ast::Expression, AstKind};
+use oxc::span::{GetSpan, Span};
 use std::collections::HashSet;
 
 pub struct NoUnusedProps;
@@ -34,14 +36,15 @@ impl Rule for NoUnusedProps {
             return;
         }
         let content = &script.content;
-        let base = script.span.start as usize;
-        let source = ctx.source;
-        let tag_text = &source[base..script.span.end as usize];
-        let content_offset = tag_text.find('>').map(|p| base + p + 1).unwrap_or(base);
 
         let props_call = match content.find("$props()") {
             Some(pos) => pos,
             None => return,
+        };
+        // Upstream reports on the declarator's binding, including its type
+        // annotation, for root properties, nested properties and index signatures.
+        let Some(report_span) = props_binding_span(ctx, props_call as u32) else {
+            return;
         };
 
         let before_props = &content[..props_call];
@@ -108,14 +111,14 @@ impl Rule for NoUnusedProps {
             {
                 return;
             }
-            for (prop_name, prop_offset) in &all_props {
+            for (prop_name, _) in &all_props {
                 if has_prop_access(full_source, var_name, prop_name) {
                     let allow_nested =
                         get_option_bool(&ctx.config.options, "allowUnusedNestedProperties");
                     if !allow_nested {
                         check_nested_properties(
                             content,
-                            content_offset,
+                            report_span,
                             full_source,
                             var_name,
                             prop_name,
@@ -124,10 +127,9 @@ impl Rule for NoUnusedProps {
                     }
                     continue;
                 }
-                let src_pos = content_offset + prop_offset;
                 ctx.diagnostic(
                     format!("'{}' is an unused Props property.", prop_name),
-                    oxc::span::Span::new(src_pos as u32, (src_pos + prop_name.len()) as u32),
+                    report_span,
                 );
             }
             return;
@@ -183,17 +185,7 @@ impl Rule for NoUnusedProps {
                 })
         });
 
-        if has_index_sig && !has_rest {
-            let decl_line_start = content[..props_call]
-                .rfind('\n')
-                .map(|p| p + 1)
-                .unwrap_or(0);
-            let src_pos = content_offset + decl_line_start;
-            ctx.diagnostic("Index signature is unused. Consider using rest operator (...) to capture remaining properties.",
-                oxc::span::Span::new(src_pos as u32, (src_pos + 10) as u32));
-        }
-
-        for (prop_name, prop_offset) in &all_props {
+        for (prop_name, _) in &all_props {
             if destructured.contains(prop_name.as_str()) {
                 continue;
             }
@@ -210,13 +202,34 @@ impl Rule for NoUnusedProps {
                 }
             }
 
-            let src_pos = content_offset + prop_offset;
             ctx.diagnostic(
                 format!("'{}' is an unused Props property.", prop_name),
-                oxc::span::Span::new(src_pos as u32, (src_pos + prop_name.len()) as u32),
+                report_span,
             );
         }
+        if has_index_sig && !has_rest {
+            ctx.diagnostic("Index signature is unused. Consider using rest operator (...) to capture remaining properties.", report_span);
+        }
     }
+}
+
+fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
+    let semantic = ctx.instance_semantic?;
+    let content_offset = ctx.ast.instance.as_ref()?.content_span.start;
+    semantic.nodes().iter().find_map(|node| {
+        let AstKind::VariableDeclarator(decl) = node.kind() else {
+            return None;
+        };
+        let Some(Expression::CallExpression(call)) = &decl.init else {
+            return None;
+        };
+        if !matches!(&call.callee, Expression::Identifier(id) if id.name == "$props" && id.span.start == call_start) {
+            return None;
+        }
+        let binding = decl.id.span();
+        let end = decl.type_annotation.as_ref().map_or(binding.end, |annotation| annotation.span.end);
+        Some(Span::new(content_offset + binding.start, content_offset + end))
+    })
 }
 
 fn has_prop_access(source: &str, base: &str, prop: &str) -> bool {
@@ -652,7 +665,7 @@ fn extract_option_patterns(options: &Option<serde_json::Value>, key: &str) -> Ve
 
 fn check_nested_properties(
     content: &str,
-    content_offset: usize,
+    report_span: Span,
     full_source: &str,
     var_name: &str,
     prop_name: &str,
@@ -673,14 +686,13 @@ fn check_nested_properties(
         return;
     }
     let prefix = format!("{}.{}", var_name, prop_name);
-    for (sub_name, sub_offset) in &nested {
+    for (sub_name, _) in &nested {
         if has_prop_access(full_source, &prefix, sub_name) {
             continue;
         }
-        let sp = content_offset + sub_offset;
         ctx.diagnostic(
             format!("'{}' in '{}' is an unused property.", sub_name, prop_name),
-            oxc::span::Span::new(sp as u32, (sp + sub_name.len()) as u32),
+            report_span,
         );
     }
 }
@@ -706,5 +718,78 @@ fn matches_pattern(name: &str, pattern: &str) -> bool {
         name.contains(inner)
     } else {
         name == pattern
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::linter::{LintDiagnostic, Linter};
+    use crate::parser;
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str) -> Vec<LintDiagnostic> {
+        let allocator = Allocator::default();
+        let result = parser::parse(source, &allocator);
+        assert!(result.errors.is_empty(), "{:?}", result.errors);
+        Linter::all()
+            .lint(&result.ast, source)
+            .into_iter()
+            .filter(|diag| diag.rule_name == "svelte/no-unused-props")
+            .collect()
+    }
+
+    #[test]
+    fn root_and_nested_findings_use_the_typed_props_binding_span() {
+        let source = r#"<!-- 😀 -->
+<script lang="ts" data-note=">">
+    interface Props {
+        unused: string;
+        user: { used: string; hidden: number; };
+    }
+    const props: Props = $props();
+    console.log(props.user.used);
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags
+                .iter()
+                .map(|diag| diag.message.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "'unused' is an unused Props property.",
+                "'hidden' in 'user' is an unused property."
+            ]
+        );
+        let start = source.find("props: Props").unwrap();
+        for diag in diags {
+            assert_eq!(diag.span.start as usize, start);
+            assert_eq!(
+                &source[diag.span.start as usize..diag.span.end as usize],
+                "props: Props"
+            );
+        }
+    }
+
+    #[test]
+    fn unused_properties_precede_index_signature_at_the_same_binding() {
+        let source = r#"<script lang="ts">
+    interface Props {
+        used: string;
+        unused: number;
+        [key: string]: unknown;
+    }
+    let /* binding */ { used }: Props = $props();
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags.iter().map(|diag| diag.message.as_str()).collect::<Vec<_>>(),
+            ["'unused' is an unused Props property.", "Index signature is unused. Consider using rest operator (...) to capture remaining properties."]
+        );
+        for diag in diags {
+            assert_eq!(
+                &source[diag.span.start as usize..diag.span.end as usize],
+                "{ used }: Props"
+            );
+        }
     }
 }

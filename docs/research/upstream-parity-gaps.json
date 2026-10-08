@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 690,
-    "gaps": 545,
+    "pass": 709,
+    "gaps": 526,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -2218,7 +2218,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 153,
+      "count": 134,
       "rules": {
         "block-lang": [
           {
@@ -2739,122 +2739,6 @@
             "dimensions": [
               "diagnostics",
               "suggestion_capability"
-            ]
-          }
-        ],
-        "no-unused-props": [
-          {
-            "id": "no-unused-props/invalid/alias-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/builtin-shadow-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/builtin-types-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/class-props-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/extends-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/generic-props-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/ignore-external-type-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/ignore-property-patterns-custom-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/ignored-type-patterns-custom-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/imported-type-check-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/imported-type-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/index-signature-no-rest-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/intersection-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/multiple-extends-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/nested-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/optional-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/parent-interface-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/simple-unused-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-unused-props/invalid/unused-index-signature-input.svelte",
-            "dimensions": [
-              "diagnostics"
             ]
           }
         ],
@@ -3803,7 +3687,7 @@
       }
     },
     "diagnostics": {
-      "count": 278,
+      "count": 259,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3832,7 +3716,7 @@
         "no-top-level-browser-globals": 3,
         "no-unknown-style-directive-property": 2,
         "no-unnecessary-state-wrap": 4,
-        "no-unused-props": 20,
+        "no-unused-props": 1,
         "no-unused-svelte-ignore": 18,
         "no-useless-mustaches": 6,
         "prefer-class-directive": 10,

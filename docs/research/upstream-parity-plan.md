@@ -27,7 +27,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 | Order | Commit subject | Targeted cases | Acceptance |
 | --- | --- | ---: | --- |
 | 1, complete | Fix reactivity checks for default-exported bindings | 1 | `prefer-svelte-reactivity` matches all 79 cases in strict mode. |
-| 2 | Align unused-props diagnostic locations | 19 | The 19 location-only cases match; all 56 valid cases remain clean. |
+| 2, complete | Align unused-props diagnostic locations | 19 | The 19 location-only cases match; all 56 valid cases remain clean. |
 | 3 | Fix unused-props custom option combinations | 1 | The remaining invalid case reports all three expected findings, at the expected locations. |
 | 4 | Align navigation diagnostic argument locations | 29 | The 29 location-only navigation cases match, without changing which calls or links are flagged. |
 | 5 | Fix navigation nullish and literal link handling | 2 | `link-nullish-like-literal01` and valid `link-nullish02` match. |
@@ -37,7 +37,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 
 The first reactivity case is [`exports02-input.svelte.js`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/prefer-svelte-reactivity/invalid/exports02-input.svelte.js). It constructs a Date, then exports its variable as the default. The expected finding is on the constructor. The implementation now resolves that exported identifier as well as named specifiers. All 79 reactivity cases pass in strict mode. TypeScript exports, shadowed constructors and duplicate named/default exports have regression coverage. This fix removes exactly one gap, bringing the suite to 690 matches, 545 gaps and 64 version skips.
 
-Unused props' last case is [`custom-config-combination-input.svelte`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/no-unused-props/invalid/custom-config-combination-input.svelte). Oxvelte reports two findings where upstream expects three. The 19 other invalid cases preserve the message multiset but use different report locations. Keep these behaviors in separate commits so a location fix does not obscure the option bug.
+Unused props' last case is [`custom-config-combination-input.svelte`](../../fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/no-unused-props/invalid/custom-config-combination-input.svelte). Oxvelte reports two findings where upstream expects three. The 19 other invalid cases now match: root properties, nested properties and index signatures report on the typed `$props()` binding. Unused-property findings precede the index-signature warning at that shared location. Regression tests cover full binding spans, Unicode before the script, quoted `>` attributes and comments before destructuring. This location fix leaves the custom-options missing finding unresolved and brings the full suite to 709 matches, 526 gaps and 64 version skips.
 
 Navigation's typed cases and branches are separate behavior changes. The [JSON inventory](upstream-parity-gaps.json) lists the complete 48-case set. The filename grouping above is a useful proposed split; inspect implementation and expected/actual details before treating each group as a proven shared cause.
 

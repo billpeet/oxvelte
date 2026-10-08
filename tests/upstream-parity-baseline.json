@@ -1087,66 +1087,9 @@
       "diagnostics": "8eea2847623d5ed40fe4834204a0051f53da2da38f5170fca9f4a09ed68c5110",
       "suggestion_capability": "a603404b2b4cd4aeb7b1e8c1d25b89df537c961979c1b418c498a1ca260d3ca3"
     },
-    "no-unused-props/invalid/alias-input.svelte": {
-      "diagnostics": "a8c991254fbcdae639a4ef734c851893d3ab018863ece9c4037a2ea64fd5cf30"
-    },
-    "no-unused-props/invalid/builtin-shadow-unused-input.svelte": {
-      "diagnostics": "e5aa6d06f7c633b2c3d5c4dd56587e8ebf26d3e1ba37941f7f161b1dd61d7e25"
-    },
-    "no-unused-props/invalid/builtin-types-unused-input.svelte": {
-      "diagnostics": "56b2c554fafec7e5bcfcb5d80945aa65a8a2ddb7fb6a708aac9740525d38eefb"
-    },
-    "no-unused-props/invalid/class-props-unused-input.svelte": {
-      "diagnostics": "4e78edccc2f5a37062c07a7a69a24585e2284bb8ed6e213579d8033878ca8c6f"
-    },
     "no-unused-props/invalid/custom-config-combination-input.svelte": {
       "diagnostic_count": "eec66b2fc2eba7d68624d63ce2ff558bc279d24171d0454d2b0eddf9aa742e6b",
-      "diagnostics": "7d78a3688cc2faca1dbba43f47e31eaf1e0a82190dbc8ea8fb42ef2357751fb1"
-    },
-    "no-unused-props/invalid/extends-unused-input.svelte": {
-      "diagnostics": "dcfadace2d6d2e7f9fa759c1e6062a32c51c28e39326a4e7bcfa341856c19611"
-    },
-    "no-unused-props/invalid/generic-props-unused-input.svelte": {
-      "diagnostics": "4df3af9a28fd75e98970943a8ec9d959452854f7e1a56a40ac86c963b2d91301"
-    },
-    "no-unused-props/invalid/ignore-external-type-input.svelte": {
-      "diagnostics": "b61426122632425bf5aa90aca7e04e0d66bba80867485dd9f05c468c1d70db5d"
-    },
-    "no-unused-props/invalid/ignore-property-patterns-custom-input.svelte": {
-      "diagnostics": "6bcb9fefbf4a2a23ef0bdb6c3a84cc1338944676c0bc759981eb480fe2cda553"
-    },
-    "no-unused-props/invalid/ignored-type-patterns-custom-input.svelte": {
-      "diagnostics": "1bb1cc263892ef0664543f7c53b62cec34c121f7be79242aae8bcc76018b52d1"
-    },
-    "no-unused-props/invalid/imported-type-check-input.svelte": {
-      "diagnostics": "79be923c21a94a4fca5261ae80cde000301b1a351e9149ba51f0ef857a5e7ec4"
-    },
-    "no-unused-props/invalid/imported-type-unused-input.svelte": {
-      "diagnostics": "10d1ccd1d39cac024af50ff0c453dda9409fef664a21baa703a511178cfb837c"
-    },
-    "no-unused-props/invalid/index-signature-no-rest-input.svelte": {
-      "diagnostics": "b778b553fa8b7dcccc3bff2facd9572ead41be7f571f2138a69d37a8225b36f6"
-    },
-    "no-unused-props/invalid/intersection-unused-input.svelte": {
-      "diagnostics": "fb237fd1ae70dbde2bf18f1f27be0d9e1718c44650c56601164a90c6bb58cbc2"
-    },
-    "no-unused-props/invalid/multiple-extends-unused-input.svelte": {
-      "diagnostics": "0db571c282143b81797f52213b58e714d70434db0aa0e270d28c0c5815eb47ad"
-    },
-    "no-unused-props/invalid/nested-unused-input.svelte": {
-      "diagnostics": "d50b93b9fbd8f10d342178e08de9703923762a836391a980b4aa512b8dd19544"
-    },
-    "no-unused-props/invalid/optional-unused-input.svelte": {
-      "diagnostics": "e8cec09b90ddb8db53bbcea3cdab41ab80035b03372901620cfa6a49e945cad9"
-    },
-    "no-unused-props/invalid/parent-interface-unused-input.svelte": {
-      "diagnostics": "7bdc2979fa7aa2c9bd5604a5a884e15a6ec6bef1ff79ff5e0e9571f6daf13b3d"
-    },
-    "no-unused-props/invalid/simple-unused-input.svelte": {
-      "diagnostics": "c08f75b25651ea56f10a3d0a6ec59fa3d91a1bdce9f727d7513f198dd5af7518"
-    },
-    "no-unused-props/invalid/unused-index-signature-input.svelte": {
-      "diagnostics": "2407dfd66a7c06029d7af1369f9e77e5d65e2acbb0821e54035752dcde82f442"
+      "diagnostics": "39d82e15040c9226a78e019364b6229b04a8b17088d559669ce0431aa37d8505"
     },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
