@@ -262,6 +262,13 @@ fn nested_type_properties(
     if rhs.starts_with('{') {
         let mut properties = Vec::new();
         let brace = property_offset + colon + 1 + rest[colon + 1..].find('{').unwrap();
+        // Array element fields are not properties of the array-valued prop.
+        if content[type_block_end(content, brace)..]
+            .trim_start()
+            .starts_with('[')
+        {
+            return Vec::new();
+        }
         extract_props_from_block(content, brace, &mut properties);
         return properties;
     }
@@ -270,6 +277,9 @@ fn nested_type_properties(
         .next()
         .unwrap_or("");
     if name.is_empty() || ignore_types.iter().any(|p| matches_pattern(name, p)) {
+        return Vec::new();
+    }
+    if rhs[name.len()..].trim_start().starts_with('[') {
         return Vec::new();
     }
     let local = extract_type_properties_with_file(content, name, file_path);
