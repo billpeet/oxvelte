@@ -41,6 +41,7 @@ jobs:
         working-directory: scripts/compiler-runtime
       - run: npm test
         working-directory: scripts/compiler-runtime
+      - run: node --test tests/compiler-configuration.test.mjs
       - run: node --test scripts/summarize-parity.test.mjs
       - run: cargo test --locked --test upstream_adapter
       - run: cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
