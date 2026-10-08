@@ -627,21 +627,6 @@
       "diagnostic_count": "b859ebaf9478f517a7f5ef02e2ceaccd88c58d3dfd33821aa0c31fcf434efad7",
       "diagnostics": "c9ed9fd5766420848f7d74c065179716db4294e5be5f8297b36584964e1bc10d"
     },
-    "no-dupe-on-directives/invalid/inline-expression-input.svelte": {
-      "diagnostics": "971142af9a5f5e1c5a13fae57bee56894eb538dbccf81bc63a9407fd054d2edf"
-    },
-    "no-dupe-on-directives/invalid/modifier-input.svelte": {
-      "diagnostics": "a50d38460b2a20b64906bf42e7568a389534e309cc3b74a42722f16988790508"
-    },
-    "no-dupe-on-directives/invalid/multiple-element-input.svelte": {
-      "diagnostics": "e0c43021c20681b8c3c3682cca43e690ec4c23cb47ecff205fa53c3b5c5ab4f5"
-    },
-    "no-dupe-on-directives/invalid/test01-input.svelte": {
-      "diagnostics": "443b562b82e2f829a0c342c9ad017590377b2638f145f8710815bbc60700054c"
-    },
-    "no-dupe-on-directives/invalid/test02-input.svelte": {
-      "diagnostics": "8fbcaab0307a4e0fea3b73ff06ec0226877f13acdcf9078ae038b4a70dbefc50"
-    },
     "no-dupe-style-properties/invalid/ternary01-input.svelte": {
       "diagnostic_count": "eec66b2fc2eba7d68624d63ce2ff558bc279d24171d0454d2b0eddf9aa742e6b",
       "diagnostics": "8c29d43f855cb5d8bc53c6c07e9be469539b516793f0263b21f2edaf7b9f7b29"
