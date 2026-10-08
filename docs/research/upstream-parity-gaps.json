@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 979,
-    "gaps": 256,
+    "pass": 980,
+    "gaps": 255,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 14,
+      "count": 13,
       "rules": {
         "html-closing-bracket-new-line": [
           {
@@ -1461,16 +1461,6 @@
           },
           {
             "id": "prefer-style-directive/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
-        "shorthand-attribute": [
-          {
-            "id": "shorthand-attribute/invalid/always/test01-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics",
@@ -1765,7 +1755,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 40,
+      "count": 39,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "mustache-spacing": 1,
@@ -1776,13 +1766,12 @@
         "no-top-level-browser-globals": 2,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 3,
-        "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "valid-compile": 8
       }
     },
     "diagnostics": {
-      "count": 71,
+      "count": 70,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -1797,7 +1786,6 @@
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
-        "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "valid-compile": 8,
         "valid-each-key": 2,
@@ -1805,11 +1793,10 @@
       }
     },
     "fix_output": {
-      "count": 13,
+      "count": 12,
       "rules": {
         "mustache-spacing": 1,
         "prefer-style-directive": 10,
-        "shorthand-attribute": 1,
         "shorthand-directive": 1
       }
     },

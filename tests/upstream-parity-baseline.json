@@ -770,11 +770,6 @@
     "require-store-reactive-access/invalid/calc01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "shorthand-attribute/invalid/always/test01-input.svelte": {
-      "diagnostic_count": "355eb3f45092dab35b89ed6c08bd6fa1f5f4ac6854340e48a1d1e3350d537299",
-      "diagnostics": "fbc6ccf2bf31e37593fab324f5e22121fc90c55e76f87cec46af3b8318077c4f",
-      "fix_output": "8018988d84756f161717aaa9b7858d9ce794f02565e5a698e082555c974d300a"
-    },
     "shorthand-directive/invalid/always/test01-input.svelte": {
       "diagnostic_count": "0b6b28e5b3742d78d1a40f36125f8dc92e69dc2c52c8cd4857a220b0f160d9ee",
       "diagnostics": "f7fa578c0acd1929b75502cf45ed467362478591b1faabc36146e1c5a63845a8",
