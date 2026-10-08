@@ -554,10 +554,7 @@ impl Rule for NoTopLevelBrowserGlobals {
         let scoping = sem.scoping();
         let nodes = sem.nodes();
 
-        let base = script.span.start as usize;
-        let source = ctx.source;
-        let tag_text = &source[base..script.span.end as usize];
-        let content_offset = tag_text.find('>').map(|p| base + p + 1).unwrap_or(base);
+        let content_offset = script.content_span.start as usize;
 
         let guard_ctx = collect_guard_ctx(sem);
         let function_spans = collect_function_spans(sem);
@@ -584,7 +581,9 @@ impl Rule for NoTopLevelBrowserGlobals {
                 continue;
             }
             // `typeof window` alone — never a read, skip.
-            if is_typeof_argument(nodes, node.id()) {
+            if is_typeof_argument(nodes, node.id())
+                && is_guard_reference(nodes, node.id(), &guard_ctx, global)
+            {
                 continue;
             }
             // `globalThis.window` — the identifier is `globalThis`, not `window`,
@@ -631,7 +630,78 @@ impl Rule for NoTopLevelBrowserGlobals {
             );
         }
 
+        for node in nodes.iter() {
+            let AstKind::StaticMemberExpression(member) = node.kind() else {
+                continue;
+            };
+            let Expression::Identifier(object) = &member.object else {
+                continue;
+            };
+            let global = member.property.name.as_str();
+            if object.name != "globalThis"
+                || !BROWSER_GLOBALS.contains(&global)
+                || scoping
+                    .get_reference(object.reference_id())
+                    .symbol_id()
+                    .is_some()
+                || is_inside_any(member.span, &function_spans)
+                || is_inside_any(member.span, &type_annotation_spans)
+                || is_guard_reference(nodes, node.id(), &guard_ctx, global)
+                || is_inside_guard(nodes, node.id(), &guard_ctx, global)
+                || after_exit_guard(nodes, node.id(), &guard_ctx, global)
+            {
+                continue;
+            }
+            let parent = nodes.kind(nodes.parent_id(node.id()));
+            if matches!(parent, AstKind::StaticMemberExpression(m) if m.optional)
+                || matches!(parent, AstKind::CallExpression(c) if c.optional)
+            {
+                continue;
+            }
+            ctx.diagnostic(
+                format!(
+                    "Unexpected top-level browser global variable \"{}\".",
+                    global
+                ),
+                Span::new(
+                    content_offset as u32 + member.span.start,
+                    content_offset as u32 + member.span.end,
+                ),
+            );
+        }
+
         check_template_nodes(&ctx.ast.html.nodes, ctx, false);
+    }
+}
+
+fn is_guard_reference(nodes: &AstNodes<'_>, node_id: NodeId, ctx: &GuardCtx, global: &str) -> bool {
+    let span = nodes.kind(node_id).span();
+    let mut id = node_id;
+    loop {
+        let parent = nodes.parent_id(id);
+        if parent == id {
+            return false;
+        }
+        match nodes.kind(parent) {
+            AstKind::IfStatement(s) if span_contains(s.test.span(), span) => {
+                let (positive, negative) = analyze_test(&s.test, ctx);
+                return protects_global(&positive, global) || protects_global(&negative, global);
+            }
+            AstKind::ConditionalExpression(s) if span_contains(s.test.span(), span) => {
+                let (positive, negative) = analyze_test(&s.test, ctx);
+                return protects_global(&positive, global) || protects_global(&negative, global);
+            }
+            AstKind::LogicalExpression(s) if span_contains(s.left.span(), span) => {
+                let (positive, negative) = analyze_test(&s.left, ctx);
+                return match s.operator {
+                    LogicalOperator::And => protects_global(&positive, global),
+                    LogicalOperator::Or => protects_global(&negative, global),
+                    _ => false,
+                };
+            }
+            _ => {}
+        }
+        id = parent;
     }
 }
 
@@ -750,8 +820,32 @@ fn check_expr_for_globals(expr: &str, span: Span, ctx: &mut LintContext<'_>) {
                     "Unexpected top-level browser global variable \"{}\".",
                     global
                 ),
-                span,
+                Span::new(
+                    span.start + 1 + pos as u32,
+                    span.start + 1 + pos as u32 + global.len() as u32,
+                ),
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn unsafe_checkers_and_global_object_reads_keep_real_source_spans() {
+        let source = "<!-- é -->\n<script data-x='>'>typeof location === 'undefined' && location.href; globalThis.location.href; globalThis.location?.href; function nested(){globalThis.location.href}</script>{location.href}";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let diagnostics =
+            crate::linter::Linter::all().lint_with_config(&parsed.ast, source, Default::default());
+        let reads: Vec<_> = diagnostics
+            .iter()
+            .filter(|d| d.rule_name == "svelte/no-top-level-browser-globals")
+            .map(|d| &source[d.span.start as usize..d.span.end as usize])
+            .collect();
+        assert_eq!(
+            reads,
+            ["location", "location", "globalThis.location", "location"]
+        );
     }
 }
