@@ -15,6 +15,13 @@ const mode = process.argv[3];
 if (mode && !["--eslint-only", "--reuse-eslint"].includes(mode))
   throw Error("Unknown mode: " + mode);
 const out = path.join(root, "reports/parity-project", path.basename(app));
+const binary =
+  process.env.OXVELTE_BINARY ||
+  path.join(
+    root,
+    "target/release/" +
+      (process.platform === "win32" ? "oxvelte.exe" : "oxvelte"),
+  );
 fs.mkdirSync(out, { recursive: true });
 const write = (name, data) =>
   fs.writeFileSync(path.join(out, name), JSON.stringify(data, null, 2) + "\n");
@@ -115,11 +122,7 @@ for (const [i, group] of groups.entries()) {
   fs.writeFileSync(configPath, JSON.stringify(group.config));
   for (let n = 0; n < group.files.length; n += 35) {
     const run = spawnSync(
-      path.join(
-        root,
-        "target/release/" +
-          (process.platform === "win32" ? "oxvelte.exe" : "oxvelte"),
-      ),
+      binary,
       [
         "lint",
         "--all-rules",

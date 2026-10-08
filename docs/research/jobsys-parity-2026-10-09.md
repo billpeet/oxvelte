@@ -1,5 +1,7 @@
 # JobSys parity check, 9 October 2026
 
+The [follow-up fixes](jobsys-parity-fixes-2026-10-09.md) close the real rule gaps described below. One correction to this initial interpretation: the unmatched mutable-set entry is a duplicate ESLint diagnostic. Oxvelte already reports the same constructor once.
+
 The upstream fixture suite passes, but JobSys still exposes rule gaps. On files both tools can parse, ESLint reports 1,030 Svelte diagnostics and Oxvelte reports 1,311. Exactly 1,028 agree on file, rule, complete source range, message and severity. There are two ESLint-only diagnostics and 283 Oxvelte-only diagnostics.
 
 Of the extras, 231 are a version gate difference: eslint-plugin-svelte 3.23.0 runs `no-navigation-without-resolve` only on SvelteKit 1/2, while JobSys now uses SvelteKit 3. Oxvelte still runs it. Setting those navigation diagnostics aside leaves 52 Oxvelte-only diagnostics and two misses. This adjustment describes the gate difference; it does not establish whether those links are correct under Kit 3.
@@ -58,7 +60,7 @@ All three `no-inner-declarations` extras occur in `CadSysEntityCanvas.svelte`. J
 
 ### Reactivity and parser validation
 
-Oxvelte misses `new Set<string>()` at line 41 in `src/lib/url-params.svelte.ts`. That set is mutated by `dirty.clear()` and `dirty.add(key)`. A simpler generic set inside an exported function does get reported by Oxvelte, so the real module needs further reduction; generic syntax alone does not explain the miss.
+ESLint emits two identical diagnostics for `new Set<string>()` at line 41 in `src/lib/url-params.svelte.ts`; Oxvelte emits one. The initial analysis incorrectly described the unmatched duplicate as a miss. A reduced exported-function example confirms the duplicate reference behavior. Oxvelte retains one diagnostic for that constructor.
 
 Oxvelte reports a nested `<style>` in `src/routes/setups/checklist-categories/+page.svelte` at lines 269–279. ESLint accepts it, and compiling the actual component with Svelte 5.57.2 succeeds without warnings. A minimal `<div><style>...</style></div>` also reproduces the Oxvelte-only system diagnostic. This is a parser validation false positive.
 
@@ -77,4 +79,4 @@ The script writes raw outputs, resolved configs, batch status records, summary a
 
 The reference pass took about 279 seconds. Oxvelte took about eight seconds across 29 separate processes. These are local run durations, not controlled benchmark results. Repeating Oxvelte through the saved reusable runner reproduced every comparison count, with no batch errors or stderr output. JobSys's tracked files remained unchanged.
 
-The remaining work can be separated into commits for Kit 3 navigation eligibility, multiline unused-prop unions, unused-prop destructuring and index-signature bounds, nested-property consumption, block-scoped function options, nested style validation and the reactivity module miss. Each should add a regression outside the frozen upstream corpus. The full upstream corpus and primary baseline were not changed by this evaluation.
+The follow-up work covers Kit 3 navigation eligibility, multiline unused-prop unions, unused-prop destructuring and index-signature bounds, nested-property consumption, block-scoped function options and nested style validation. The reactivity entry needs a duplicate-reference regression rather than a missing-finding fix. Each regression lives outside the frozen upstream corpus. The full upstream corpus and primary baseline were not changed by this evaluation.

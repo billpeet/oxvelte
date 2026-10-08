@@ -3415,5 +3415,13 @@
       ],
       "stderr": ""
     }
+  ],
+  "corrections": [
+    {
+      "rule": "svelte/prefer-svelte-reactivity",
+      "file": "src/lib/url-params.svelte.ts",
+      "line": 41,
+      "explanation": "The ESLint-only entry is a duplicate reference diagnostic. Oxvelte already reports this exact constructor once; it was incorrectly described as a semantic miss."
+    }
   ]
 }

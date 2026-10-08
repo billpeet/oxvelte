@@ -96,7 +96,7 @@ See the [version matrix report](research/upstream-parity-version-matrix.md) for 
 
 ## Remaining coverage
 
-The [JobSys check from 9 October 2026](research/jobsys-parity-2026-10-09.md) found differences beyond the passing fixture corpus, including unused-prop parsing and consumption, Kit 3 navigation eligibility, block-scoped function options, nested style validation and a reactivity module miss.
+The [JobSys check from 9 October 2026](research/jobsys-parity-2026-10-09.md) found differences beyond the passing fixture corpus. The [follow-up fixes](research/jobsys-parity-fixes-2026-10-09.md) cover unused-prop parsing and consumption, Kit 3 navigation eligibility, block-scoped function options and nested style validation. All 1,029 comparable Oxvelte diagnostics now match exactly; the only unmatched reference entry is a duplicate ESLint reactivity diagnostic.
 
 This first runner covers the raw rule fixtures. The imported TypeScript/core integration test sources, processor/config/settings tests and custom `no-conflicting-module-names` tests are available for later ports but are not executed. It also does not run a reference ESLint installation to validate each snapshot under the declared environment. Expectations come from the pinned upstream files. All eligible raw rule fixtures now match. Type-aware condition checks have scope limitations documented in the seventh-wave report. The existing real-project parity script remains useful alongside these checks.
 
