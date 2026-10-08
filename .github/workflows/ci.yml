@@ -54,3 +54,29 @@ jobs:
         with:
           name: upstream-parity-${{ matrix.os }}
           path: reports/upstream-parity.json
+
+
+  upstream-version-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        profile: [modern, svelte4, legacyparser, svelte3]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: scripts/upstream-parity
+      - run: node --test scripts/version-matrix/run.test.mjs
+      - run: node scripts/version-matrix/run.mjs --profile ${{ matrix.profile }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upstream-matrix-${{ matrix.profile }}-${{ matrix.os }}
+          path: |
+            reports/version-matrix/${{ matrix.profile }}/parity.json
+            reports/version-matrix/summary-${{ matrix.profile }}.json

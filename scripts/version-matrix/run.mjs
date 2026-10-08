@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { isDeepStrictEqual } from 'node:util';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildManifest, digest } from '../upstream-parity/import.mjs';
@@ -114,7 +115,7 @@ function main() {
     failed ||= result.status !== 0;
     if (!existsSync(profile.report)) throw new Error(`No parity report generated for ${name}`);
     const report = JSON.parse(readFileSync(profile.report));
-    if (JSON.stringify(report.environment) !== JSON.stringify(profile.environment)) throw new Error(`Report environment differs for ${name}`);
+    if (!isDeepStrictEqual(report.environment, profile.environment)) throw new Error(`Report environment differs for ${name}`);
     if (report.manifestHash !== digest(readFileSync(path.join(profile.corpus, 'manifest.json')))) throw new Error(`Report corpus differs for ${name}`);
     reports[name] = report;
   }

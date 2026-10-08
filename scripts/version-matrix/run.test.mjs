@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { digest } from '../upstream-parity/import.mjs';
-import { summarizeMatrix, verifiedFiles } from './run.mjs';
+import { digest, buildManifest } from '../upstream-parity/import.mjs';
+import { summarizeMatrix, verifiedFiles, profiles } from './run.mjs';
+import { fileURLToPath } from 'node:url';
 
 test('verify original corpus bytes before copying into version profiles', () => {
   const directory = mkdtempSync(path.join(os.tmpdir(), 'oxvelte-matrix-'));
@@ -33,4 +34,19 @@ test('report union coverage without hiding regressions in another environment', 
   assert.equal(summary.withGaps, 1);
   assert.deepEqual(summary.uncovered, []);
   assert.throws(() => summarizeMatrix(original, { missing: report([]) }), /report is missing old/);
+});
+
+
+test('pinned matrix declarations make every original skip eligible somewhere', () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const corpus = path.join(root, 'fixtures/upstream/eslint-plugin-svelte');
+  const original = JSON.parse(readFileSync(path.join(corpus, 'manifest.json')));
+  const files = verifiedFiles(corpus, original);
+  const eligible = new Set();
+  for (const profile of profiles) {
+    const versions = JSON.parse(readFileSync(path.join(root, 'scripts/version-matrix', profile, 'package.json'))).dependencies;
+    const manifest = buildManifest(files, versions);
+    for (const entry of manifest.cases) if (!entry.ineligible.length) eligible.add(entry.id);
+  }
+  assert.deepEqual(original.cases.filter(entry => entry.ineligible.length && !eligible.has(entry.id)).map(entry => entry.id), []);
 });
