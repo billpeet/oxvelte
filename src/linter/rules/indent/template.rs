@@ -347,6 +347,13 @@ fn apply_nodes(nodes: &[TemplateNode<'_>], layout: &mut Layout<'_>) {
             TemplateNode::IfBlock(n) => {
                 block_header(layout, n.header_span, &[n.test_span]);
                 if let Some(open) = layout.first(n.header_span) {
+                    if n.elseif {
+                        if let Some(else_token) = layout.after(open) {
+                            if let Some(if_token) = layout.after(else_token) {
+                                layout.set(if_token, 1, open);
+                            }
+                        }
+                    }
                     children(layout, &n.consequent.nodes, open);
                     if let Some(a) = &n.alternate {
                         let branch_span = if let TemplateNode::IfBlock(branch) = a.as_ref() {
@@ -519,7 +526,11 @@ fn apply_attributes(n: &crate::ast::Element<'_>, layout: &mut Layout<'_>) {
                                             ..
                                         }
                                 ) {
-                                    meta.parts.iter().map(|p| p.span).collect()
+                                    if meta.parts.is_empty() {
+                                        meta.mustache_span.or(meta.value_span).into_iter().collect()
+                                    } else {
+                                        meta.parts.iter().map(|p| p.span).collect()
+                                    }
                                 } else {
                                     Vec::new()
                                 };
@@ -546,6 +557,11 @@ fn apply_attributes(n: &crate::ast::Element<'_>, layout: &mut Layout<'_>) {
                     mustache(layout, m, &[e]);
                 } else {
                     apply_text(layout, part.span, true);
+                }
+            }
+            if meta.parts.is_empty() && meta.expression_span.is_none() {
+                if let Some(value) = meta.value_span {
+                    apply_text(layout, value, true);
                 }
             }
         }
@@ -656,7 +672,13 @@ fn branch(layout: &mut Layout<'_>, f: &Fragment<'_>, parent: usize, binding: Opt
             layout.set(kw, 1, open);
             if let Some(b) = binding {
                 if let Some(t) = layout.first(b) {
-                    layout.set(t, 1, kw);
+                    let keyword = if open == parent {
+                        layout.before(t).unwrap_or(kw)
+                    } else {
+                        kw
+                    };
+                    layout.set(keyword, 1, open);
+                    layout.set(t, 1, keyword);
                 }
             }
         }
