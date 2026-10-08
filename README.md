@@ -7,7 +7,7 @@
 > [!NOTE]
 > **This is a fork of [tolgaouz/oxvelte](https://github.com/tolgaouz/oxvelte).** oxvelte was created by [@tolgaouz](https://github.com/tolgaouz), and all credit for the original design and implementation goes to him. The original repository looks to be no longer actively developed, so this fork ([billpeet/oxvelte](https://github.com/billpeet/oxvelte)) continues the work. It is not affiliated with or endorsed by the original author.
 
-A Svelte linter written in Rust. Drop-in replacement for [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) — same rules, same diagnostics, **50-1000x faster**.
+A Svelte linter with native Rust rules and optional Node.js compiler and type checks. All 1,232 eligible fixtures in the pinned [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) suite match. See the [parity report](docs/research/upstream-parity-seventh-wave.md) for scope and runtime requirements.
 
 <p align="center">
   <img src="assets/compare.gif" alt="Side-by-side benchmark linting shadcn-svelte (1,603 files): eslint-plugin-svelte takes ~15s while oxvelte completes the same lint hundreds of times in the same window" width="900">
@@ -262,14 +262,14 @@ Full reference — AST shape, `ctx` API, auto-fix, limitations — in [`docs/cus
 
 Upstream compatibility is tracked separately with a pinned fixture suite and exact expectations. See [upstream parity](docs/upstream-parity.md) for current gaps and how to run it.
 
-- **78 lint rules** from eslint-plugin-svelte, all ported to Rust
+- **Svelte lint rules** implemented in Rust, with Node.js for compiler and type checks
 - **Full Svelte 4 + Svelte 5** template parser (106/106 parser fixture tests)
-- **281 tests passing** (lint rules + parser fixtures)
+- **1,232 upstream rule fixtures match**, with 67 version skips
 - **Parallel file processing** via rayon
 - **eslint-disable** / **svelte-ignore** comment directives
 - **Auto-fix** support for fixable rules (`--fix`)
 
-### Intentionally excluded rules
+### Compiler and formatting rules
 
 Compiler-backed and formatting rules are supported:
 
