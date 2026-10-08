@@ -47,7 +47,7 @@ export function ineligible(requirements, versions = environment) {
 
 // Inspect the rule's actual metadata and statically provable runtime guards.
 // Never execute imported rule modules or infer capabilities from fixture names.
-export function ruleMetadata(source, versions = environment) {
+export function ruleMetadata(source, versions = environment, coreRules = builtinRules) {
   const file = ts.createSourceFile('rule.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const declarations = new Map();
   const coreLoaders = new Set();
@@ -86,7 +86,7 @@ export function ruleMetadata(source, versions = environment) {
       if (ts.isSpreadAssignment(property) && ts.isPropertyAccessExpression(property.expression) && property.expression.name.text === 'meta' && ts.isIdentifier(property.expression.expression)) {
         const call = declarations.get(property.expression.expression.text);
         if (call && ts.isCallExpression(call) && ts.isIdentifier(call.expression) && coreLoaders.has(call.expression.text) && call.arguments.length === 1 && ts.isStringLiteral(call.arguments[0])) {
-          const coreRule = builtinRules.get(call.arguments[0].text);
+          const coreRule = coreRules.get(call.arguments[0].text);
           if (!coreRule) throw new Error(`Unknown inherited ESLint core rule ${call.arguments[0].text}`);
           fixable = ['code', 'whitespace'].includes(coreRule.meta?.fixable);
         }
@@ -116,7 +116,7 @@ export function ruleMetadata(source, versions = environment) {
   return { fixable, ineligible: blocked };
 }
 
-export function buildManifest(files) {
+export function buildManifest(files, versions = environment, coreRules = builtinRules) {
   const get = (name) => files.get(name)?.toString('utf8');
   const json = (name) => JSON.parse(get(name));
   const cases = [];
@@ -140,7 +140,7 @@ export function buildManifest(files) {
     const sourceFile = `src/rules/${rule}.ts`;
     // Only Svelte rules expose fixability here. The adapted TS integration rule
     // has no source module, and is reported as unsupported by the Rust runner.
-    if (!ruleMetadataCache.has(sourceFile)) ruleMetadataCache.set(sourceFile, ruleMetadata(get(sourceFile) ?? ''));
+    if (!ruleMetadataCache.has(sourceFile)) ruleMetadataCache.set(sourceFile, ruleMetadata(get(sourceFile) ?? '', versions, coreRules));
     const metadata = ruleMetadataCache.get(sourceFile);
     const fixable = metadata.fixable;
     const errorsFile = companion(fullPath, 'errors.yaml');
@@ -159,12 +159,12 @@ export function buildManifest(files) {
       }
     }
     cases.push({ id, rule, kind: parts[kindIndex], filename: fullPath, configFile: configFile ?? null,
-      config, executableConfig: Boolean(executableConfig), requirements, ineligible: [...ineligible(requirements), ...metadata.ineligible],
+      config, executableConfig: Boolean(executableConfig), requirements, ineligible: [...ineligible(requirements, versions), ...metadata.ineligible],
       fixable, errors, output });
   }
   cases.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   if (!cases.length) throw new Error('No fixture cases discovered');
-  return { schema: 1, repository, revision, version: '3.23.0', environment,
+  return { schema: 1, repository, revision, version: '3.23.0', environment: versions,
     scope: 'Raw rule fixtures. Inline, processor, config and core integration tests are not included.',
     parserDefaults: { ecmaVersion: 'latest', sourceType: 'module', globals: 'browser',
       parserOptions: { project: 'tests/fixtures/rules/tsconfig.json', extraFileExtensions: ['.svelte'], parser: { ts: '@typescript-eslint/parser', js: 'espree' } } },

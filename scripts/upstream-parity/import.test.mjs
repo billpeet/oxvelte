@@ -51,3 +51,27 @@ test('only a proven module compiler-version gate returning no listeners makes ca
   assert.deepEqual(ruleMetadata(source.replace('const enabled', 'let enabled')).ineligible, []);
   assert.deepEqual(ruleMetadata(source.replace('create(context)', 'create(enabled)')).ineligible, []);
 });
+
+
+test('version variants recompute eligibility and inherited metadata without changing expectations', () => {
+  const source = `import { VERSION } from 'svelte/compiler'; import semver from 'semver';
+    import { getCoreRule } from '../utils/eslint-core.js'; const core = getCoreRule('example');
+    const enabled = semver.satisfies(VERSION, '>=5.56.0');
+    export default createRule('r', {meta:{...core.meta},create(context){if(!enabled){return {};}return {listener(){}};}});`;
+  const files = new Map([
+    ['src/rules/r.ts', Buffer.from(source)],
+    ['tests/fixtures/rules/r/invalid/test-input.svelte', Buffer.from('<div/>')],
+    ['tests/fixtures/rules/r/invalid/test-output.svelte', Buffer.from('<p/>')],
+    ['tests/fixtures/rules/r/invalid/test-errors.yaml', Buffer.from('- message: original\n  line: 1\n  column: 1\n')],
+    ['tests/fixtures/rules/r/invalid/test-requirements.json', Buffer.from('{"svelte":">=5.56.0"}')],
+  ]);
+  const rules = new Map([['example', {meta:{fixable:'code'}}]]);
+  const old = buildManifest(files, {svelte:'5.49.2'}, rules);
+  const modern = buildManifest(files, {svelte:'5.56.0'}, rules);
+  assert.equal(old.cases[0].ineligible.length, 2);
+  assert.deepEqual(modern.cases[0].ineligible, []);
+  assert.deepEqual(modern.cases[0].errors, old.cases[0].errors);
+  assert.equal(modern.cases[0].output, '<p/>');
+  assert.deepEqual(modern.files, old.files);
+  assert.deepEqual(modern.environment, {svelte:'5.56.0'});
+});
