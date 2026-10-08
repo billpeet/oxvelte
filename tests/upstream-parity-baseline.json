@@ -339,12 +339,6 @@
     "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte": {
       "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
     },
-    "no-bind-value-on-checkable-inputs/invalid/checkbox-bind-value-input.svelte": {
-      "unsupported_rule": "8241b18af2d18eeea3d5a562fcf9b58769dd37de44b7b305c67682a91a76cf17"
-    },
-    "no-bind-value-on-checkable-inputs/invalid/radio-bind-value-input.svelte": {
-      "unsupported_rule": "8241b18af2d18eeea3d5a562fcf9b58769dd37de44b7b305c67682a91a76cf17"
-    },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
     },

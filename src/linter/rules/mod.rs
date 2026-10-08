@@ -12,6 +12,7 @@ mod max_lines_per_block;
 mod no_add_event_listener;
 mod no_at_debug_tags;
 mod no_at_html_tags;
+mod no_bind_value_on_checkable_inputs;
 mod no_dom_manipulating;
 mod no_dupe_else_if_blocks;
 mod no_dupe_on_directives;
@@ -241,6 +242,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_unused_props::NoUnusedProps),
         Box::new(prefer_writable_derived::PreferWritableDerived),
         Box::new(prefer_derived_over_derived_by::PreferDerivedOverDerivedBy),
+        Box::new(no_bind_value_on_checkable_inputs::NoBindValueOnCheckableInputs),
         Box::new(require_stores_init::RequireStoresInit),
         Box::new(no_add_event_listener::NoAddEventListener),
         Box::new(block_lang::BlockLang),
