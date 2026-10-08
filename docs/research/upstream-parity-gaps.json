@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1023,
-    "gaps": 212,
+    "pass": 1025,
+    "gaps": 210,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -18,7 +18,7 @@
     {
       "id": "missing-rule",
       "label": "Missing rule implementations",
-      "count": 107,
+      "count": 105,
       "rules": {
         "@typescript-eslint/no-unnecessary-condition": [
           {
@@ -653,20 +653,6 @@
           },
           {
             "id": "no-nested-style-tag/valid/top-level-style-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          }
-        ],
-        "prefer-attribute-interpolation": [
-          {
-            "id": "prefer-attribute-interpolation/invalid/template-literal-attribute-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "prefer-attribute-interpolation/valid/boundaries-input.svelte",
             "dimensions": [
               "unsupported_rule"
             ]
@@ -1431,13 +1417,12 @@
   ],
   "dimensions": {
     "unsupported_rule": {
-      "count": 107,
+      "count": 105,
       "rules": {
         "@typescript-eslint/no-unnecessary-condition": 7,
         "indent": 91,
         "no-at-const-tags": 3,
-        "no-nested-style-tag": 4,
-        "prefer-attribute-interpolation": 2
+        "no-nested-style-tag": 4
       }
     },
     "compiler_capability": {

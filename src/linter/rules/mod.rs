@@ -44,6 +44,7 @@ mod no_unused_props;
 mod no_unused_svelte_ignore;
 mod no_useless_children_snippet;
 mod no_useless_mustaches;
+mod prefer_attribute_interpolation;
 mod prefer_class_directive;
 mod prefer_derived_over_derived_by;
 mod prefer_style_directive;
@@ -242,6 +243,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(no_unused_props::NoUnusedProps),
         Box::new(prefer_writable_derived::PreferWritableDerived),
         Box::new(prefer_derived_over_derived_by::PreferDerivedOverDerivedBy),
+        Box::new(prefer_attribute_interpolation::PreferAttributeInterpolation),
         Box::new(no_bind_value_on_checkable_inputs::NoBindValueOnCheckableInputs),
         Box::new(require_stores_init::RequireStoresInit),
         Box::new(no_add_event_listener::NoAddEventListener),

@@ -564,12 +564,6 @@
     "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
-    "prefer-attribute-interpolation/invalid/template-literal-attribute-input.svelte": {
-      "unsupported_rule": "a05101a0bfce1c07ed5a87b9472625a8607c47721ebcc0c11b31f981bd65ee59"
-    },
-    "prefer-attribute-interpolation/valid/boundaries-input.svelte": {
-      "unsupported_rule": "a05101a0bfce1c07ed5a87b9472625a8607c47721ebcc0c11b31f981bd65ee59"
-    },
     "prefer-const/invalid/option1/test01-input.svelte": {
       "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
     },
