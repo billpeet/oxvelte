@@ -674,15 +674,6 @@
     "no-extra-reactive-curlies/invalid/test02-input.svelte": {
       "suggestions": "5e78fd22299b60470dbefd9f08ae3c5dcca4cf50b7abcf4b6dd5812156d71b7f"
     },
-    "no-goto-without-base/invalid/aliased-goto01-input.svelte": {
-      "diagnostics": "42e5059a022444f5a89023d539538682d6047ef9501772e45f8b40a0a6695b9b"
-    },
-    "no-goto-without-base/invalid/base-not-prefixed01-input.svelte": {
-      "diagnostics": "634135f512b45e2f9ef3865a805f8d73a1071532389176abd708c5a6548eaf24"
-    },
-    "no-goto-without-base/invalid/no-base01-input.svelte": {
-      "diagnostics": "e540fc03845036ca6a9400164ecd8b0b3804a229ae3353542ce2866bd2348774"
-    },
     "no-ignored-unsubscribe/invalid/test01-input.svelte": {
       "diagnostics": "7f6f5a7f9b146e0191b97b281ec1242939ff95b4cc3da279b167cd77bb075444"
     },

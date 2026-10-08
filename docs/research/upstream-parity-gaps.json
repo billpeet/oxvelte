@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 771,
-    "gaps": 464,
+    "pass": 774,
+    "gaps": 461,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1874,7 +1874,7 @@
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 15,
+      "count": 12,
       "rules": {
         "max-lines-per-block": [
           {
@@ -1911,26 +1911,6 @@
           },
           {
             "id": "no-export-load-in-svelte-module-in-kit-pages/invalid/test02/+page.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-goto-without-base": [
-          {
-            "id": "no-goto-without-base/invalid/aliased-goto01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-goto-without-base/invalid/base-not-prefixed01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-goto-without-base/invalid/no-base01-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -3279,7 +3259,7 @@
       }
     },
     "diagnostics": {
-      "count": 197,
+      "count": 194,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3294,7 +3274,6 @@
         "no-dupe-style-properties": 2,
         "no-dynamic-slot-name": 4,
         "no-export-load-in-svelte-module-in-kit-pages": 4,
-        "no-goto-without-base": 3,
         "no-ignored-unsubscribe": 1,
         "no-navigation-without-base": 15,
         "no-not-function-handler": 10,
