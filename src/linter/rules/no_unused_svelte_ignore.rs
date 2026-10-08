@@ -33,7 +33,17 @@ impl Rule for NoUnusedSvelteIgnore {
             return;
         }
         let unused = match ctx.compiler_result() {
-            Ok(result) if result.kind != "error" => result.unused_ignores.clone(),
+            Ok(result) if result.kind != "error" => result
+                .unused_ignores
+                .iter()
+                // Svelte 4 does not emit this warning with generate:false.
+                // Follow upstream's workaround for that compiler behavior.
+                .filter(|item| {
+                    !(result.compiler_version.starts_with("4.")
+                        && item.code.as_deref() == Some("reactive-component"))
+                })
+                .cloned()
+                .collect::<Vec<_>>(),
             Err(error) => {
                 let message = format!("Unable to run Svelte compiler: {error}");
                 ctx.diagnostic(message, Span::new(0, 0));
