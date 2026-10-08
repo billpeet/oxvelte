@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 789,
-    "gaps": 446,
+    "pass": 796,
+    "gaps": 439,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -3053,7 +3053,7 @@
     {
       "id": "suggestions",
       "label": "Suggestions are the remaining blocker",
-      "count": 13,
+      "count": 6,
       "rules": {
         "no-at-debug-tags": [
           {
@@ -3094,50 +3094,6 @@
         "no-reactive-literals": [
           {
             "id": "no-reactive-literals/invalid/test01-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          }
-        ],
-        "prefer-writable-derived": [
-          {
-            "id": "prefer-writable-derived/invalid/basic1-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/basic2-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/effect-pre1-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/effect-pre2-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/multiple-reassign1-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/multiple-reassign2-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "prefer-writable-derived/invalid/multiple-reassign3-input.svelte",
             "dimensions": [
               "suggestions"
             ]
@@ -3201,7 +3157,7 @@
       }
     },
     "suggestions": {
-      "count": 78,
+      "count": 71,
       "rules": {
         "block-lang": 49,
         "derived-has-same-inputs-outputs": 1,
@@ -3212,7 +3168,6 @@
         "no-reactive-literals": 1,
         "no-unnecessary-state-wrap": 4,
         "prefer-destructured-store-props": 7,
-        "prefer-writable-derived": 7,
         "require-store-callbacks-use-set-param": 2
       }
     },

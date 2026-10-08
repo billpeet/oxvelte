@@ -1230,27 +1230,6 @@
       "diagnostics": "f3e29988c25e109dfb758b0f3966716d2f23ad7d96ff21e8090f299890ce7f83",
       "fix_output": "7e76405144f853045aa8fecb584fe4c77ce2fbc71bf2014f65011ec81efa892e"
     },
-    "prefer-writable-derived/invalid/basic1-input.svelte": {
-      "suggestions": "07b7c02dcb45d33ff96b8420c28836e6446e8c04690e9387a0b8207c919a5dbc"
-    },
-    "prefer-writable-derived/invalid/basic2-input.svelte": {
-      "suggestions": "dcec5652509e0be5a8da48bed92b9a37c7a955177aa712ea32c7ef34456039b0"
-    },
-    "prefer-writable-derived/invalid/effect-pre1-input.svelte": {
-      "suggestions": "07b7c02dcb45d33ff96b8420c28836e6446e8c04690e9387a0b8207c919a5dbc"
-    },
-    "prefer-writable-derived/invalid/effect-pre2-input.svelte": {
-      "suggestions": "dcec5652509e0be5a8da48bed92b9a37c7a955177aa712ea32c7ef34456039b0"
-    },
-    "prefer-writable-derived/invalid/multiple-reassign1-input.svelte": {
-      "suggestions": "613c21db23f319bded1fa479d69bf96020549d43c7fd9d1ab6769774b3da6c08"
-    },
-    "prefer-writable-derived/invalid/multiple-reassign2-input.svelte": {
-      "suggestions": "0d451d2c28de72ebe0d8616cb0c2cc37ed23a08fda36a981260b1d0fce7a43ec"
-    },
-    "prefer-writable-derived/invalid/multiple-reassign3-input.svelte": {
-      "suggestions": "8af1c5269ea0365078a7026b98c82a70ae1f09b94e89e2d3df919baf3d3e8619"
-    },
     "require-event-dispatcher-types/invalid/import-alias01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },

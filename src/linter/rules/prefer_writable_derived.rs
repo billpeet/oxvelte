@@ -1,10 +1,10 @@
 //! `svelte/prefer-writable-derived` — prefer `$derived` with a setter over `$state` + `$effect`.
 //! ⭐ Recommended 💡
 
-use crate::linter::{LintContext, Rule};
+use crate::linter::{Fix, LintContext, Rule, Suggestion};
 use oxc::ast::ast::{Argument, AssignmentTarget, Expression, Statement};
 use oxc::ast::AstKind;
-use oxc::span::Span;
+use oxc::span::{GetSpan, Span};
 use oxc::syntax::operator::AssignmentOperator;
 
 pub struct PreferWritableDerived;
@@ -27,7 +27,13 @@ impl Rule for PreferWritableDerived {
         let Some(semantic) = ctx.instance_semantic else {
             return;
         };
-        let content_offset = ctx.instance_content_offset;
+        let content_offset = ctx
+            .ast
+            .instance
+            .as_ref()
+            .map_or(ctx.instance_content_offset, |script| {
+                script.content_span.start
+            });
         let scoping = semantic.scoping();
         let nodes = semantic.nodes();
 
@@ -84,9 +90,39 @@ impl Rule for PreferWritableDerived {
 
             let s = content_offset + decl.span.start;
             let e = content_offset + decl.span.end;
-            ctx.diagnostic(
+            // ESLint normalizes multiple edits to an encompassing replacement.
+            // Preserve all text between the initializer and the effect call.
+            let mut edits = [
+                (
+                    init_ce.span,
+                    format!(
+                        "$derived({})",
+                        &ctx.source[(content_offset + ae.right.span().start) as usize
+                            ..(content_offset + ae.right.span().end) as usize]
+                    ),
+                ),
+                (ce.span, String::new()),
+            ];
+            edits.sort_by_key(|(span, _)| span.start);
+            let start = content_offset + edits[0].0.start;
+            let end = content_offset + edits[1].0.end;
+            let replacement = format!(
+                "{}{}{}",
+                edits[0].1,
+                &ctx.source[(content_offset + edits[0].0.end) as usize
+                    ..(content_offset + edits[1].0.start) as usize],
+                edits[1].1
+            );
+            ctx.diagnostic_with_suggestions(
                 "Prefer using writable $derived instead of $state and $effect",
                 Span::new(s, e),
+                vec![Suggestion {
+                    description: "Rewrite $state and $effect to $derived".into(),
+                    fix: Fix {
+                        span: Span::new(start, end),
+                        replacement,
+                    },
+                }],
             );
         }
     }
@@ -124,5 +160,33 @@ fn fn_arg_block_body<'a>(arg: &'a Argument<'a>) -> Option<&'a [Statement<'a>]> {
             f.body.as_ref().map(|b| b.statements.as_slice())
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{linter::Linter, parser};
+    use oxc::allocator::Allocator;
+
+    #[test]
+    fn rewrite_keeps_comments_and_uses_the_resolved_binding() {
+        let source = "<!-- 😀 --><script data-note=\">\">let value = $state(0); /* keep */ $effect(() => { value = count + 1; }); function inner() { let value = 0; $effect(() => { value = 2; }); }</script>";
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        assert!(parsed.errors.is_empty());
+        let diagnostics: Vec<_> = Linter::all()
+            .lint(&parsed.ast, source)
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/prefer-writable-derived")
+            .collect();
+        assert_eq!(diagnostics.len(), 1);
+        assert!(diagnostics[0].fix.is_none());
+        let suggestion = &diagnostics[0].suggestions[0];
+        let mut output = source.to_string();
+        output.replace_range(
+            suggestion.fix.span.start as usize..suggestion.fix.span.end as usize,
+            &suggestion.fix.replacement,
+        );
+        assert_eq!(output, "<!-- 😀 --><script data-note=\">\">let value = $derived(count + 1); /* keep */ ; function inner() { let value = 0; $effect(() => { value = 2; }); }</script>");
     }
 }
