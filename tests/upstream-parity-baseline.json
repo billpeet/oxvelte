@@ -40,11 +40,6 @@
       "diagnostic_count": "d1487e8cc0d4155ffca386dd92f6c27909f907dc649ccdc069d74629db8dad77",
       "diagnostics": "d31f437e4e97151a16b2e8f37f7fea6a92ffaf6715a26c5ec1cea8156d90e8fd"
     },
-    "derived-has-same-inputs-outputs/invalid/test01-input.js": {
-      "diagnostic_count": "da2f954713c9d14c9af6e7284d2450bb9f903b6e71f39f5fd422b4eb200bb1e3",
-      "diagnostics": "7a7139fe260dd7c2d63bb7e6ea438393bcbabbd68ee7fcbdf028c758a24ceeb5",
-      "suggestions": "85cec87d48fd018fe117abe613bf5cdb506c5553a7a095a36ee48bf1d41483a1"
-    },
     "experimental-require-slot-types/invalid/no-slot-types01-input.svelte": {
       "diagnostics": "969284d3b284fc1e4b36464f8e909b4f8e807dc693ee987dc6acc8d6afe80110"
     },

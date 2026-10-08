@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 861,
-    "gaps": 374,
+    "pass": 862,
+    "gaps": 373,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1377,7 +1377,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 36,
+      "count": 35,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1406,16 +1406,6 @@
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
-            ]
-          }
-        ],
-        "derived-has-same-inputs-outputs": [
-          {
-            "id": "derived-has-same-inputs-outputs/invalid/test01-input.js",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "suggestions"
             ]
           }
         ],
@@ -2636,10 +2626,9 @@
       }
     },
     "diagnostics": {
-      "count": 171,
+      "count": 170,
       "rules": {
         "consistent-selector-style": 5,
-        "derived-has-same-inputs-outputs": 1,
         "experimental-require-slot-types": 1,
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -2675,10 +2664,9 @@
       }
     },
     "diagnostic_count": {
-      "count": 62,
+      "count": 61,
       "rules": {
         "consistent-selector-style": 4,
-        "derived-has-same-inputs-outputs": 1,
         "html-closing-bracket-new-line": 1,
         "mustache-spacing": 1,
         "no-dupe-else-if-blocks": 2,
@@ -2696,19 +2684,6 @@
         "valid-compile": 8
       }
     },
-    "suggestions": {
-      "count": 18,
-      "rules": {
-        "derived-has-same-inputs-outputs": 1,
-        "no-add-event-listener": 2,
-        "no-at-debug-tags": 2,
-        "no-extra-reactive-curlies": 2,
-        "no-reactive-functions": 1,
-        "no-reactive-literals": 1,
-        "prefer-destructured-store-props": 7,
-        "require-store-callbacks-use-set-param": 2
-      }
-    },
     "fix_output": {
       "count": 81,
       "rules": {
@@ -2721,6 +2696,18 @@
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "sort-attributes": 26
+      }
+    },
+    "suggestions": {
+      "count": 17,
+      "rules": {
+        "no-add-event-listener": 2,
+        "no-at-debug-tags": 2,
+        "no-extra-reactive-curlies": 2,
+        "no-reactive-functions": 1,
+        "no-reactive-literals": 1,
+        "prefer-destructured-store-props": 7,
+        "require-store-callbacks-use-set-param": 2
       }
     },
     "compiler_capability": {
