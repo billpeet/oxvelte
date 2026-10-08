@@ -2383,6 +2383,11 @@ impl<'a> TemplateParser<'a> {
         let legacy = self.source[self.pos + 1..keyword_end]
             .trim_start()
             .starts_with('@');
+        let kind = if self.source[self.pos + 1..keyword_end].trim_start() == "let" {
+            TemplateDeclarationKind::Let
+        } else {
+            TemplateDeclarationKind::Const
+        };
         self.pos = keyword_end;
         self.skip_whitespace();
         let declaration_start = self.pos as u32;
@@ -2393,11 +2398,17 @@ impl<'a> TemplateParser<'a> {
                 self.report_error(message);
             }
         } else {
-            let wrapped = self.allocator.alloc_str(&format!("const {declaration}"));
+            let wrapped = self
+                .allocator
+                .alloc_str(&format!("{} {declaration}", kind.keyword()));
             let parsed =
                 oxc::parser::Parser::new(self.allocator, wrapped, oxc::span::SourceType::ts())
                     .parse();
-            self.extend_expression_syntax_errors(parsed.errors, declaration_span, 6);
+            self.extend_expression_syntax_errors(
+                parsed.errors,
+                declaration_span,
+                kind.keyword().len() + 1,
+            );
             if parsed.program.body.len() != 1
                 || !matches!(
                     parsed.program.body.first(),
@@ -2412,6 +2423,7 @@ impl<'a> TemplateParser<'a> {
         Ok(TemplateNode::ConstTag(ConstTag {
             _phantom: PhantomData,
             declaration,
+            kind,
             span: Span::new(start, self.pos as u32),
             declaration_span,
         }))
@@ -2423,6 +2435,8 @@ impl<'a> TemplateParser<'a> {
         let body = remaining.trim_start();
         let prefix = if body.starts_with("@const") {
             "@const"
+        } else if body.starts_with("let") {
+            "let"
         } else {
             "const"
         };
@@ -4059,9 +4073,11 @@ impl<'a> TemplateParser<'a> {
                     TemplateNode::AwaitBlock(block) => (&block.expression, block.expression_span),
                     TemplateNode::KeyBlock(block) => (&block.expression, block.expression_span),
                     TemplateNode::ConstTag(tag) => {
-                        let declaration = self
-                            .allocator
-                            .alloc_str(&format!("const {};", tag.declaration));
+                        let declaration = self.allocator.alloc_str(&format!(
+                            "{} {};",
+                            tag.kind.keyword(),
+                            tag.declaration
+                        ));
                         let parsed = oxc::parser::Parser::new(
                             self.allocator,
                             declaration,
@@ -4071,7 +4087,7 @@ impl<'a> TemplateParser<'a> {
                         self.extend_expression_syntax_errors(
                             parsed.errors,
                             tag.declaration_span,
-                            6,
+                            tag.kind.keyword().len() + 1,
                         );
                         return;
                     }

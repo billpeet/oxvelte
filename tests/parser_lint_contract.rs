@@ -143,3 +143,47 @@ fn directive_subjects_keep_dollar_identifiers_and_exact_spans() {
             .is_empty()
     );
 }
+
+#[test]
+fn modern_let_tags_retain_declaration_kind_and_unicode_ranges() {
+    let source =
+        "<!-- 😀 -->{#if yes}{ let\n label = `${value} pixels` }{const size = 2}{letdown}{/if}";
+    let alloc = Allocator::default();
+    let parsed = parser::parse_for_lint(source, &alloc);
+    assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+    let TemplateNode::IfBlock(block) = &parsed.ast.html.nodes[1] else {
+        panic!("if block");
+    };
+    let TemplateNode::ConstTag(tag) = &block.consequent.nodes[0] else {
+        panic!("declaration tag");
+    };
+    assert_eq!(tag.kind, oxvelte::ast::TemplateDeclarationKind::Let);
+    assert_eq!(
+        &source[tag.declaration_span.start as usize..tag.declaration_span.end as usize],
+        "label = `${value} pixels` "
+    );
+    let TemplateNode::ConstTag(tag) = &block.consequent.nodes[1] else {
+        panic!("const tag");
+    };
+    assert_eq!(tag.kind, oxvelte::ast::TemplateDeclarationKind::Const);
+    assert!(matches!(
+        block.consequent.nodes[2],
+        TemplateNode::MustacheTag(_)
+    ));
+}
+
+#[test]
+fn modern_let_serialization_keeps_mutability_and_identifier_offsets() {
+    let source = "{ let\n label = 1 }";
+    let alloc = Allocator::default();
+    let parsed = parser::parse_for_lint(source, &alloc);
+    let json = parser::serialize::to_modern_json(&parsed.ast, source);
+    let tag = &json["fragment"]["nodes"][0];
+    assert_eq!(tag["type"], "LetTag");
+    assert_eq!(tag["declaration"]["kind"], "let");
+    assert_eq!(tag["declaration"]["start"], 2);
+    assert_eq!(
+        tag["declaration"]["declarations"][0]["id"]["start"],
+        source.find("label").unwrap()
+    );
+}

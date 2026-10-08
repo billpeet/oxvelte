@@ -2984,7 +2984,7 @@ fn serialize_node_modern_ctx(
         }
         TemplateNode::ConstTag(c) => {
             json!({
-                "type": "ConstTag",
+                "type": if c.kind == TemplateDeclarationKind::Let { "LetTag" } else { "ConstTag" },
                 "start": c.span.start,
                 "end": c.span.end,
                 "declaration": serialize_const_declaration_modern(c, source)
@@ -4096,7 +4096,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
         }
         TemplateNode::ConstTag(c) => {
             json!({
-                "type": "ConstTag",
+                "type": if c.kind == TemplateDeclarationKind::Let { "LetTag" } else { "ConstTag" },
                 "start": c.span.start,
                 "end": c.span.end,
                 "expression": serialize_const_expression_legacy(c, source)
@@ -4558,8 +4558,12 @@ fn serialize_const_declaration_modern(const_tag: &ConstTag, source: &str) -> Val
     use oxc::parser::Parser;
     use oxc::span::SourceType;
 
-    let wrapper = format!("const {}", const_tag.declaration);
-    let offset = const_tag.span.start + 2;
+    let wrapper = format!("{} {}", const_tag.kind.keyword(), const_tag.declaration);
+    let offset = if const_tag.kind == TemplateDeclarationKind::Let {
+        const_tag.declaration_span.start - (const_tag.kind.keyword().len() as u32 + 1)
+    } else {
+        const_tag.span.start + 2
+    };
     let alloc = Allocator::default();
     let parsed = Parser::new(&alloc, &wrapper, SourceType::ts()).parse();
 
@@ -4569,6 +4573,14 @@ fn serialize_const_declaration_modern(const_tag: &ConstTag, source: &str) -> Val
     let mut declaration = serialize_statement_legacy(stmt, source, offset);
 
     if let Some(obj) = declaration.as_object_mut() {
+        if const_tag.kind == TemplateDeclarationKind::Let {
+            let body = &source
+                [const_tag.span.start as usize + 1..const_tag.declaration_span.start as usize];
+            obj.insert(
+                "start".into(),
+                json!(const_tag.span.start as usize + 1 + body.len() - body.trim_start().len()),
+            );
+        }
         obj.remove("loc");
         if let Some(declarations) = obj.get_mut("declarations").and_then(|v| v.as_array_mut()) {
             for declarator in declarations {
