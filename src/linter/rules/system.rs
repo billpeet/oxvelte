@@ -26,9 +26,8 @@ fn walk(nodes: &[TemplateNode], parent: Option<&str>, in_svg: bool, ctx: &mut Li
             if el.name == "script" && !in_head {
                 ctx.diagnostic("`<script>` should be at the top level of the component, not nested inside markup.", el.span);
             }
-            if el.name == "style" && !in_svg && !in_head {
-                ctx.diagnostic("`<style>` should be at the top level of the component, not nested inside markup.", el.span);
-            }
+            // Nested style elements are ordinary HTML elements. Svelte accepts
+            // them; the optional no-nested-style-tag rule handles conventions.
             walk(
                 &el.children,
                 Some(el.name.as_str()),
