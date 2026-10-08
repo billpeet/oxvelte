@@ -454,36 +454,6 @@
     "no-nested-style-tag/valid/top-level-style-input.svelte": {
       "unsupported_rule": "6cdde377b1913db1f527a980c3d8dbcd96e60d6fd0ea554ea57f2ef570780359"
     },
-    "no-not-function-handler/invalid/array01-input.svelte": {
-      "diagnostics": "7d13c6ec8c62a5e997fcdf2c1b71e8713d321d08b8790db4fe1b4d9df5bcfbdb"
-    },
-    "no-not-function-handler/invalid/class01-input.svelte": {
-      "diagnostics": "0b08be94565eed5943fa8dc7f2bc4e4e098b9dba9013849efcf709911963afbe"
-    },
-    "no-not-function-handler/invalid/object01-input.svelte": {
-      "diagnostics": "691881eece72aede3b76d4fbc463831c608cd001f504c98f046ee81f5554b31a"
-    },
-    "no-not-function-handler/invalid/string01-input.svelte": {
-      "diagnostics": "19fd382db8b6f0132d6e03eef2116d81ce80940287558f0727d58becfc4bc0f2"
-    },
-    "no-not-function-handler/invalid/svelte5/array01-input.svelte": {
-      "diagnostics": "b280b2a876e7a3f44dec002b8ee3f334f93993866f89a4476dbc0ed901716f8f"
-    },
-    "no-not-function-handler/invalid/svelte5/class01-input.svelte": {
-      "diagnostics": "7256383e007b326d303cd0ca6baeadf7a7e71aa49b030dd127fc5e5f25a1e3be"
-    },
-    "no-not-function-handler/invalid/svelte5/object01-input.svelte": {
-      "diagnostics": "a2603f73941e981f787f443e58eb3b2d4414a66b657f71db143f0f08baa2de55"
-    },
-    "no-not-function-handler/invalid/svelte5/string01-input.svelte": {
-      "diagnostics": "a4d0b501acab812bb6c1c2558fc5ce66d160d13a022f58f76b0574e13b3a9cb8"
-    },
-    "no-not-function-handler/invalid/svelte5/value01-input.svelte": {
-      "diagnostics": "74cc5e9044bed632eca7b826bdb60a61fc6b7e444766d632e9743279071196a2"
-    },
-    "no-not-function-handler/invalid/value01-input.svelte": {
-      "diagnostics": "acea0b28eab93abb07982f9a37d1e80d37595d03026d8520ddfc5ec1074c5ee1"
-    },
     "no-object-in-text-mustaches/invalid/array01-input.svelte": {
       "diagnostics": "1708eaf910b32d0b9f9e2c6da9a9906e6318a5d925133955e58c8a8f123a9c98"
     },
