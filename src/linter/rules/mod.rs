@@ -89,6 +89,21 @@ mod valid_style_parse;
 use super::Rule;
 use crate::ast::{AttributeValue, AttributeValuePart};
 
+/// Token boundaries for suggestion edits. Comments are excluded, so punctuation
+/// inside a comment cannot be mistaken for a label or call delimiter.
+pub(super) fn script_token_spans(source: &str) -> Vec<oxc::span::Span> {
+    let allocator = oxc::allocator::Allocator::default();
+    let parsed = oxc::parser::Parser::new(&allocator, source, oxc::span::SourceType::ts())
+        .with_config(oxc::parser::config::TokensParserConfig)
+        .parse();
+    parsed
+        .tokens
+        .iter()
+        .filter(|token| token.end() > token.start())
+        .map(|token| oxc::span::Span::new(token.start(), token.end()))
+        .collect()
+}
+
 pub(super) fn directive_expression_key(value: &AttributeValue) -> String {
     match value {
         AttributeValue::True => String::new(),
