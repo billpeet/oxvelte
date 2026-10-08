@@ -1,11 +1,14 @@
 name: Release
 
-# Pushing a v* tag builds every platform binary, publishes the npm packages
+# Pushing a v* tag builds every platform binary, stages the npm packages
 # and creates a GitHub release. Running it manually (workflow_dispatch) does
-# the build, staging and install test but publishes nothing.
+# the build, packaging and install test but sends nothing to npm.
+#
+# The packages are staged, not published: a maintainer has to approve each
+# one with 2FA before it can be installed (https://docs.npmjs.com/staged-publishing).
 #
 # npm auth: trusted publishing (OIDC) when it is configured for the packages
-# on npmjs.com, otherwise the NPM_TOKEN repository secret.
+# on npmjs.com, otherwise the stage-only NPM_TOKEN repository secret.
 
 on:
   push:
@@ -148,22 +151,34 @@ jobs:
             "../tarballs/billpeet-oxvelte-linux-x64-gnu-$VERSION.tgz"
           test "$(./node_modules/.bin/oxvelte --version)" = "oxvelte $VERSION"
 
-      - name: Publish to npm
+      # Staged publishing needs npm 11.15 or later.
+      - run: npm install -g npm@11
+
+      - name: Stage on npm
         if: github.event_name == 'push'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Platform packages first so the main package never points at
-          # versions that do not exist yet. Already-published versions are
-          # skipped, which makes a failed run safe to re-run.
+          # Versions that are already staged or published are skipped, which
+          # makes a failed run safe to re-run.
           for dir in dist-npm/oxvelte-*/ dist-npm/oxvelte/; do
             name=$(node -p "require('./${dir}package.json').name")
             if npm view "$name@$VERSION" version > /dev/null 2>&1; then
               echo "$name@$VERSION is already published, skipping"
               continue
             fi
-            npm publish "./$dir" --access public --provenance
+            if npm stage list "$name" --json 2> /dev/null | grep -qF "\"$VERSION\""; then
+              echo "$name@$VERSION is already staged, skipping"
+              continue
+            fi
+            npm stage publish "./$dir" --access public --provenance
           done
+          {
+            echo "### $VERSION is staged on npm, not yet published"
+            echo "Approve each package with 2FA on npmjs.com (Staged Packages tab) or with"
+            echo "\`npm stage list\` and \`npm stage approve <stage-id>\`."
+            echo "Approve the platform packages before \`@billpeet/oxvelte\`."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   github-release:
     needs: publish
