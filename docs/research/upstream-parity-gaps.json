@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 980,
-    "gaps": 255,
+    "pass": 981,
+    "gaps": 254,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 13,
+      "count": 12,
       "rules": {
         "html-closing-bracket-new-line": [
           {
@@ -1461,16 +1461,6 @@
           },
           {
             "id": "prefer-style-directive/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
-        "shorthand-directive": [
-          {
-            "id": "shorthand-directive/invalid/always/test01-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics",
@@ -1755,7 +1745,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 39,
+      "count": 38,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "mustache-spacing": 1,
@@ -1766,12 +1756,11 @@
         "no-top-level-browser-globals": 2,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 3,
-        "shorthand-directive": 1,
         "valid-compile": 8
       }
     },
     "diagnostics": {
-      "count": 70,
+      "count": 69,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -1786,18 +1775,16 @@
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
-        "shorthand-directive": 1,
         "valid-compile": 8,
         "valid-each-key": 2,
         "valid-style-parse": 2
       }
     },
     "fix_output": {
-      "count": 12,
+      "count": 11,
       "rules": {
         "mustache-spacing": 1,
-        "prefer-style-directive": 10,
-        "shorthand-directive": 1
+        "prefer-style-directive": 10
       }
     },
     "compiler_capability": {

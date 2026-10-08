@@ -68,9 +68,18 @@ impl Rule for ShorthandDirective {
                         );
                     }
                 } else if let Some(eq) = region.find('=') {
-                    let expression = el.attribute_meta.get(idx).and_then(|m| m.expression_ast);
-                    let raw = match value {
-                        AttributeValue::Expression(expr) => expr.as_str(),
+                    let meta = &el.attribute_meta[idx];
+                    let (raw, expression) = match value {
+                        AttributeValue::Expression(expr) => (expr.as_str(), meta.expression_ast),
+                        AttributeValue::Concat(parts) if parts.len() == 1 => {
+                            let crate::ast::AttributeValuePart::Expression(expr) = &parts[0] else {
+                                continue;
+                            };
+                            (
+                                expr.as_str(),
+                                meta.parts.first().and_then(|part| part.expression_ast),
+                            )
+                        }
                         _ => continue,
                     };
                     if expression_is_identifier(expression, raw, name) {
@@ -99,4 +108,42 @@ fn expression_identifier_name<'a>(expr: Option<&'a Expression<'a>>) -> Option<&'
 
 fn expression_is_identifier(expr: Option<&Expression>, raw: &str, expected: &str) -> bool {
     expression_identifier_name(expr).map_or_else(|| raw.trim() == expected, |name| name == expected)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/shorthand-directive")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let source = "<!-- 😀 --><div style:color = \"{color}\" class:active='{active}' />";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 2);
+        assert!(diagnostics
+            .iter()
+            .all(|d| d.fix.as_ref().unwrap().replacement.is_empty()));
+        assert!(lint("<div style:color=\" {color} \" />", serde_json::json!([])).is_empty());
+    }
 }
