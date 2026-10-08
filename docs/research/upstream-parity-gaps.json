@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 991,
-    "gaps": 244,
+    "pass": 994,
+    "gaps": 241,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1465,7 +1465,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 22,
+      "count": 19,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1599,26 +1599,6 @@
               "fix_output"
             ]
           }
-        ],
-        "require-optimized-style-attribute": [
-          {
-            "id": "require-optimized-style-attribute/invalid/comment01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "require-optimized-style-attribute/invalid/key01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "require-optimized-style-attribute/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
         ]
       }
     },
@@ -1664,7 +1644,7 @@
       }
     },
     "diagnostics": {
-      "count": 59,
+      "count": 56,
       "rules": {
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
@@ -1673,7 +1653,6 @@
         "no-top-level-browser-globals": 3,
         "no-unused-svelte-ignore": 18,
         "prefer-style-directive": 10,
-        "require-optimized-style-attribute": 3,
         "valid-compile": 8,
         "valid-style-parse": 2
       }

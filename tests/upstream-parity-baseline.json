@@ -729,15 +729,6 @@
     "require-event-dispatcher-types/valid/non-svelte-dispatcher01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "require-optimized-style-attribute/invalid/comment01-input.svelte": {
-      "diagnostics": "408a5b21b0b9596900f8e98bebd231b11a41c809a56ffe65aa7ab3005f89ab38"
-    },
-    "require-optimized-style-attribute/invalid/key01-input.svelte": {
-      "diagnostics": "1a27d8fac01a01f30274a5d2382f3b1acaf9d1b49aab328636e0a64b23cf1b89"
-    },
-    "require-optimized-style-attribute/invalid/test01-input.svelte": {
-      "diagnostics": "4906d5c922733e8573e7ac1380d3180f6ecdbb2a1f372a4decf4dcfe39447688"
-    },
     "require-store-reactive-access/invalid/calc01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
