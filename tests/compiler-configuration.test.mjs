@@ -8,15 +8,17 @@ import { dirname, join } from 'node:path';
 const repo = dirname(dirname(fileURLToPath(import.meta.url)));
 const runtime = join(repo, 'scripts/compiler-runtime');
 const fixtures = join(repo, 'fixtures/upstream/eslint-plugin-svelte/tests/fixtures/rules/valid-compile');
-function compile(source, settings) {
+function request(input) {
   const child = spawnSync(process.execPath, [join(runtime, 'bridge.cjs')], {
-    input: JSON.stringify({ source, settings }) + '\n', encoding: 'utf8',
+    input: JSON.stringify(input) + '\n', encoding: 'utf8',
     env: { ...process.env, OXVELTE_COMPILER_RUNTIME: runtime },
   });
   assert.equal(child.status, 0, child.stderr);
   return JSON.parse(child.stdout.trim());
 }
 
+function compile(source, settings) { return request({source,settings}); }
+function callbacks(source, settings, warnings) { return request({operation:'callbacks',source,settings,warnings}); }
 test('executes all six eligible upstream compiler configuration modules', () => {
   for (const [kind, directory, name] of [
     ['invalid', 'svelte-config-custom-warn', 'a11y'],
@@ -28,10 +30,13 @@ test('executes all six eligible upstream compiler configuration modules', () => 
   ]) {
     const path = join(fixtures, kind, directory);
     const source = readFileSync(join(path, name + '-input.svelte'), 'utf8');
-    const response = compile(source, { compiler: { executableConfigPath: join(path, '_config.cjs') } });
+    const settings = { compiler: { executableConfigPath: join(path, '_config.cjs') } };
+    const response = compile(source, settings);
     assert.equal(response.error, undefined, directory);
     assert.equal(response.result.kind, 'warn', directory);
-    const reported = response.result.warnings.filter(warning => !warning.filtered);
+    const transformed = callbacks(source, settings, response.result.warnings);
+    assert.equal(transformed.error, undefined, directory);
+    const reported = transformed.result.warnings.filter(warning => !warning.filtered);
     if (kind === 'valid') assert.deepEqual(reported, [], directory);
     else if (directory === 'svelte-config-custom-warn') {
       assert.equal(reported.length, 2);

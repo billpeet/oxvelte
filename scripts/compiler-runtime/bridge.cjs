@@ -44,18 +44,46 @@ function sourceMapRemap(output, input, mappings, decode) {
   };
 }
 function byteToIndex(source, byte) { return Buffer.from(source).subarray(0, byte).toString('utf8').length; }
-async function run(request) {
-  const { source, filename } = request; const settings = request.settings || {};
-  const req = resolver(filename); let compiler;
-  try { compiler = req('svelte/compiler'); }
-  catch (e) { throw new Error('Cannot resolve svelte/compiler for ' + (filename || process.cwd()) + '. Install Svelte in the project or set OXVELTE_COMPILER_RUNTIME to a runtime directory. ' + e.message); }
-  const cfg = settings.compiler || {};
+function loadConfig(req, cfg) {
   let config = cfg.svelteConfig || {};
   if (cfg.executableConfigPath) {
     const exported = req(path.resolve(cfg.executableConfigPath));
     const entry = Array.isArray(exported) ? exported.find(x => x.languageOptions?.parserOptions?.svelteConfig) : exported;
     config = entry?.languageOptions?.parserOptions?.svelteConfig || {};
   }
+  return config;
+}
+function applyCallbacks(request) {
+  const { source, filename } = request, settings = request.settings || {};
+  const config = loadConfig(resolver(filename), settings.compiler || {});
+  function report(value) {
+    const point = value => value ? (value.character ?? indexAt(source, value.line, value.column)) : null;
+    let start = point(value.start), end = point(value.end);
+    start ??= end; end ??= start;
+    return {message:value.message, code:value.code || null, start, end};
+  }
+  return {warnings:request.warnings.map(raw => {
+    raw.filtered = false; raw.report = null;
+    if (!raw.code) return raw;
+    const value = {...(raw.metadata || {}), message:raw.message, code:raw.code};
+    delete value.start; delete value.end;
+    if (raw.start != null) value.start = positionAt(source, raw.start);
+    if (raw.end != null) value.end = positionAt(source, raw.end);
+    if (config.warningFilter) raw.filtered = !config.warningFilter(value);
+    else if (config.onwarn) {
+      let replacement = null; config.onwarn(value, w => {replacement = w;});
+      raw.filtered = !replacement; if (replacement) raw.report = report(replacement);
+    }
+    return raw;
+  })};
+}
+async function run(request) {
+  const { source, filename } = request; const settings = request.settings || {};
+  const req = resolver(filename); let compiler;
+  try { compiler = req('svelte/compiler'); }
+  catch (e) { throw new Error('Cannot resolve svelte/compiler for ' + (filename || process.cwd()) + '. Install Svelte in the project or set OXVELTE_COMPILER_RUNTIME to a runtime directory. ' + e.message); }
+  const cfg = settings.compiler || {};
+  const config = loadConfig(req, cfg);
   let text = source;
   const strip = [...(settings._oxvelteStripRanges || [])];
   const styles = settings._oxvelteStyles || [];
@@ -146,20 +174,13 @@ async function run(request) {
     result = { kind: 'warn', warnings: compiler.compile(code, options).warnings };
   } catch (e) { result = { kind: 'error', warnings: [e] }; }
   return { compiler_version: compiler.VERSION, svelte_major: Number.parseInt(compiler.VERSION, 10), kind: result.kind, warnings: result.warnings.map(value => {
-    const raw = warning(value); raw.filtered = false; raw.report = null;
-    if (result.kind === 'warn' && value.code) {
-      if (config.warningFilter) raw.filtered = !config.warningFilter(value);
-      else if (config.onwarn) {
-        let replacement = null; config.onwarn(value, w => { replacement = w; });
-        raw.filtered = !replacement; if (replacement) raw.report = warning(replacement);
-      }
-    }
+    const raw = warning(value); raw.metadata = {...value}; raw.filtered = false; raw.report = null;
     return raw;
   }), strip_style_elements: strippedStyles, unused_ignores: [], ignore_items: [] };
 }
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on('line', async line => {
-  try { const result = await run(JSON.parse(line)); protocolWrite(JSON.stringify({ result }) + '\n'); }
+  try { const request = JSON.parse(line); const result = request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
   catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });
 

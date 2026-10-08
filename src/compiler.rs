@@ -1,7 +1,7 @@
 //! Shared bridge to the project's Svelte compiler. The process starts only when
 //! a compiler-backed rule runs and is reused across components.
 use oxc::span::Span;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Write};
@@ -16,6 +16,7 @@ pub struct ReportWarning {
 }
 #[derive(Debug, Clone)]
 pub struct Warning {
+    pub metadata: Value,
     pub message: String,
     pub code: Option<String>,
     pub span: Option<Span>,
@@ -39,8 +40,10 @@ pub struct CompileResult {
     pub ignore_items: Vec<IgnoreItem>,
     pub strip_style_elements: Vec<Span>,
 }
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct WireReport {
+    #[serde(default)]
+    metadata: Value,
     message: String,
     code: Option<String>,
     start: Option<usize>,
@@ -62,9 +65,20 @@ struct WireResult {
     strip_style_elements: Vec<[u32; 2]>,
 }
 #[derive(Deserialize)]
-struct Response {
-    result: Option<WireResult>,
+struct Response<T> {
+    result: Option<T>,
     error: Option<String>,
+}
+#[derive(Deserialize)]
+struct WireCallbacks {
+    warnings: Vec<WireWarning>,
+}
+#[derive(Serialize)]
+struct CallbackRequest<'a> {
+    operation: &'static str,
+    #[serde(flatten)]
+    request: Request<'a>,
+    warnings: Vec<WireReport>,
 }
 #[derive(Serialize)]
 struct Request<'a> {
@@ -122,54 +136,12 @@ impl Runtime {
         if let Some(result) = self.cache.get(&key) {
             return Ok(result.clone());
         }
-        self.input
-            .write_all(key.as_bytes())
-            .and_then(|_| self.input.write_all(b"\n"))
-            .and_then(|_| self.input.flush())
-            .map_err(|e| format!("Cannot write compiler request: {e}"))?;
-        let mut line = String::new();
-        self.output
-            .read_line(&mut line)
-            .map_err(|e| format!("Cannot read compiler response: {e}"))?;
-        if line.is_empty() {
-            return Err("Svelte compiler runtime exited without a response".into());
-        }
-        let response: Response = serde_json::from_str(&line)
-            .map_err(|e| format!("Invalid Svelte compiler response: {e}"))?;
-        if let Some(error) = response.error {
-            return Err(error);
-        }
-        let wire = response
-            .result
-            .ok_or("Compiler response did not contain a result")?;
-        let report = |w: WireReport| ReportWarning {
-            message: w.message,
-            code: w.code,
-            span: w.start.or(w.end).map(|start| {
-                Span::new(
-                    utf16_byte(source, start),
-                    utf16_byte(source, w.end.unwrap_or(start)),
-                )
-            }),
-        };
+        let wire: WireResult = self.exchange(&key)?;
         let result = CompileResult {
             compiler_version: wire.compiler_version,
             svelte_major: wire.svelte_major,
             kind: wire.kind,
-            warnings: wire
-                .warnings
-                .into_iter()
-                .map(|w| {
-                    let raw = report(w.warning);
-                    Warning {
-                        message: raw.message,
-                        code: raw.code,
-                        span: raw.span,
-                        filtered: w.filtered,
-                        report: w.report.map(report),
-                    }
-                })
-                .collect(),
+            warnings: convert_warnings(source, wire.warnings),
             unused_ignores: vec![],
             ignore_items: vec![],
             strip_style_elements: wire
@@ -185,6 +157,91 @@ impl Runtime {
         self.cache.insert(key, result.clone());
         Ok(result)
     }
+    fn exchange<T: DeserializeOwned>(&mut self, key: &str) -> Result<T, String> {
+        self.input
+            .write_all(key.as_bytes())
+            .and_then(|_| self.input.write_all(b"\n"))
+            .and_then(|_| self.input.flush())
+            .map_err(|e| format!("Cannot write compiler request: {e}"))?;
+        let mut line = String::new();
+        self.output
+            .read_line(&mut line)
+            .map_err(|e| format!("Cannot read compiler response: {e}"))?;
+        if line.is_empty() {
+            return Err("Svelte compiler runtime exited without a response".into());
+        }
+        let response: Response<T> = serde_json::from_str(&line)
+            .map_err(|e| format!("Invalid Svelte compiler response: {e}"))?;
+        if let Some(error) = response.error {
+            return Err(error);
+        }
+        response
+            .result
+            .ok_or_else(|| "Compiler response did not contain a result".into())
+    }
+    fn callbacks(
+        &mut self,
+        source: &str,
+        filename: Option<&str>,
+        settings: Option<&Value>,
+        warnings: &[Warning],
+    ) -> Result<Vec<Warning>, String> {
+        let request = CallbackRequest {
+            operation: "callbacks",
+            request: Request {
+                source,
+                filename,
+                settings,
+            },
+            warnings: warnings
+                .iter()
+                .map(|warning| WireReport {
+                    metadata: warning.metadata.clone(),
+                    message: warning.message.clone(),
+                    code: warning.code.clone(),
+                    start: warning.span.map(|span| byte_utf16(source, span.start)),
+                    end: warning.span.map(|span| byte_utf16(source, span.end)),
+                })
+                .collect(),
+        };
+        let key = serde_json::to_string(&request).map_err(|error| error.to_string())?;
+        let wire: WireCallbacks = self.exchange(&key)?;
+        Ok(convert_warnings(source, wire.warnings))
+    }
+}
+fn convert_warnings(source: &str, warnings: Vec<WireWarning>) -> Vec<Warning> {
+    let report = |w: WireReport| ReportWarning {
+        message: w.message,
+        code: w.code,
+        span: w.start.or(w.end).map(|start| {
+            Span::new(
+                utf16_byte(source, start),
+                utf16_byte(source, w.end.unwrap_or(start)),
+            )
+        }),
+    };
+    warnings
+        .into_iter()
+        .map(|w| {
+            let metadata = w.warning.metadata.clone();
+            let raw = report(w.warning);
+            Warning {
+                metadata,
+                message: raw.message,
+                code: raw.code,
+                span: raw.span,
+                filtered: w.filtered,
+                report: w.report.map(report),
+            }
+        })
+        .collect()
+}
+fn byte_utf16(source: &str, byte: u32) -> usize {
+    source
+        .get(..byte as usize)
+        .unwrap_or(source)
+        .encode_utf16()
+        .count()
 }
 fn utf16_byte(source: &str, index: usize) -> u32 {
     let mut units = 0;
@@ -203,6 +260,22 @@ pub fn compile(
     filename: Option<&str>,
     settings: Option<&Value>,
 ) -> Result<CompileResult, String> {
+    with_runtime(|runtime| runtime.compile(source, filename, settings))
+}
+/// Apply executable Svelte warning hooks only to warnings retained by the
+/// native ignore and rule filters. Callback requests are intentionally uncached.
+pub fn apply_warning_callbacks(
+    source: &str,
+    filename: Option<&str>,
+    settings: Option<&Value>,
+    warnings: &[Warning],
+) -> Result<Vec<Warning>, String> {
+    if warnings.is_empty() {
+        return Ok(vec![]);
+    }
+    with_runtime(|runtime| runtime.callbacks(source, filename, settings, warnings))
+}
+fn with_runtime<T>(action: impl FnOnce(&mut Runtime) -> Result<T, String>) -> Result<T, String> {
     static RUNTIME: OnceLock<Mutex<Option<Runtime>>> = OnceLock::new();
     let mut state = RUNTIME
         .get_or_init(|| Mutex::new(None))
@@ -211,7 +284,7 @@ pub fn compile(
     if state.is_none() {
         *state = Some(Runtime::start()?);
     }
-    let result = state.as_mut().unwrap().compile(source, filename, settings);
+    let result = action(state.as_mut().unwrap());
     if result.as_ref().is_err_and(|message| {
         message.contains("compiler runtime exited")
             || message.contains("Cannot write compiler request")
