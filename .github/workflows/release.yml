@@ -1,0 +1,191 @@
+name: Release
+
+# Pushing a v* tag builds every platform binary, publishes the npm packages
+# and creates a GitHub release. Running it manually (workflow_dispatch) does
+# the build, staging and install test but publishes nothing.
+#
+# npm auth: trusted publishing (OIDC) when it is configured for the packages
+# on npmjs.com, otherwise the NPM_TOKEN repository secret.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read version and check it matches the tag
+        id: version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+
+      - run: cargo test --lib --locked
+
+  build:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep in sync with TARGETS in scripts/stage-npm.mjs.
+        # `zig` targets are cross-compiled with cargo-zigbuild; the .2.17
+        # suffix pins the glibc version so the binary runs on older distros.
+        # `run` marks binaries the runner can execute for a quick check.
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            run: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            zig: x86_64-unknown-linux-gnu.2.17
+            run: true
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            zig: aarch64-unknown-linux-gnu.2.17
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: x86_64-unknown-linux-musl
+            run: true
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: aarch64-unknown-linux-musl
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            run: true
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: rustup target add ${{ matrix.target }}
+
+      - if: matrix.zig
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      - name: Build (cargo-zigbuild)
+        if: matrix.zig
+        run: |
+          pip install cargo-zigbuild
+          cargo zigbuild --release --locked --features custom-rules --target ${{ matrix.zig }}
+
+      - name: Build
+        if: ${{ !matrix.zig }}
+        run: cargo build --release --locked --features custom-rules --target ${{ matrix.target }}
+
+      - name: Check the binary runs
+        if: matrix.run
+        run: target/${{ matrix.target }}/release/oxvelte --version
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/oxvelte
+            target/${{ matrix.target }}/release/oxvelte.exe
+          if-no-files-found: error
+
+  publish:
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: binaries
+
+      - name: Stage npm packages
+        run: node scripts/stage-npm.mjs --binaries binaries
+
+      - name: Install the packed packages and run the CLI
+        run: |
+          mkdir tarballs smoke
+          for dir in dist-npm/*/; do
+            npm pack "./$dir" --pack-destination tarballs
+          done
+          cd smoke
+          npm init -y > /dev/null
+          npm install \
+            "../tarballs/billpeet-oxvelte-$VERSION.tgz" \
+            "../tarballs/billpeet-oxvelte-linux-x64-gnu-$VERSION.tgz"
+          test "$(./node_modules/.bin/oxvelte --version)" = "oxvelte $VERSION"
+
+      - name: Publish to npm
+        if: github.event_name == 'push'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # Platform packages first so the main package never points at
+          # versions that do not exist yet. Already-published versions are
+          # skipped, which makes a failed run safe to re-run.
+          for dir in dist-npm/oxvelte-*/ dist-npm/oxvelte/; do
+            name=$(node -p "require('./${dir}package.json').name")
+            if npm view "$name@$VERSION" version > /dev/null 2>&1; then
+              echo "$name@$VERSION is already published, skipping"
+              continue
+            fi
+            npm publish "./$dir" --access public --provenance
+          done
+
+  github-release:
+    needs: publish
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: binaries
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir release
+          for dir in binaries/*/; do
+            target=$(basename "$dir")
+            for file in "$dir"oxvelte*; do
+              cp "$file" "release/oxvelte-$target${file#"$dir"oxvelte}"
+            done
+          done
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --generate-notes

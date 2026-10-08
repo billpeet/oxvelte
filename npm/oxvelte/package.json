@@ -1,0 +1,33 @@
+{
+  "name": "@billpeet/oxvelte",
+  "version": "0.0.0",
+  "description": "A fast Svelte linter written in Rust. Drop-in replacement for eslint-plugin-svelte.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/billpeet/oxvelte.git"
+  },
+  "homepage": "https://github.com/billpeet/oxvelte#readme",
+  "bugs": "https://github.com/billpeet/oxvelte/issues",
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "linter",
+    "lint",
+    "eslint",
+    "oxc",
+    "rust"
+  ],
+  "bin": {
+    "oxvelte": "bin/oxvelte.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

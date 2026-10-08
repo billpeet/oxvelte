@@ -24,10 +24,8 @@ test.log
 *.swo
 *~
 
-# npm platform binaries (staged by scripts/build-npm.sh)
-npm/@oxvelte/*/oxvelte
-npm/@oxvelte/*/oxvelte.exe
-npm/oxvelte/README.md
+# npm packages staged by scripts/stage-npm.mjs
+/dist-npm/
 
 # OS
 .DS_Store

@@ -29,19 +29,10 @@ echo ""
 sed -i.bak "s/^version = \"${CURRENT}\"/version = \"${NEW}\"/" Cargo.toml
 rm -f Cargo.toml.bak
 
-# Update all npm package.json files
-for pkg_json in npm/oxvelte/package.json npm/@oxvelte/*/package.json; do
-  if [ -f "$pkg_json" ]; then
-    sed -i.bak "s/\"version\": \".*\"/\"version\": \"${NEW}\"/" "$pkg_json"
-    rm -f "$pkg_json.bak"
-  fi
-done
+# The npm packages take their version from Cargo.toml when the release
+# workflow stages them (scripts/stage-npm.mjs), so there is nothing else to bump.
 
-# Update optionalDependencies versions
-sed -i.bak "s/\"@oxvelte\/cli-\([^\"]*\)\": \"[^\"]*\"/\"@oxvelte\/cli-\1\": \"${NEW}\"/g" npm/oxvelte/package.json
-rm -f npm/oxvelte/package.json.bak
-
-# Verify build
+# Verify build (this also updates the version recorded in Cargo.lock)
 echo "Building..."
 cargo build --release
 
@@ -49,7 +40,7 @@ echo "Running tests..."
 cargo test --lib
 
 # Commit and tag
-git add Cargo.toml npm/
+git add Cargo.toml Cargo.lock
 git commit -m "release: v${NEW}"
 git tag -a "v${NEW}" -m "v${NEW}"
 

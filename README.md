@@ -30,8 +30,7 @@ oxlint can lint the JavaScript/TypeScript inside `.svelte` `<script>` blocks, bu
 
 ```bash
 # Install both
-npm install -D oxlint
-cargo install --git https://github.com/billpeet/oxvelte.git
+npm install -D oxlint @billpeet/oxvelte
 
 # Add to package.json
 ```
@@ -148,7 +147,7 @@ Both tools return non-zero exit codes on errors, so they work naturally in CI:
 ```yaml
 # GitHub Actions
 - run: npx oxlint --tsconfig tsconfig.json
-- run: oxvelte lint src/
+- run: npx oxvelte lint src/
 ```
 
 For JSON output (useful for custom reporters or IDE integration):
@@ -159,6 +158,16 @@ oxvelte lint --json src/
 ```
 
 ## Install
+
+### From npm
+
+```bash
+npm install -D @billpeet/oxvelte    # or: pnpm add -D / yarn add -D / bun add -d
+```
+
+This installs a prebuilt native binary for your platform and puts the `oxvelte` command in `node_modules/.bin`, so it works in `package.json` scripts and through `npx oxvelte`. No Rust toolchain is needed.
+
+Prebuilt binaries cover macOS (arm64, x64), Linux (x64 and arm64, glibc and musl) and Windows (x64, arm64). They are built with the `custom-rules` feature enabled.
 
 ### From GitHub
 
@@ -241,7 +250,7 @@ export default {
 };
 ```
 
-Rules run in an embedded [Boa](https://boajs.dev/) engine — no Node.js dependency, no IPC. Requires the `custom-rules` feature at build time (`cargo install … --features custom-rules`).
+Rules run in an embedded [Boa](https://boajs.dev/) engine — no Node.js dependency, no IPC. The npm package includes this; when building from source it requires the `custom-rules` feature (`cargo install … --features custom-rules`).
 
 Full reference — AST shape, `ctx` API, auto-fix, limitations — in [`docs/custom-rules.md`](docs/custom-rules.md).
 
