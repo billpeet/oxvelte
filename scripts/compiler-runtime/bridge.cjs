@@ -69,7 +69,10 @@ function applyCallbacks(request) {
     delete value.start; delete value.end;
     if (raw.start != null) value.start = positionAt(source, raw.start);
     if (raw.end != null) value.end = positionAt(source, raw.end);
-    if (config.warningFilter) raw.filtered = !config.warningFilter(value);
+    if (config.warningFilter) {
+      raw.filtered = !config.warningFilter(value);
+      if (!raw.filtered) raw.report = report(value);
+    }
     else if (config.onwarn) {
       let replacement = null; config.onwarn(value, w => {replacement = w;});
       raw.filtered = !replacement; if (replacement) raw.report = report(replacement);
@@ -183,6 +186,7 @@ rl.on('line', async line => {
   try { const request = JSON.parse(line); const result = request.operation === 'callbacks' ? applyCallbacks(request) : await run(request); protocolWrite(JSON.stringify({ result }) + '\n'); }
   catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });
+
 
 
 

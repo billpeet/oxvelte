@@ -154,3 +154,16 @@ test('each callback operation executes stateful hooks without caching results', 
   } finally {rmSync(directory,{recursive:true,force:true});}
 });
 
+test('warningFilter mutations are retained only in the reporting view', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'oxvelte-compiler-filter-'));
+  const configPath = join(directory, '_config.cjs');
+  try {
+    writeFileSync(configPath, `module.exports={languageOptions:{parserOptions:{svelteConfig:{warningFilter(warning){warning.message='Filtered replacement';warning.code='custom';return true}}}}}`);
+    const source = '<img src="x">', settings = {compiler:{executableConfigPath:configPath}};
+    const raw = compile(source,settings);
+    const transformed = callbacks(source,settings,raw.warnings);
+    assert.equal(transformed.warnings[0].code,'a11y_missing_attribute');
+    assert.equal(transformed.warnings[0].report.code,'custom');
+    assert.equal(transformed.warnings[0].report.message,'Filtered replacement');
+  } finally {rmSync(directory,{recursive:true,force:true});}
+});
