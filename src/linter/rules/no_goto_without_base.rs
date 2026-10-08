@@ -13,8 +13,20 @@ impl Rule for NoGotoWithoutBase {
     }
     fn run<'a>(&self, ctx: &mut LintContext<'a>) {
         for (semantic, offset) in [
-            (ctx.instance_semantic, ctx.instance_content_offset),
-            (ctx.module_semantic, ctx.module_content_offset),
+            (
+                ctx.instance_semantic,
+                ctx.ast
+                    .instance
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
+            (
+                ctx.module_semantic,
+                ctx.ast
+                    .module
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
         ] {
             let Some(semantic) = semantic else { continue };
             for node in semantic.nodes().iter() {
@@ -136,6 +148,26 @@ fn import_reference(
 mod tests {
     use crate::{linter::Linter, parser};
     use oxc::allocator::Allocator;
+
+    #[test]
+    fn argument_spans_use_parsed_script_offsets() {
+        for attributes in ["data-note=\">\"", "module data-note=\">\""] {
+            let source = format!("<!-- 😀 -->\n<script {attributes}>\nimport {{ goto }} from '$app/navigation';\ngoto('/route');\n</script>");
+            let allocator = Allocator::default();
+            let parsed = parser::parse(&source, &allocator);
+            assert!(parsed.errors.is_empty());
+            let diagnostics = Linter::all().lint(&parsed.ast, &source);
+            let finding = diagnostics
+                .iter()
+                .find(|d| d.rule_name == "svelte/no-goto-without-base")
+                .unwrap();
+            let start = source.find("'/route'").unwrap() as u32;
+            assert_eq!(
+                finding.span,
+                oxc::span::Span::new(start, start + "'/route'".len() as u32)
+            );
+        }
+    }
     #[test]
     fn arguments_and_import_identity_follow_the_legacy_contract() {
         let source = r#"<script>

@@ -29,8 +29,20 @@ impl Rule for NoNavigationWithoutBase {
                 .unwrap_or(false)
         };
         for (semantic, offset) in [
-            (ctx.instance_semantic, ctx.instance_content_offset),
-            (ctx.module_semantic, ctx.module_content_offset),
+            (
+                ctx.instance_semantic,
+                ctx.ast
+                    .instance
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
+            (
+                ctx.module_semantic,
+                ctx.ast
+                    .module
+                    .as_ref()
+                    .map_or(0, |script| script.content_span.start),
+            ),
         ] {
             let Some(semantic) = semantic else { continue };
             for node in semantic.nodes().iter() {
@@ -408,6 +420,17 @@ mod tests {
         parser,
     };
     use oxc::allocator::Allocator;
+
+    #[test]
+    fn argument_spans_use_parsed_script_offsets() {
+        for attributes in ["data-note=\">\"", "module data-note=\">\""] {
+            let source = format!("<!-- 😀 -->\n<script {attributes}>\nimport {{ goto, pushState, replaceState }} from '$app/navigation';\ngoto('/goto');\npushState('/push');\nreplaceState('/replace');\n</script>");
+            assert_eq!(
+                findings(&source, serde_json::json!([])),
+                ["'/goto'", "'/push'", "'/replace'"]
+            );
+        }
+    }
 
     fn findings(source: &str, options: serde_json::Value) -> Vec<String> {
         let allocator = Allocator::default();
