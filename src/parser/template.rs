@@ -1586,7 +1586,9 @@ impl<'a> TemplateParser<'a> {
                 // Whitespace also permits an expression beginning with a
                 // regular expression. A block close contains only its name.
                 let name = body.strip_prefix('/')?.trim_start();
-                let end = name.find(|ch:char|!ch.is_ascii_alphanumeric() && ch != '_' && ch != '$').unwrap_or(name.len());
+                let end = name
+                    .find(|ch: char| !ch.is_ascii_alphanumeric() && ch != '_' && ch != '$')
+                    .unwrap_or(name.len());
                 if end == 0 || !name[end..].trim_start().starts_with('}') {
                     return None;
                 }
