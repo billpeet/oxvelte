@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 958,
-    "gaps": 277,
+    "pass": 968,
+    "gaps": 267,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,7 +1362,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 16,
+      "count": 14,
       "rules": {
         "html-closing-bracket-new-line": [
           {
@@ -1439,24 +1439,6 @@
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
-            ]
-          }
-        ],
-        "prefer-class-directive": [
-          {
-            "id": "prefer-class-directive/invalid/empty/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
             ]
           }
         ],
@@ -1554,7 +1536,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 44,
+      "count": 36,
       "rules": {
         "no-dom-manipulating": [
           {
@@ -1726,64 +1708,6 @@
             ]
           }
         ],
-        "prefer-class-directive": [
-          {
-            "id": "prefer-class-directive/invalid/simple-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/svelte-element01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/test02-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/test03-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/transform-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/transform-test02-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/trim-test01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "prefer-class-directive/invalid/trim-test01.2-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output"
-            ]
-          }
-        ],
         "prefer-style-directive": [
           {
             "id": "prefer-style-directive/invalid/complex-test01-input.svelte",
@@ -1921,7 +1845,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 42,
+      "count": 40,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "mustache-spacing": 1,
@@ -1931,7 +1855,6 @@
         "no-shorthand-style-property-overrides": 1,
         "no-top-level-browser-globals": 2,
         "no-unused-svelte-ignore": 18,
-        "prefer-class-directive": 2,
         "prefer-style-directive": 3,
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
@@ -1939,7 +1862,7 @@
       }
     },
     "diagnostics": {
-      "count": 91,
+      "count": 81,
       "rules": {
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
@@ -1954,7 +1877,6 @@
         "no-top-level-browser-globals": 3,
         "no-unused-svelte-ignore": 18,
         "no-useless-mustaches": 6,
-        "prefer-class-directive": 10,
         "prefer-style-directive": 10,
         "require-optimized-style-attribute": 3,
         "shorthand-attribute": 1,
@@ -1965,11 +1887,10 @@
       }
     },
     "fix_output": {
-      "count": 30,
+      "count": 20,
       "rules": {
         "mustache-spacing": 1,
         "no-useless-mustaches": 7,
-        "prefer-class-directive": 10,
         "prefer-style-directive": 10,
         "shorthand-attribute": 1,
         "shorthand-directive": 1

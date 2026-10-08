@@ -705,48 +705,6 @@
     "prefer-attribute-interpolation/valid/boundaries-input.svelte": {
       "unsupported_rule": "a05101a0bfce1c07ed5a87b9472625a8607c47721ebcc0c11b31f981bd65ee59"
     },
-    "prefer-class-directive/invalid/empty/test01-input.svelte": {
-      "diagnostic_count": "719cc5f6dec02abd72c5b31d174b7b078dc3758c1e622c14ec36835dffa19a25",
-      "diagnostics": "74fea011a11279eb9c6fd2025a38132771f1eace77c9bb9cc923a13ee21b1287",
-      "fix_output": "de4cbc2cff8c7451fb8d09b966abca553c0e6a3fb1bbc75df9f9afd127df67b5"
-    },
-    "prefer-class-directive/invalid/simple-test01-input.svelte": {
-      "diagnostics": "565f44edb3d17a47a96c4e4d973b495664ce922d8613ccaa2e80624f0b24161f",
-      "fix_output": "8058204c36420112144840ee5dbc01d05caace13e4524f05e36967d5f900b1f7"
-    },
-    "prefer-class-directive/invalid/svelte-element01-input.svelte": {
-      "diagnostics": "db5b8027f61720eacda47fd06ad138a75a7f742b0e2c44e42fcd36c9e7111733",
-      "fix_output": "e36c27ed06060d6951b8b8011d3c6c0f1b63c6babea4937078f8155a8fa04282"
-    },
-    "prefer-class-directive/invalid/test01-input.svelte": {
-      "diagnostic_count": "eec66b2fc2eba7d68624d63ce2ff558bc279d24171d0454d2b0eddf9aa742e6b",
-      "diagnostics": "cda94d9eb9a1757fc20adc38dd095fd52206fe0fd84337d389aa7c41e08dbe8f",
-      "fix_output": "27c25da5ee0abeb5f80609e7092bf7bd9a1fb2445c3c78b2d0c14eb978e914fe"
-    },
-    "prefer-class-directive/invalid/test02-input.svelte": {
-      "diagnostics": "278105eaef41cb9af70b387c9506abeaed3e4b649c3c55a9844bc98f66e28e97",
-      "fix_output": "c8a0df3245885a3b4c2234f63884b09906ec8f5b0b6e0229d54d6fefd24d8c16"
-    },
-    "prefer-class-directive/invalid/test03-input.svelte": {
-      "diagnostics": "ae08b42e51ff029fdac1ebd790eebcf17b6f108227ea99553b3c96b7c680126d",
-      "fix_output": "72bb56a6261eca5130c09b61ae8b2a4acf88f64977d0669709f89282819ada9b"
-    },
-    "prefer-class-directive/invalid/transform-test01-input.svelte": {
-      "diagnostics": "6c5e510c6c6b85bc5f927cfd54b3dfe3ee4668e789cf869b4749af9f707c2df0",
-      "fix_output": "2b53414eb492e635adbbcc322092c24a5bdc2c1b68fd96dc5321056e7247270f"
-    },
-    "prefer-class-directive/invalid/transform-test02-input.svelte": {
-      "diagnostics": "4dd9ef4beff89e4d0ca2da464167ae2a6d29d18c89af916857a4aa36aeb3e399",
-      "fix_output": "03b4d5a035c0a86db8f1444b24bc7fd143c58021dbfb8fe68d4742af6ab9ca3c"
-    },
-    "prefer-class-directive/invalid/trim-test01-input.svelte": {
-      "diagnostics": "a472e1f473683d01697f45991a00d0eb27dd53b4a5732b14b41a08b40e93a786",
-      "fix_output": "af90f6763db5c0b66433f9562612130b25eee53503a0eaa68a6fa8a936278211"
-    },
-    "prefer-class-directive/invalid/trim-test01.2-input.svelte": {
-      "diagnostics": "bc673b00cdf07f06cb11d36b428d62ea968408768dae34730d90841495c21855",
-      "fix_output": "52e58a8aa863a9defea66172548a67cf595abf0738da434f560b23b970c3fa76"
-    },
     "prefer-const/invalid/option1/test01-input.svelte": {
       "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
     },
