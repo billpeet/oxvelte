@@ -9,6 +9,8 @@
 
 A Svelte linter with native Rust rules and optional Node.js compiler and type checks. All 1,232 eligible fixtures in the pinned [eslint-plugin-svelte](https://github.com/sveltejs/eslint-plugin-svelte) suite match. See the [parity report](docs/research/upstream-parity-seventh-wave.md) for scope and runtime requirements.
 
+All 1,299 imported cases pass across the [pinned version matrix](docs/research/upstream-parity-version-matrix.md), including the 67 cases skipped in the primary environment.
+
 <p align="center">
   <img src="assets/compare.gif" alt="Side-by-side benchmark linting shadcn-svelte (1,603 files): eslint-plugin-svelte takes ~15s while oxvelte completes the same lint hundreds of times in the same window" width="900">
 </p>

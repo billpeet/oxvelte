@@ -1,5 +1,7 @@
 # Parallel parity work plan
 
+The [version matrix](upstream-parity-version-matrix.md) is complete. All 67 primary version skips pass under matching dependencies, so all 1,299 imported cases are covered across the environments. Every profile has zero eligible gaps. The primary counts and historical dispatch tables below remain unchanged.
+
 Status: the [seventh wave](upstream-parity-seventh-wave.md) is complete. Current results are 1,232 matches, zero gaps and 67 skips. Every eligible fixture in the current frozen corpus matches. The tables and dispatch manifest below retain the original queue snapshot; use the wave reports for implementation limits and coverage beyond this corpus.
 
 The code starting point is `aa9b3ea`, with 762 matches, 473 gaps and 64 version skips. The [dispatch manifest](upstream-parity-work-packages.json) assigns every remaining gap case to exactly one package and records its rules, source files and dependencies. It is a snapshot of this starting point; use fresh reports to assess a package after prerequisites merge.

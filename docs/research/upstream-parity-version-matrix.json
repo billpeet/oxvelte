@@ -1,0 +1,2005 @@
+{
+  "revision": "18339c886320151148568063c5801bf69cb51027",
+  "profiles": {
+    "modern": {
+      "environment": {
+        "@typescript-eslint/parser": "8.70.0",
+        "eslint": "10.9.1",
+        "svelte": "5.56.0",
+        "svelte-eslint-parser": "1.8.1",
+        "typescript": "6.0.3"
+      },
+      "totals": {
+        "gaps": 0,
+        "pass": 1238,
+        "versionSkip": 61
+      }
+    },
+    "svelte4": {
+      "environment": {
+        "@typescript-eslint/parser": "8.70.0",
+        "eslint": "9.39.1",
+        "svelte": "4.2.20",
+        "svelte-eslint-parser": "1.8.1",
+        "typescript": "5.9.3"
+      },
+      "totals": {
+        "gaps": 0,
+        "pass": 1013,
+        "versionSkip": 286
+      }
+    },
+    "legacyparser": {
+      "environment": {
+        "@typescript-eslint/parser": "6.10.0",
+        "eslint": "8.57.1",
+        "svelte": "4.2.20",
+        "svelte-eslint-parser": "1.8.1",
+        "typescript": "5.2.2"
+      },
+      "totals": {
+        "gaps": 0,
+        "pass": 1013,
+        "versionSkip": 286
+      }
+    },
+    "svelte3": {
+      "environment": {
+        "@typescript-eslint/parser": "6.10.0",
+        "eslint": "8.57.1",
+        "svelte": "3.59.2",
+        "svelte-eslint-parser": "1.8.1",
+        "typescript": "5.2.2"
+      },
+      "totals": {
+        "gaps": 0,
+        "pass": 1006,
+        "versionSkip": 293
+      }
+    }
+  },
+  "originallySkipped": 67,
+  "covered": 67,
+  "withGaps": 0,
+  "uncovered": [],
+  "cases": [
+    {
+      "id": "experimental-require-strict-events/invalid/no-strict-events01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "experimental-require-strict-events/valid/has-events-interface01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "experimental-require-strict-events/valid/has-events-type-alias01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "experimental-require-strict-events/valid/has-strict-events01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "experimental-require-strict-events/valid/no-typescript01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "experimental-require-strict-events/valid/script-module-context01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "indent/invalid/declaration-tag-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.56.0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "indent/invalid/ts-v5/ts-import-assertion01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "indent/invalid/ts-v5/ts-import-assertion03-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "indent/invalid/ts-v5/ts-import-assertion04-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "@typescript-eslint/parser 8.70.0 does not satisfy <6.11.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "indent/valid/declaration-tag-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.56.0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "mustache-spacing/invalid/declaration-tag-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.55.9"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.55.9"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.55.9"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-at-const-tags/invalid/const01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 3.59.2 does not satisfy >=5.56.0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-at-const-tags/valid/declaration-tag-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 3.59.2 does not satisfy >=5.56.0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 4.2.20 does not satisfy >=5.56.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy >=5.0.0",
+              "Rule runtime gate: svelte 3.59.2 does not satisfy >=5.56.0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-inner-declarations/invalid/both/test01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 10.9.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 8.57.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 8.57.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-inner-declarations/invalid/test01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 10.9.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 8.57.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 8.57.1 does not satisfy ^9.0.0-0"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-inner-declarations/invalid/v8/both/test01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 10.9.1 does not satisfy <=8"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 9.39.1 does not satisfy <=8"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-inner-declarations/invalid/v8/test01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 10.9.1 does not satisfy <=8"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "eslint 9.39.1 does not satisfy <=8"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/invalid/script-comment02-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/reactive-component-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 3.59.2 does not satisfy ^4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/script-comment-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang02-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang03-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang04-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang05-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "no-unused-svelte-ignore/valid/style-lang06-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^4 || ^3"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-event-dispatcher-types/invalid/import-alias01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-event-dispatcher-types/invalid/no-types01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-event-dispatcher-types/valid/has-types01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-event-dispatcher-types/valid/no-typescript01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-event-dispatcher-types/valid/non-svelte-dispatcher01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "require-store-reactive-access/invalid/calc01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/a11y01-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/dyamic-slot01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/invalid-svelte-ignore01-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/invalid-svelte-ignore02-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/invalid-svelte-ignore03-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/style-lang01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/style-without-global-01-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/svelte-config-custom-warn/a11y-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/svelte-config-onwarn/a11y-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/invalid/ts/enum01-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/ignore01-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/ignore02-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/script-comment-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore01-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore02-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore03-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore04-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore05-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore06-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte-ignore07-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/svelte3-options-custom-element-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy ^3.0.0"
+            ]
+          }
+        },
+        "legacyparser": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 4.2.20 does not satisfy ^3.0.0"
+            ]
+          }
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-compile/valid/ts/script-comment-svelte4-input.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/invalid/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/invalid/svelte-config-from-parser-options/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/invalid/svelte-config/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/invalid/svelte4-children/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test001/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test002-1/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test002-2/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test003-1/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test003-2/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test004-1/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    },
+    {
+      "id": "valid-prop-names-in-kit-pages/valid/test004-2/+page.svelte",
+      "covered": true,
+      "gaps": false,
+      "outcomes": {
+        "modern": {
+          "status": "version_skip",
+          "issues": {
+            "version_skip": [
+              "svelte 5.56.0 does not satisfy ^3.0.0 || ^4.0.0"
+            ]
+          }
+        },
+        "svelte4": {
+          "status": "pass",
+          "issues": {}
+        },
+        "legacyparser": {
+          "status": "pass",
+          "issues": {}
+        },
+        "svelte3": {
+          "status": "pass",
+          "issues": {}
+        }
+      }
+    }
+  ]
+}

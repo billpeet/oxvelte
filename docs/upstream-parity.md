@@ -88,6 +88,12 @@ Metadata inspection uses the exact declared ESLint and TypeScript versions to re
 
 For a future upstream refresh, change the pinned revision and version in the importer and runner together, import into a fresh reviewed corpus directory, inspect expectation changes, then generate a full report and review the baseline. The importer refuses to overwrite modified files or leave stale files behind. The generated `tests/package.json` binds Oxvelte's nearest-package Svelte-version signal to the declared environment, while upstream's original package metadata is preserved unchanged.
 
+## Version matrix
+
+All 67 primary version skips now pass in matching pinned environments. The four additional profiles cover Svelte 3, Svelte 4, newer Svelte 5, ESLint 8/9 and the older TypeScript parser. Each runs against unchanged expectations with `--strict --no-baseline`; all eligible cases pass. Across the environments, all 1,299 imported cases are covered. The primary baseline remains at 1,232 passes, zero gaps and 67 version skips.
+
+See the [version matrix report](research/upstream-parity-version-matrix.md) for exact versions, reproduction commands, validation and per-case coverage. CI runs each profile on Windows and Linux.
+
 ## Remaining coverage
 
 This first runner covers the raw rule fixtures. The imported TypeScript/core integration test sources, processor/config/settings tests and custom `no-conflicting-module-names` tests are available for later ports but are not executed. It also does not run a reference ESLint installation to validate each snapshot under the declared environment. Expectations come from the pinned upstream files. All eligible raw rule fixtures now match. Type-aware condition checks have scope limitations documented in the seventh-wave report. The existing real-project parity script remains useful alongside these checks.

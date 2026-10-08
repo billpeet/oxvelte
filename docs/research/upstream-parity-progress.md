@@ -1,5 +1,7 @@
 # Upstream parity progress
 
+The [version matrix](upstream-parity-version-matrix.md) now covers all 67 primary version skips. All 1,299 imported cases pass in at least one matching environment, with zero eligible gaps in every profile. The primary environment remains at 1,232 passes, zero gaps and 67 version skips. The reports below retain the earlier batch results.
+
 The [seventh parallel wave](upstream-parity-seventh-wave.md) is complete and integrated. All seven type-aware condition cases now match, bringing the full suite to 1,232 matches, zero gaps and 67 version skips. Every eligible fixture in the current frozen corpus matches. The wave report documents scope limits and further coverage beyond this corpus; the earlier reports and batch below record previous work.
 
 Remaining work is divided into independent packages in the [parallel work plan](upstream-parity-parallel-plan.md). Its [dispatch manifest](upstream-parity-work-packages.json) retains the original queue snapshot and file ownership; use the current inventory for remaining cases.
