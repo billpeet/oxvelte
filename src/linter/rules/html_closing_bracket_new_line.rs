@@ -172,7 +172,6 @@ fn report_if_needed(
         phrase(data.actual)
     );
     if expected > 0 && !can_fix_add_linebreak {
-        ctx.diagnostic(message, data.report_span);
         return;
     }
 
@@ -191,5 +190,42 @@ fn phrase(line_breaks: usize) -> String {
         0 => "no line breaks".to_string(),
         1 => "1 line break".to_string(),
         n => format!("{n} line breaks"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/html-closing-bracket-new-line")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let diagnostics = lint(
+            "<!-- 😀 --><div></div><input />",
+            serde_json::json!([{"singleline":"always"}]),
+        );
+        assert_eq!(diagnostics.len(), 2);
+        assert!(diagnostics.iter().all(|d| d.fix.is_some()));
     }
 }

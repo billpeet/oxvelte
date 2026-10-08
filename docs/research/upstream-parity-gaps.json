@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 982,
-    "gaps": 253,
+    "pass": 983,
+    "gaps": 252,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1362,17 +1362,8 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 11,
+      "count": 10,
       "rules": {
-        "html-closing-bracket-new-line": [
-          {
-            "id": "html-closing-bracket-new-line/invalid/singleline-always/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
         "no-dupe-else-if-blocks": [
           {
             "id": "no-dupe-else-if-blocks/invalid/test01-input.svelte",
@@ -1734,24 +1725,9 @@
         "prefer-derived-over-derived-by": 9
       }
     },
-    "diagnostic_count": {
-      "count": 37,
-      "rules": {
-        "html-closing-bracket-new-line": 1,
-        "no-dupe-else-if-blocks": 2,
-        "no-dupe-style-properties": 1,
-        "no-reactive-reassign": 1,
-        "no-shorthand-style-property-overrides": 1,
-        "no-top-level-browser-globals": 2,
-        "no-unused-svelte-ignore": 18,
-        "prefer-style-directive": 3,
-        "valid-compile": 8
-      }
-    },
     "diagnostics": {
-      "count": 68,
+      "count": 67,
       "rules": {
-        "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
@@ -1766,6 +1742,19 @@
         "valid-compile": 8,
         "valid-each-key": 2,
         "valid-style-parse": 2
+      }
+    },
+    "diagnostic_count": {
+      "count": 36,
+      "rules": {
+        "no-dupe-else-if-blocks": 2,
+        "no-dupe-style-properties": 1,
+        "no-reactive-reassign": 1,
+        "no-shorthand-style-property-overrides": 1,
+        "no-top-level-browser-globals": 2,
+        "no-unused-svelte-ignore": 18,
+        "prefer-style-directive": 3,
+        "valid-compile": 8
       }
     },
     "compiler_capability": {

@@ -39,10 +39,6 @@
     "experimental-require-strict-events/valid/script-module-context01-input.svelte": {
       "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
     },
-    "html-closing-bracket-new-line/invalid/singleline-always/test01-input.svelte": {
-      "diagnostic_count": "0c58ddca6f0dd1fc53c6729330947d9fb356badaad045b82343cccaacfb886ba",
-      "diagnostics": "ba04a0c7f637fa98d43977e43c546c19b32260293911c21bfe5a1933abee72cb"
-    },
     "indent/invalid/4-indent/test01-input.svelte": {
       "unsupported_rule": "cf9c2ce1dd59f2d987720acfcae087e88ad05329b9333a9e99aaf67c7bff2734"
     },
