@@ -139,8 +139,13 @@ impl Rule for NoNavigationWithoutResolve {
                         continue;
                     };
 
-                    let safe =
-                        is_safe_nav_arg(first_arg, &resolve_locals, sem, &mut FxHashSet::default());
+                    let safe = is_safe_nav_arg(
+                        first_arg,
+                        &resolve_locals,
+                        sem,
+                        &mut FxHashSet::default(),
+                        *orig_name != "goto",
+                    );
                     if !safe {
                         let argument_span = first_arg.span();
                         let s = content_offset + argument_span.start;
@@ -265,6 +270,32 @@ nav.replaceState(url, {});
             assert!(attribute == "href={`${undefined}`}" || attribute == "href={`${null}`}");
         }
     }
+
+    #[test]
+    fn branches_must_each_meet_the_navigation_policy() {
+        let source = r#"<script>
+            import { goto, pushState } from '$app/navigation';
+            import { resolve } from '$app/paths';
+            const resolved = resolve('/jobs');
+            goto(flag ? resolved : resolved);
+            goto(flag ? resolved : '/jobs');
+            goto(flag ? resolved : '');
+            pushState(flag ? resolved : '', {});
+            pushState(flag ? resolved : 'https://example.com', {});
+        </script>
+        <a href={flag ? resolved : '#jobs'}>safe</a>
+        <a href={flag ? resolved : '/jobs'}>unsafe</a>
+        <a href={'#jobs' - 1}>unsafe operator</a>"#;
+        let diagnostics = lint(source);
+        assert_eq!(diagnostics.len(), 5);
+        assert_eq!(
+            diagnostics
+                .iter()
+                .filter(|d| d.message.contains("href"))
+                .count(),
+            2
+        );
+    }
 }
 
 fn is_nav_ignored(
@@ -319,7 +350,9 @@ fn static_string_prefix(expr: &Expression<'_>) -> Option<String> {
                 Some(prefix)
             }
         }
-        Expression::BinaryExpression(b) => {
+        Expression::BinaryExpression(b)
+            if b.operator == oxc::syntax::operator::BinaryOperator::Addition =>
+        {
             let left = static_string_prefix(&b.left)?;
             // If left is a complete static string (no dynamic tail), try to
             // extend with right; otherwise left's prefix is already the answer.
@@ -429,16 +462,35 @@ fn is_safe_nav_arg<'a>(
     resolve_locals: &[String],
     semantic: &'a Semantic<'a>,
     seen: &mut FxHashSet<oxc::semantic::SymbolId>,
+    allow_empty: bool,
 ) -> bool {
-    if static_string_prefix(expr).is_some_and(|p| is_exempt_href(&p)) {
+    if allow_empty && matches!(expr, Expression::StringLiteral(l) if l.value.is_empty())
+        || allow_empty
+            && matches!(expr, Expression::TemplateLiteral(t) if t.expressions.is_empty() && t.quasis.iter().all(|q| q.value.raw.is_empty()))
+    {
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_nav_arg(
+                &c.consequent,
+                resolve_locals,
+                semantic,
+                &mut seen.clone(),
+                allow_empty,
+            ) && is_safe_nav_arg(
+                &c.alternate,
+                resolve_locals,
+                semantic,
+                &mut seen.clone(),
+                allow_empty,
+            )
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
-        Expression::NullLiteral(_) => true,
+        Expression::NullLiteral(_) => false,
         Expression::Identifier(id) => {
             if id.name == "undefined" {
-                return true;
+                return false;
             }
             let reference = semantic.scoping().get_reference(id.reference_id());
             let Some(sid) = reference.symbol_id() else {
@@ -456,7 +508,9 @@ fn is_safe_nav_arg<'a>(
                     _ => None,
                 });
             match init {
-                Some(init_expr) => is_safe_nav_arg(init_expr, resolve_locals, semantic, seen),
+                Some(init_expr) => {
+                    is_safe_nav_arg(init_expr, resolve_locals, semantic, seen, allow_empty)
+                }
                 None => false,
             }
         }
@@ -493,6 +547,19 @@ fn is_safe_template_root<'a>(
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_template_root(
+                &c.consequent,
+                resolve_locals,
+                instance_sem,
+                &mut seen.clone(),
+            ) && is_safe_template_root(
+                &c.alternate,
+                resolve_locals,
+                instance_sem,
+                &mut seen.clone(),
+            )
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
         Expression::NullLiteral(_) => true,
         Expression::Identifier(id) => {
@@ -594,6 +661,10 @@ fn is_safe_instance_expr<'a>(
         return true;
     }
     match expr {
+        Expression::ConditionalExpression(c) => {
+            is_safe_instance_expr(&c.consequent, resolve_locals, sem, &mut seen.clone())
+                && is_safe_instance_expr(&c.alternate, resolve_locals, sem, &mut seen.clone())
+        }
         Expression::CallExpression(_) => is_resolve_call(expr, resolve_locals),
         Expression::NullLiteral(_) => true,
         Expression::Identifier(id) => {
