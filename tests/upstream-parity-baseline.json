@@ -634,18 +634,6 @@
     "no-dupe-style-properties/invalid/test01-input.svelte": {
       "diagnostics": "19bc98152226f7c3cdc9ecc77a1cce435329c625d53db200f75c1ee33f186721"
     },
-    "no-dupe-use-directives/invalid/inline-expression-input.svelte": {
-      "diagnostics": "8044cae0e96fe482e72115cb5b8564abcb40655eafb7527ccc2d31c977dd1da8"
-    },
-    "no-dupe-use-directives/invalid/multiple-element-input.svelte": {
-      "diagnostics": "04329001c8f3a20b1036d43ae24ab40562d2677a0893afb125a760ad2640ad01"
-    },
-    "no-dupe-use-directives/invalid/test01-input.svelte": {
-      "diagnostics": "ea60f9ba9a16c402692a70c842ae7af3e6db6dd33bad559accdcbeaf00bf701f"
-    },
-    "no-dupe-use-directives/invalid/test02-input.svelte": {
-      "diagnostics": "1bf07e7d91cb09e6d9136b2def1faea4ceaf36fd9332c50e1d6af5100cb7bb78"
-    },
     "no-dynamic-slot-name/invalid/bool-slot01-input.svelte": {
       "parse_errors": "b24b766d474947e63f8f944d13f38a619eb9b786fa753382034e0bdca1b28471"
     },

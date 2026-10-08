@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 767,
-    "gaps": 468,
+    "pass": 771,
+    "gaps": 464,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1874,7 +1874,7 @@
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 19,
+      "count": 15,
       "rules": {
         "max-lines-per-block": [
           {
@@ -1885,32 +1885,6 @@
           },
           {
             "id": "max-lines-per-block/invalid/template-too-long/template01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-dupe-use-directives": [
-          {
-            "id": "no-dupe-use-directives/invalid/inline-expression-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-dupe-use-directives/invalid/multiple-element-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-dupe-use-directives/invalid/test01-input.svelte",
-            "dimensions": [
-              "diagnostics"
-            ]
-          },
-          {
-            "id": "no-dupe-use-directives/invalid/test02-input.svelte",
             "dimensions": [
               "diagnostics"
             ]
@@ -3305,7 +3279,7 @@
       }
     },
     "diagnostics": {
-      "count": 201,
+      "count": 197,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3318,7 +3292,6 @@
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
         "no-dupe-style-properties": 2,
-        "no-dupe-use-directives": 4,
         "no-dynamic-slot-name": 4,
         "no-export-load-in-svelte-module-in-kit-pages": 4,
         "no-goto-without-base": 3,
