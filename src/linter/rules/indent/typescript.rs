@@ -164,7 +164,10 @@ pub(super) fn apply_node(
                 })
                 .unwrap_or(first);
             layout.set(first, 1, anchor);
-            if let Some(second) = layout.after(first) {
+            if let Some(second) = layout
+                .after(first)
+                .filter(|&i| layout.tokens[i].span.end <= span.end)
+            {
                 layout.set(second, 1, anchor);
             }
             if let Some(before) = layout.before(first) {
@@ -294,9 +297,14 @@ pub(super) fn apply_node(
                 property(layout, span, key, true, None);
             }
             if let Some(ty) = &n.type_annotation {
-                if let (Some(last), Some(end)) =
+                if let (Some(mut last), Some(end)) =
                     (layout.last(key), layout.first(shifted(ty.span, base)))
                 {
+                    if n.computed {
+                        if let Some(close) = layout.after(last) {
+                            last = close;
+                        }
+                    }
                     range(layout, last + 1, end, 1, first);
                 }
             } else if n.optional {
@@ -621,10 +629,20 @@ pub(super) fn apply_node(
             if let Some(end) = layout.first(shifted(n.id.span, base)) {
                 range(layout, first + 1, end, 1, first);
             }
+            // OXC includes the trailing semicolon in this declaration span;
+            // ESTree leaves it between declarations at the script's level.
+            semicolon(layout, span, first);
         }
         AstKind::TSTemplateLiteralType(n) => {
             for q in n.quasis.iter().skip(1) {
-                child(layout, shifted(q.span, base), 0, first);
+                let raw = shifted(q.span, base);
+                if let Some(i) = layout
+                    .tokens
+                    .iter()
+                    .position(|t| !t.comment && t.span.start <= raw.start && raw.start < t.span.end)
+                {
+                    layout.set(i, 0, first);
+                }
             }
             for t in &n.types {
                 child(layout, shifted(t.span(), base), 1, first);
@@ -734,7 +752,20 @@ pub(super) fn apply_node(
         | AstKind::TSBigIntKeyword(_) => {}
         _ => return false,
     }
-    semicolon(layout, span, first);
+    if matches!(
+        kind,
+        AstKind::TSTypeAliasDeclaration(_)
+            | AstKind::TSCallSignatureDeclaration(_)
+            | AstKind::TSConstructSignatureDeclaration(_)
+            | AstKind::TSImportEqualsDeclaration(_)
+            | AstKind::TSEnumMember(_)
+            | AstKind::TSPropertySignature(_)
+            | AstKind::TSIndexSignature(_)
+            | AstKind::TSMethodSignature(_)
+            | AstKind::AccessorProperty(_)
+    ) {
+        semicolon(layout, span, first);
+    }
     true
 }
 
@@ -810,11 +841,96 @@ fn decorators(
                 {
                     layout.set(after, 0, first);
                 }
-            } else if let Some(p) = layout.first(shifted(parent.span(), base)) {
+            } else if let Some(mut p) = layout.first(shifted(parent.span(), base)) {
+                // OXC class spans exclude decorators. For exported classes,
+                // the declaration's indentation belongs to the export token.
+                if matches!(parent, AstKind::Class(_)) {
+                    if let Some(before) = layout.before(p) {
+                        if layout.text(before) == "export" {
+                            p = before;
+                        } else if layout.text(before) == "default" {
+                            if let Some(export) = layout.before(before) {
+                                if layout.text(export) == "export" {
+                                    p = export;
+                                }
+                            }
+                        }
+                    }
+                }
                 layout.copy(first, p);
             }
         } else if let Some(anchor) = layout.first(shifted(d.span, base)) {
             layout.set(first, 0, anchor);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintContext, Rule, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+    use serde_json::json;
+
+    fn fixed(source: &str) -> String {
+        let allocator = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &allocator);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let config = RuleConfig {
+            options: Some(json!([{"indent":2,"indentScript":true}])),
+            ..Default::default()
+        };
+        let mut ctx = LintContext::with_config(&parsed.ast, source, config);
+        ctx.file_path = Some("Unicode.svelte".into());
+        super::super::Indent.run(&mut ctx);
+        let diagnostics = ctx.into_diagnostics();
+        let mut output = source.to_owned();
+        for diagnostic in diagnostics.into_iter().rev() {
+            let fix = diagnostic
+                .fix
+                .expect("indentation diagnostic must have a fix");
+            let old = &source[fix.span.start as usize..fix.span.end as usize];
+            assert!(old.chars().all(char::is_whitespace));
+            output.replace_range(
+                fix.span.start as usize..fix.span.end as usize,
+                &fix.replacement,
+            );
+        }
+        output
+    }
+
+    #[test]
+    fn preserves_unicode_and_type_syntax_while_indenting_members() {
+        let source =
+            "<!-- 😀 -->\n<script lang=\"ts\">\ntype Label = {\nname:\nstring;\n};\n</script>";
+        let expected="<!-- 😀 -->\n<script lang=\"ts\">\n  type Label = {\n    name:\n      string;\n  };\n</script>";
+        assert_eq!(fixed(source), expected);
+        assert_eq!(fixed(expected), expected);
+    }
+
+    #[test]
+    fn anchors_mapped_keys_and_constraints_independently() {
+        let source="<script lang=\"ts\">\ntype Flags = {\n[\nkey in\nkeyof Model\n]:\nboolean\n};\n</script>";
+        let expected="<script lang=\"ts\">\n  type Flags = {\n    [\n      key in\n        keyof Model\n    ]:\n    boolean\n  };\n</script>";
+        assert_eq!(fixed(source), expected);
+        assert_eq!(fixed(expected), expected);
+    }
+
+    #[test]
+    fn aligns_exported_decorators_and_template_type_delimiters() {
+        let source="<script lang=\"ts\">\n@decorate\nexport class Box {}\ntype Name = `hello${\nstring\n}`;\n</script>";
+        let expected="<script lang=\"ts\">\n  @decorate\n  export class Box {}\n  type Name = `hello${\n    string\n  }`;\n</script>";
+        assert_eq!(fixed(source), expected);
+        assert_eq!(fixed(expected), expected);
+    }
+
+    #[test]
+    fn keeps_a_following_declaration_outside_a_single_token_predicate_annotation() {
+        let source="<script lang=\"ts\">\ntype Check = (value: unknown) => value is string;\ntype Next = [\nnumber\n];\n</script>";
+        let expected="<script lang=\"ts\">\n  type Check = (value: unknown) => value is string;\n  type Next = [\n    number\n  ];\n</script>";
+        assert_eq!(fixed(source), expected);
+        assert_eq!(fixed(expected), expected);
     }
 }
