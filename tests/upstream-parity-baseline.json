@@ -384,12 +384,6 @@
     "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte": {
       "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
     },
-    "no-at-debug-tags/invalid/debug01-input.svelte": {
-      "suggestions": "bc96dab2ebfa78a7d3c2791ebc5242946cd71b842a45957b0b129d37284cf1d0"
-    },
-    "no-at-debug-tags/invalid/debug02-input.svelte": {
-      "suggestions": "bc96dab2ebfa78a7d3c2791ebc5242946cd71b842a45957b0b129d37284cf1d0"
-    },
     "no-bind-value-on-checkable-inputs/invalid/checkbox-bind-value-input.svelte": {
       "unsupported_rule": "8241b18af2d18eeea3d5a562fcf9b58769dd37de44b7b305c67682a91a76cf17"
     },

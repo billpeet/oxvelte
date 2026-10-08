@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 863,
-    "gaps": 372,
+    "pass": 865,
+    "gaps": 370,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -2548,22 +2548,8 @@
     {
       "id": "suggestions",
       "label": "Suggestions are the remaining blocker",
-      "count": 6,
+      "count": 4,
       "rules": {
-        "no-at-debug-tags": [
-          {
-            "id": "no-at-debug-tags/invalid/debug01-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          },
-          {
-            "id": "no-at-debug-tags/invalid/debug02-input.svelte",
-            "dimensions": [
-              "suggestions"
-            ]
-          }
-        ],
         "no-extra-reactive-curlies": [
           {
             "id": "no-extra-reactive-curlies/invalid/test01-input.svelte",
@@ -2684,10 +2670,9 @@
       }
     },
     "suggestions": {
-      "count": 17,
+      "count": 15,
       "rules": {
         "no-add-event-listener": 2,
-        "no-at-debug-tags": 2,
         "no-extra-reactive-curlies": 2,
         "no-reactive-functions": 1,
         "no-reactive-literals": 1,
