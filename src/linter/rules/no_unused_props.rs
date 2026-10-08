@@ -142,8 +142,9 @@ impl Rule for NoUnusedProps {
             extract_option_patterns(&ctx.config.options, "ignoreTypePatterns");
         let check_imported = get_option_bool(&ctx.config.options, "checkImportedTypes");
 
+        let imported_file = ctx.file_path.clone();
         let resolve_path = if check_imported {
-            ctx.file_path.as_deref()
+            imported_file.as_deref()
         } else {
             None
         };
@@ -185,8 +186,35 @@ impl Rule for NoUnusedProps {
                 })
         });
 
-        for (prop_name, _) in &all_props {
+        for (prop_name, prop_offset) in &all_props {
             if destructured.contains(prop_name.as_str()) {
+                // Passing or spreading the object consumes all its properties.
+                if ctx.source.contains(&format!("{{{}}}", prop_name))
+                    || ctx.source.contains(&format!("...{}", prop_name))
+                {
+                    continue;
+                }
+                if !get_option_bool(&ctx.config.options, "allowUnusedNestedProperties") {
+                    let nested = nested_type_properties(
+                        content,
+                        *prop_offset,
+                        resolve_path,
+                        &ignore_type_patterns,
+                    );
+                    for (sub_name, _) in nested {
+                        if ignore_patterns
+                            .iter()
+                            .any(|p| matches_pattern(&sub_name, p))
+                            || has_prop_access(ctx.source, prop_name, &sub_name)
+                        {
+                            continue;
+                        }
+                        ctx.diagnostic(
+                            format!("'{}' in '{}' is an unused property.", sub_name, prop_name),
+                            report_span,
+                        );
+                    }
+                }
                 continue;
             }
 
@@ -211,6 +239,41 @@ impl Rule for NoUnusedProps {
             ctx.diagnostic("Index signature is unused. Consider using rest operator (...) to capture remaining properties.", report_span);
         }
     }
+}
+
+fn nested_type_properties(
+    content: &str,
+    property_offset: usize,
+    file_path: Option<&str>,
+    ignore_types: &[String],
+) -> Vec<(String, usize)> {
+    let Some(rest) = content.get(property_offset..) else {
+        return Vec::new();
+    };
+    let Some(colon) = rest.find(':') else {
+        return Vec::new();
+    };
+    let rhs = rest[colon + 1..].trim_start();
+    if rhs.starts_with('{') {
+        let mut properties = Vec::new();
+        let brace = property_offset + colon + 1 + rest[colon + 1..].find('{').unwrap();
+        extract_props_from_block(content, brace, &mut properties);
+        return properties;
+    }
+    let name = rhs
+        .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
+        .next()
+        .unwrap_or("");
+    if name.is_empty() || ignore_types.iter().any(|p| matches_pattern(name, p)) {
+        return Vec::new();
+    }
+    let local = extract_type_properties_with_file(content, name, file_path);
+    if !local.is_empty() {
+        return local;
+    }
+    file_path
+        .map(|path| resolve_imported_type_properties(content, name, path))
+        .unwrap_or_default()
 }
 
 fn props_binding_span(ctx: &LintContext<'_>, call_start: u32) -> Option<Span> {
@@ -726,6 +789,54 @@ mod tests {
     use crate::linter::{LintDiagnostic, Linter};
     use crate::parser;
     use oxc::allocator::Allocator;
+
+    #[test]
+    fn destructured_named_types_respect_nested_options() {
+        let source = r#"<script lang="ts">
+            interface Details { used: string; hidden: string; _internal: string; }
+            interface Props { details: Details; ignored: Details; unused: string; }
+            let { details, ignored }: Props = $props();
+            console.log(details.used);
+        </script>"#;
+        let allocator = Allocator::default();
+        let parsed = parser::parse(source, &allocator);
+        for (options, expected) in [
+            (
+                serde_json::json!([{"ignorePropertyPatterns": ["/^_/"], "ignoreTypePatterns": ["Details"]}]),
+                vec!["'unused' is an unused Props property."],
+            ),
+            (
+                serde_json::json!([{"ignorePropertyPatterns": ["/^_/"]}]),
+                vec![
+                    "'hidden' in 'details' is an unused property.",
+                    "'used' in 'ignored' is an unused property.",
+                    "'hidden' in 'ignored' is an unused property.",
+                    "'unused' is an unused Props property.",
+                ],
+            ),
+            (
+                serde_json::json!([{"allowUnusedNestedProperties": true}]),
+                vec!["'unused' is an unused Props property."],
+            ),
+        ] {
+            let diagnostics = Linter::all().lint_with_config(
+                &parsed.ast,
+                source,
+                crate::linter::RuleConfig {
+                    options: Some(options),
+                    ..Default::default()
+                },
+            );
+            assert_eq!(
+                diagnostics
+                    .iter()
+                    .filter(|d| d.rule_name == "svelte/no-unused-props")
+                    .map(|d| d.message.as_str())
+                    .collect::<Vec<_>>(),
+                expected
+            );
+        }
+    }
 
     fn lint(source: &str) -> Vec<LintDiagnostic> {
         let allocator = Allocator::default();

@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 709,
-    "gaps": 526,
+    "pass": 710,
+    "gaps": 525,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -1589,7 +1589,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 55,
+      "count": 54,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1891,15 +1891,6 @@
           },
           {
             "id": "no-top-level-browser-globals/invalid/guards08-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics"
-            ]
-          }
-        ],
-        "no-unused-props": [
-          {
-            "id": "no-unused-props/invalid/custom-config-combination-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics"
@@ -3687,7 +3678,7 @@
       }
     },
     "diagnostics": {
-      "count": 259,
+      "count": 258,
       "rules": {
         "block-lang": 2,
         "consistent-selector-style": 5,
@@ -3716,7 +3707,6 @@
         "no-top-level-browser-globals": 3,
         "no-unknown-style-directive-property": 2,
         "no-unnecessary-state-wrap": 4,
-        "no-unused-props": 1,
         "no-unused-svelte-ignore": 18,
         "no-useless-mustaches": 6,
         "prefer-class-directive": 10,
@@ -3759,7 +3749,7 @@
       }
     },
     "diagnostic_count": {
-      "count": 91,
+      "count": 90,
       "rules": {
         "consistent-selector-style": 4,
         "derived-has-same-inputs-outputs": 1,
@@ -3772,7 +3762,6 @@
         "no-reactive-reassign": 1,
         "no-shorthand-style-property-overrides": 1,
         "no-top-level-browser-globals": 2,
-        "no-unused-props": 1,
         "no-unused-svelte-ignore": 18,
         "prefer-class-directive": 2,
         "prefer-style-directive": 3,

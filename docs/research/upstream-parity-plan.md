@@ -28,7 +28,7 @@ Keep these commits separate. Their listed case sets do not overlap, and they giv
 | --- | --- | ---: | --- |
 | 1, complete | Fix reactivity checks for default-exported bindings | 1 | `prefer-svelte-reactivity` matches all 79 cases in strict mode. |
 | 2, complete | Align unused-props diagnostic locations | 19 | The 19 location-only cases match; all 56 valid cases remain clean. |
-| 3 | Fix unused-props custom option combinations | 1 | The remaining invalid case reports all three expected findings, at the expected locations. |
+| 3, complete | Fix unused-props custom option combinations | 1 | The remaining invalid case reports all three expected findings, at the expected locations. |
 | 4 | Align navigation diagnostic argument locations | 29 | The 29 location-only navigation cases match, without changing which calls or links are flagged. |
 | 5 | Fix navigation nullish and literal link handling | 2 | `link-nullish-like-literal01` and valid `link-nullish02` match. |
 | 6 | Fix navigation branches and operators | 10 | Eight ternary cases and two invalid-operator cases match. |
@@ -85,3 +85,5 @@ cargo test --locked
 ```
 
 Treat the generated case inventory as current data. This document records the original commit order and counts; annotate completed batches or revise the order when new evidence changes the diagnosis.
+
+Commit 3 checks named nested types on destructured props, including imported types when enabled, and applies nested type/property exclusions. All 76 unused-props cases now pass in strict mode. The full suite has 710 matches, 525 gaps and 64 version skips.

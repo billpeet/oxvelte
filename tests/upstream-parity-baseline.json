@@ -1087,10 +1087,6 @@
       "diagnostics": "8eea2847623d5ed40fe4834204a0051f53da2da38f5170fca9f4a09ed68c5110",
       "suggestion_capability": "a603404b2b4cd4aeb7b1e8c1d25b89df537c961979c1b418c498a1ca260d3ca3"
     },
-    "no-unused-props/invalid/custom-config-combination-input.svelte": {
-      "diagnostic_count": "eec66b2fc2eba7d68624d63ce2ff558bc279d24171d0454d2b0eddf9aa742e6b",
-      "diagnostics": "39d82e15040c9226a78e019364b6229b04a8b17088d559669ce0431aa37d8505"
-    },
     "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
       "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
