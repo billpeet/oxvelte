@@ -7,6 +7,77 @@ use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion
 use serde_json::json;
 
 #[test]
+fn type_aware_fixture_configuration_uses_the_imported_suite_project() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("fixtures/upstream/eslint-plugin-svelte");
+    let manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(root.join("manifest.json")).unwrap())
+            .unwrap();
+    let rule = "@typescript-eslint/no-unnecessary-condition";
+    let cases: Vec<_> = manifest["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|case| case["rule"] == rule)
+        .collect();
+    assert_eq!(cases.len(), 7);
+    let expected = root.join("tests/fixtures/rules/tsconfig.json");
+    let project: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&expected).unwrap()).unwrap();
+    assert_eq!(project["compilerOptions"]["strict"], true);
+    for case in cases {
+        let settings = parity::fixture_settings(&case["config"], None, &root, rule).unwrap();
+        assert_eq!(
+            settings["typescript"]["project"],
+            expected.to_string_lossy().replace('\\', "/")
+        );
+    }
+    assert_eq!(
+        parity::fixture_settings(&json!({}), None, &root, "require-each-key"),
+        None
+    );
+}
+
+#[test]
+fn explicit_typescript_projects_resolve_paths_and_preserve_other_settings() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let absolute = root.join("separate/tsconfig.json");
+    let config = json!({
+        "settings": {"typescript": {"strictNullChecks": true}, "svelte": {"ignoreWarnings": ["test"]}},
+        "languageOptions": {"parserOptions": {"project": ["custom/tsconfig.json", absolute]}}
+    });
+    let settings = parity::fixture_settings(
+        &config,
+        None,
+        root,
+        "@typescript-eslint/no-unnecessary-condition",
+    )
+    .unwrap();
+    assert_eq!(
+        settings["typescript"]["project"],
+        json!([
+            root.join("custom/tsconfig.json")
+                .to_string_lossy()
+                .replace('\\', "/"),
+            absolute.to_string_lossy().replace('\\', "/")
+        ])
+    );
+    assert_eq!(settings["typescript"]["strictNullChecks"], true);
+    assert_eq!(settings["svelte"]["ignoreWarnings"], json!(["test"]));
+    let disabled = json!({"languageOptions": {"parserOptions": {"project": false}}});
+    assert_eq!(
+        parity::fixture_settings(
+            &disabled,
+            None,
+            root,
+            "@typescript-eslint/no-unnecessary-condition"
+        )
+        .unwrap()["typescript"]["project"],
+        false
+    );
+}
+
+#[test]
 fn compiler_configuration_preserves_settings_and_executable_module_paths() {
     let config = json!({
         "settings": {"svelte": {"ignoreWarnings": ["example"]}, "compiler": {"customElement": true}},

@@ -180,7 +180,8 @@ fn rule_config(root: &Path, case: &Case, issues: &mut Issues) -> Result<RuleConf
     } else {
         None
     };
-    let settings = parity::compiler_settings(&case.config, executable_path.as_deref());
+    let settings =
+        parity::fixture_settings(&case.config, executable_path.as_deref(), root, &case.rule);
     if let Some(language) = case.config.get("languageOptions") {
         if let Some(parser_options) = language.get("parserOptions") {
             if let Some(svelte_config) = parser_options.get("svelteConfig") {
@@ -196,6 +197,8 @@ fn rule_config(root: &Path, case: &Case, issues: &mut Issues) -> Result<RuleConf
                 o.iter().any(|(key, value)| {
                     key != "svelteConfig"
                         && !(compiler_rule && key == "parser" && value == "@babel/eslint-parser")
+                        && !(case.rule == "@typescript-eslint/no-unnecessary-condition"
+                            && key == "project")
                 })
             }) {
                 issues.insert("parser_configuration".into(), parser_options.clone());

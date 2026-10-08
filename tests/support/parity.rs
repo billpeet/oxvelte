@@ -2,8 +2,51 @@ use oxvelte::linter::{Fix, LintDiagnostic};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
+use std::path::Path;
 
 pub type Signatures = BTreeMap<String, BTreeMap<String, String>>;
+
+/// The imported manifest contains per-case configuration. Type-aware suites also
+/// inherit RULES_PROJECT from their RuleTester, which points to this unchanged
+/// corpus tsconfig. Forward that default only for rules which query types.
+pub fn fixture_settings(
+    config: &Value,
+    executable_path: Option<&str>,
+    corpus_root: &Path,
+    rule: &str,
+) -> Option<Value> {
+    let mut settings = compiler_settings(config, executable_path);
+    if rule != "@typescript-eslint/no-unnecessary-condition" {
+        return settings;
+    }
+    let project = config
+        .pointer("/languageOptions/parserOptions/project")
+        .cloned()
+        .unwrap_or_else(|| json!("tests/fixtures/rules/tsconfig.json"));
+    fn resolve(project: Value, root: &Path) -> Value {
+        match project {
+            Value::String(path) => {
+                let path = Path::new(&path);
+                let resolved = if path.is_absolute() {
+                    path.to_path_buf()
+                } else {
+                    root.join(path)
+                };
+                json!(resolved.to_string_lossy().replace('\\', "/"))
+            }
+            Value::Array(paths) => {
+                Value::Array(paths.into_iter().map(|path| resolve(path, root)).collect())
+            }
+            other => other,
+        }
+    }
+    let value = settings.get_or_insert_with(|| json!({}));
+    if value.get("typescript").is_none() {
+        value["typescript"] = json!({});
+    }
+    value["typescript"]["project"] = resolve(project, corpus_root);
+    settings
+}
 
 /// Preserve compiler settings without serializing executable callback functions.
 /// The runtime loads the hashed fixture module at the supplied absolute path.
