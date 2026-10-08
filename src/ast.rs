@@ -339,6 +339,9 @@ pub struct DebugTag<'a> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ConstTag<'a> {
+    /// Declaration body without the `const` keyword, shared by legacy
+    /// `{@const ...}` and modern `{const ...}` tags. The source at `span`
+    /// distinguishes their syntax; `declaration_span` always covers the body.
     pub declaration: String,
     pub span: Span,
     #[serde(skip)]

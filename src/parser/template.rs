@@ -1541,7 +1541,7 @@ impl<'a> TemplateParser<'a> {
             self.parse_raw_mustache().map(FragmentStep::Node)
         } else if self.looking_at_special_tag("debug") {
             self.parse_debug_tag().map(FragmentStep::Node)
-        } else if self.looking_at_special_tag("const") {
+        } else if self.const_tag_keyword_end().is_some() {
             self.parse_const_tag().map(FragmentStep::Node)
         } else if self.looking_at_special_tag("render") {
             self.parse_render_tag().map(FragmentStep::Node)
@@ -2345,21 +2345,65 @@ impl<'a> TemplateParser<'a> {
 
     fn parse_const_tag(&mut self) -> Result<TemplateNode<'a>, OxcDiagnostic> {
         let start = self.pos as u32;
-        self.eat("{@const")?;
+        let keyword_end = self.const_tag_keyword_end().expect("const tag dispatch");
+        let legacy = self.source[self.pos + 1..keyword_end]
+            .trim_start()
+            .starts_with('@');
+        self.pos = keyword_end;
         self.skip_whitespace();
         let declaration_start = self.pos as u32;
         let declaration = self.read_expression()?;
         let declaration_span = Span::new(declaration_start, self.pos as u32);
-        if let Some(message) = const_tag_declaration_diagnostic(&declaration) {
-            self.report_error(message);
+        if legacy {
+            if let Some(message) = const_tag_declaration_diagnostic(&declaration) {
+                self.report_error(message);
+            }
+        } else {
+            let wrapped = self.allocator.alloc_str(&format!("const {declaration}"));
+            let parsed =
+                oxc::parser::Parser::new(self.allocator, wrapped, oxc::span::SourceType::ts())
+                    .parse();
+            self.extend_expression_syntax_errors(parsed.errors, declaration_span, 6);
+            if parsed.program.body.len() != 1
+                || !matches!(
+                    parsed.program.body.first(),
+                    Some(oxc::ast::ast::Statement::VariableDeclaration(_))
+                )
+            {
+                self.report_error("Expected a const declaration in declaration tag");
+            }
         }
         self.eat("}")?;
+        self.record_template_tag(Span::new(start, self.pos as u32), true, true);
         Ok(TemplateNode::ConstTag(ConstTag {
             _phantom: PhantomData,
             declaration,
             span: Span::new(start, self.pos as u32),
             declaration_span,
         }))
+    }
+
+    /// Retain the existing declaration AST and source offsets for both syntaxes.
+    fn const_tag_keyword_end(&self) -> Option<usize> {
+        let remaining = self.source[self.pos..].strip_prefix('{')?;
+        let body = remaining.trim_start();
+        let prefix = if body.starts_with("@const") {
+            "@const"
+        } else {
+            "const"
+        };
+        let after = body.strip_prefix(prefix)?;
+        if after
+            .chars()
+            .next()
+            .is_some_and(|ch| ch.is_alphanumeric() || ch == '_' || ch == '$')
+        {
+            return None;
+        }
+        if prefix == "@const" && !after.chars().next().is_none_or(char::is_whitespace) {
+            return None;
+        }
+        Some(self.pos + 1 + remaining.len() - body.len() + prefix.len())
     }
 
     fn parse_render_tag(&mut self) -> Result<TemplateNode<'a>, OxcDiagnostic> {
@@ -3235,7 +3279,12 @@ impl<'a> TemplateParser<'a> {
         const_allowed: bool,
     ) {
         match node {
-            TemplateNode::ConstTag(_) if !const_allowed => {
+            TemplateNode::ConstTag(tag)
+                if !const_allowed
+                    && self.source[tag.span.start as usize + 1..tag.span.end as usize]
+                        .trim_start()
+                        .starts_with("@const") =>
+            {
                 self.report_error(const_tag_invalid_placement_message());
             }
             TemplateNode::Element(element) => {
@@ -9785,6 +9834,95 @@ mod tests {
                 _ => panic!("expected normal attribute"),
             },
             _ => panic!("expected Element"),
+        }
+    }
+}
+
+#[cfg(test)]
+mod modern_const_tag_tests {
+    use crate::{ast::TemplateNode, parser};
+    use oxc::allocator::Allocator;
+
+    #[test]
+    fn modern_const_declarations_preserve_source_spans_and_multiple_bindings() {
+        let source = "<!-- 😀 -->{#if ready}{ const /* keep */ first = 1, second = { text: '}' } }{const{ value } = object}{constellation}{/if}";
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let TemplateNode::IfBlock(block) = &parsed.ast.html.nodes[1] else {
+            panic!("if block")
+        };
+        for node in &block.consequent.nodes[..2] {
+            let TemplateNode::ConstTag(tag) = node else {
+                panic!("const declaration")
+            };
+            assert_eq!(
+                &source[tag.declaration_span.start as usize..tag.declaration_span.end as usize],
+                tag.declaration
+            );
+            assert!(source[tag.span.start as usize..tag.span.end as usize].starts_with('{'));
+        }
+        assert!(
+            matches!(&block.consequent.nodes[2], TemplateNode::MustacheTag(tag) if tag.expression == "constellation")
+        );
+    }
+
+    #[test]
+    fn modern_const_keeps_declaration_syntax_errors() {
+        for (source, expected) in [
+            ("{const value = }", "Unexpected token"),
+            ("{const value = other + }", "Unexpected token"),
+            ("{const value}", "Missing initializer"),
+            ("{const value = 1; call()}", "Expected a const declaration"),
+        ] {
+            let alloc = Allocator::default();
+            for parsed in [
+                parser::parse(source, &alloc),
+                parser::parse_for_lint(source, &alloc),
+            ] {
+                assert!(
+                    parsed
+                        .errors
+                        .iter()
+                        .any(|error| error.message.contains(expected)),
+                    "{source}: {:?}",
+                    parsed.errors
+                );
+                assert!(
+                    parsed
+                        .errors
+                        .iter()
+                        .all(|error| !error.message.contains("immediate child")),
+                    "syntax must not be masked by placement: {source}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn modern_declarations_are_allowed_at_root_and_inside_regular_elements() {
+        // Svelte 5.56 DeclarationTag.js has no legacy ConstTag parent check.
+        for source in [
+            "<svelte:options runes={true} />{const value = $derived(count)}<p>{value}</p>",
+            "<svelte:options runes={true} /><div>{ const value = $derived(count) }{value}</div>",
+        ] {
+            let alloc = Allocator::default();
+            let parsed = parser::parse(source, &alloc);
+            assert!(parsed.errors.is_empty(), "{source}: {:?}", parsed.errors);
+        }
+        for source in [
+            "{@const value = count}",
+            "<div>{@const value = count}</div>",
+        ] {
+            let alloc = Allocator::default();
+            let parsed = parser::parse(source, &alloc);
+            assert!(
+                parsed
+                    .errors
+                    .iter()
+                    .any(|error| error.message.contains("immediate child")),
+                "legacy placement remains checked: {source}"
+            );
         }
     }
 }
