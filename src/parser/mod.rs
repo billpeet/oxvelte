@@ -26,6 +26,22 @@ pub struct ParseResult<'a> {
 /// pre-parsed template-expression AST nodes attached to the returned
 /// `SvelteAst` — it must outlive the result.
 pub fn parse<'a>(source: &'a str, allocator: &'a Allocator) -> ParseResult<'a> {
+    parse_with_mode(source, allocator, template::ValidationMode::Compiler)
+}
+
+/// Parse a component for linting. Keeps syntax and structural errors, but leaves
+/// compiler-only placement and attribute constraints to lint rules. This lets
+/// rules inspect constructs such as dynamic slots and invalid binding targets.
+/// Use [`parse`] when compiler-oriented validation is required.
+pub fn parse_for_lint<'a>(source: &'a str, allocator: &'a Allocator) -> ParseResult<'a> {
+    parse_with_mode(source, allocator, template::ValidationMode::Lint)
+}
+
+fn parse_with_mode<'a>(
+    source: &'a str,
+    allocator: &'a Allocator,
+    mode: template::ValidationMode,
+) -> ParseResult<'a> {
     // Match Svelte's `Parser` constructor: trailing whitespace on the
     // template is dropped before parsing. Spans are byte offsets into the
     // trimmed view (same byte positions as the original up to the trim
@@ -61,7 +77,7 @@ pub fn parse<'a>(source: &'a str, allocator: &'a Allocator) -> ParseResult<'a> {
         content_span: r.content_span,
     });
 
-    let (mut html, template_errors) = template::parse_fragment_with_errors(trimmed, allocator);
+    let (mut html, template_errors) = template::parse_fragment_with_mode(trimmed, allocator, mode);
     errors.extend(template_errors);
 
     // Post-pass: parse every attribute expression's text into a typed AST so

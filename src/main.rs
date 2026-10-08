@@ -213,7 +213,7 @@ fn cmd_lint(
             let diags = if is_svelte {
                 match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     let alloc = oxc::allocator::Allocator::default();
-                    let result = parser::parse(&source, &alloc);
+                    let result = parser::parse_for_lint(&source, &alloc);
                     lint.lint_with_project_config_and_path(
                         &result.ast,
                         &source,

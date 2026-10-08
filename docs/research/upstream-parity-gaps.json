@@ -9,8 +9,8 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 851,
-    "gaps": 384,
+    "pass": 861,
+    "gaps": 374,
     "versionSkip": 64
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
@@ -960,8 +960,7 @@
           {
             "id": "no-unused-svelte-ignore/valid/has-error-svelte4-input.svelte",
             "dimensions": [
-              "compiler_capability",
-              "parse_errors"
+              "compiler_capability"
             ]
           },
           {
@@ -1363,222 +1362,11 @@
     {
       "id": "parser",
       "label": "Parser/compiler validation differences",
-      "count": 27,
+      "count": 1,
       "rules": {
-        "no-dynamic-slot-name": [
-          {
-            "id": "no-dynamic-slot-name/invalid/bool-slot01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/literal-slot01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/multi-report01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-dynamic-slot-name/invalid/var-slot01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          }
-        ],
-        "no-not-function-handler": [
-          {
-            "id": "no-not-function-handler/valid/bind01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          }
-        ],
-        "no-restricted-html-elements": [
-          {
-            "id": "no-restricted-html-elements/valid/array-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-restricted-html-elements/valid/object-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          }
-        ],
-        "no-spaces-around-equal-signs-in-attribute": [
-          {
-            "id": "no-spaces-around-equal-signs-in-attribute/invalid/test01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "no-spaces-around-equal-signs-in-attribute/valid/test-01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          }
-        ],
         "require-store-reactive-access": [
           {
-            "id": "require-store-reactive-access/invalid/svelte-element01-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
             "id": "require-store-reactive-access/valid/directives-store01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          }
-        ],
-        "sort-attributes": [
-          {
-            "id": "sort-attributes/invalid/default/default-test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix1-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix2-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix3-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/default/default-test01fix4-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix1-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix2-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix3-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix4-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix5-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix6-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/invalid/order/test01fix7-input.svelte",
-            "dimensions": [
-              "diagnostics",
-              "fix_output",
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/valid/default/default-test01-input.svelte",
-            "dimensions": [
-              "parse_errors"
-            ]
-          },
-          {
-            "id": "sort-attributes/valid/order/test01-input.svelte",
             "dimensions": [
               "parse_errors"
             ]
@@ -1589,7 +1377,7 @@
     {
       "id": "diagnostic-count",
       "label": "Diagnostic count differences",
-      "count": 28,
+      "count": 36,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1643,22 +1431,6 @@
         "mustache-spacing": [
           {
             "id": "mustache-spacing/invalid/always-after-expression/test01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "mustache-spacing/invalid/snippet-render01-input.svelte",
-            "dimensions": [
-              "diagnostic_count",
-              "diagnostics",
-              "fix_output"
-            ]
-          },
-          {
-            "id": "mustache-spacing/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostic_count",
               "diagnostics",
@@ -1830,6 +1602,86 @@
               "diagnostics",
               "fix_output"
             ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix1-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix2-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/default/default-test01fix3-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix1-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix2-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix3-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix4-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix5-input.svelte",
+            "dimensions": [
+              "diagnostic_count",
+              "diagnostics",
+              "fix_output"
+            ]
           }
         ]
       }
@@ -1837,7 +1689,7 @@
     {
       "id": "diagnostic-message",
       "label": "Same count, different messages",
-      "count": 12,
+      "count": 14,
       "rules": {
         "max-lines-per-block": [
           {
@@ -1896,6 +1748,13 @@
             ]
           },
           {
+            "id": "sort-attributes/invalid/default/default-test01fix4-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
             "id": "sort-attributes/invalid/default/let-test-input.svelte",
             "dimensions": [
               "diagnostics",
@@ -1904,6 +1763,13 @@
           },
           {
             "id": "sort-attributes/invalid/ignore-no-order-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix6-input.svelte",
             "dimensions": [
               "diagnostics",
               "fix_output"
@@ -1929,7 +1795,7 @@
     {
       "id": "diagnostic-location",
       "label": "Same messages, different locations/order",
-      "count": 89,
+      "count": 95,
       "rules": {
         "consistent-selector-style": [
           {
@@ -1984,6 +1850,35 @@
             "id": "no-dupe-style-properties/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics"
+            ]
+          }
+        ],
+        "no-dynamic-slot-name": [
+          {
+            "id": "no-dynamic-slot-name/invalid/literal-slot01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/multi-report01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/recursive-loop01-input.svelte",
+            "dimensions": [
+              "diagnostics"
+            ]
+          },
+          {
+            "id": "no-dynamic-slot-name/invalid/var-slot01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
             ]
           }
         ],
@@ -2462,6 +2357,13 @@
             ]
           },
           {
+            "id": "require-store-reactive-access/invalid/svelte-element01-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
             "id": "require-store-reactive-access/invalid/test01-input.svelte",
             "dimensions": [
               "diagnostics",
@@ -2542,6 +2444,13 @@
           },
           {
             "id": "sort-attributes/invalid/ignore-no-order-with-spread-test-input.svelte",
+            "dimensions": [
+              "diagnostics",
+              "fix_output"
+            ]
+          },
+          {
+            "id": "sort-attributes/invalid/order/test01fix7-input.svelte",
             "dimensions": [
               "diagnostics",
               "fix_output"
@@ -2727,14 +2636,14 @@
       }
     },
     "diagnostics": {
-      "count": 173,
+      "count": 171,
       "rules": {
         "consistent-selector-style": 5,
         "derived-has-same-inputs-outputs": 1,
         "experimental-require-slot-types": 1,
         "html-closing-bracket-new-line": 1,
         "max-lines-per-block": 2,
-        "mustache-spacing": 3,
+        "mustache-spacing": 1,
         "no-add-event-listener": 2,
         "no-dom-manipulating": 1,
         "no-dupe-else-if-blocks": 3,
@@ -2766,12 +2675,12 @@
       }
     },
     "diagnostic_count": {
-      "count": 64,
+      "count": 62,
       "rules": {
         "consistent-selector-style": 4,
         "derived-has-same-inputs-outputs": 1,
         "html-closing-bracket-new-line": 1,
-        "mustache-spacing": 3,
+        "mustache-spacing": 1,
         "no-dupe-else-if-blocks": 2,
         "no-dupe-style-properties": 1,
         "no-reactive-reassign": 1,
@@ -2801,9 +2710,9 @@
       }
     },
     "fix_output": {
-      "count": 83,
+      "count": 81,
       "rules": {
-        "mustache-spacing": 3,
+        "mustache-spacing": 1,
         "no-dynamic-slot-name": 3,
         "no-useless-mustaches": 7,
         "prefer-class-directive": 10,
@@ -2812,19 +2721,6 @@
         "shorthand-attribute": 1,
         "shorthand-directive": 1,
         "sort-attributes": 26
-      }
-    },
-    "parse_errors": {
-      "count": 29,
-      "rules": {
-        "no-dynamic-slot-name": 5,
-        "no-not-function-handler": 1,
-        "no-restricted-html-elements": 2,
-        "no-spaces-around-equal-signs-in-attribute": 2,
-        "no-unused-svelte-ignore": 1,
-        "require-store-reactive-access": 2,
-        "sort-attributes": 15,
-        "valid-compile": 1
       }
     },
     "compiler_capability": {
@@ -2839,6 +2735,13 @@
       "rules": {
         "no-useless-mustaches": 2,
         "prefer-const": 3
+      }
+    },
+    "parse_errors": {
+      "count": 2,
+      "rules": {
+        "require-store-reactive-access": 1,
+        "valid-compile": 1
       }
     },
     "executable_configuration": {

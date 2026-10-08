@@ -234,7 +234,7 @@ fn lint_case(
 ) -> Vec<LintDiagnostic> {
     if path.ends_with(".svelte") {
         let alloc = Allocator::default();
-        let result = parser::parse(source, &alloc);
+        let result = parser::parse_for_lint(source, &alloc);
         let mut errors: Vec<_> = result
             .errors
             .iter()
