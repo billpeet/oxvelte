@@ -256,6 +256,8 @@ Full reference — AST shape, `ctx` API, auto-fix, limitations — in [`docs/cus
 
 ## What's implemented
 
+Upstream compatibility is tracked separately with a pinned fixture suite and exact expectations. See [upstream parity](docs/upstream-parity.md) for current gaps and how to run it.
+
 - **78 lint rules** from eslint-plugin-svelte, all ported to Rust
 - **Full Svelte 4 + Svelte 5** template parser (106/106 parser fixture tests)
 - **281 tests passing** (lint rules + parser fixtures)

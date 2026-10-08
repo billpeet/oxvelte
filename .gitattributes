@@ -1,0 +1,4 @@
+# Pinned upstream blobs and hashes must survive Windows Git checkouts unchanged.
+/fixtures/upstream/** -text
+# Parser snapshots contain byte offsets computed from LF source files.
+/fixtures/parser/** text eol=lf

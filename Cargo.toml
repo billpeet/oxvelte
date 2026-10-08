@@ -40,6 +40,12 @@ cssparser = "0.36"
 
 [dev-dependencies]
 insta = { version = "1", features = ["json"] }
+sha2 = "0.10"
+
+[[test]]
+name = "upstream_parity"
+path = "tests/upstream_parity.rs"
+harness = false
 
 [profile.release]
 opt-level = 3

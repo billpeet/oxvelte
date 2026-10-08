@@ -1,0 +1,13 @@
+{
+  "name": "oxvelte-upstream-parity-import",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import": "node import.mjs",
+    "test": "node --test import.test.mjs"
+  },
+  "dependencies": {
+    "semver": "7.7.2",
+    "yaml": "2.8.1"
+  }
+}

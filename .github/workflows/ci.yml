@@ -16,3 +16,26 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --lib
       - run: cargo build --release
+
+  upstream-parity:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: scripts/upstream-parity
+      - run: npm test
+        working-directory: scripts/upstream-parity
+      - run: cargo test --locked --test upstream_adapter
+      - run: cargo test --locked --test upstream_parity -- --report reports/upstream-parity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upstream-parity-${{ matrix.os }}
+          path: reports/upstream-parity.json

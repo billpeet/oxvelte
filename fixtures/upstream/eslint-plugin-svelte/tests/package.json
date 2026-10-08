@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "svelte": "5.49.2"
+  }
+}
