@@ -78,128 +78,11 @@
     "no-inner-declarations/invalid/v8/test01-input.svelte": {
       "version_skip": "e7fb23074757273334488c569c05c9fa6cb6906a0027d226efd467f00f3f55fe"
     },
-    "no-unused-svelte-ignore/invalid/html-comment-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "71660ecc8fb34e969f39df27db74363c2ad44c1026f73b2c7a17e2219ecaa6d9"
-    },
-    "no-unused-svelte-ignore/invalid/html-comment-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "71660ecc8fb34e969f39df27db74363c2ad44c1026f73b2c7a17e2219ecaa6d9"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "35f11b5f9f33c8c8fd7a9c8679bd6c09019964c78744a2f60116b2647586b19f"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore01-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "35f11b5f9f33c8c8fd7a9c8679bd6c09019964c78744a2f60116b2647586b19f"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "35f11b5f9f33c8c8fd7a9c8679bd6c09019964c78744a2f60116b2647586b19f"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore02-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "35f11b5f9f33c8c8fd7a9c8679bd6c09019964c78744a2f60116b2647586b19f"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "73a9de6086f0c7590bbdb817538a49c033cbec72adf305f07ef3dbd5e4465f7a",
-      "diagnostics": "715402ad49ed3bc16f0969ec0a260616906dfc8b142d1cee0611a1b87c41f965"
-    },
-    "no-unused-svelte-ignore/invalid/invalid-svelte-ignore03-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "73a9de6086f0c7590bbdb817538a49c033cbec72adf305f07ef3dbd5e4465f7a",
-      "diagnostics": "715402ad49ed3bc16f0969ec0a260616906dfc8b142d1cee0611a1b87c41f965"
-    },
-    "no-unused-svelte-ignore/invalid/missing-code-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/invalid/script-comment01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "7643ac7084c890a27f660ae796e5d1a2de03fb3f9ffefd75b8654aa1938c3cc0"
-    },
-    "no-unused-svelte-ignore/invalid/script-comment01-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "dc7c6e64360cf654255ca0200b59f6801b5e2426e7528ae6bc646860a8a1dd5d",
-      "diagnostics": "5b3a3c06f2a0e186e33f6de825ea62405155cd6fedc5efc268a4c54c22b2ee91"
-    },
     "no-unused-svelte-ignore/invalid/script-comment02-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "no-unused-svelte-ignore/invalid/style-lang01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/style-lang02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/style-lang03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/style-lang04-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/style-lang05-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/style-lang06-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "3abe8afba2d440c62e86f9d54460e063c905f9202dad04b5c9e58a6d131f3306"
-    },
-    "no-unused-svelte-ignore/invalid/transform-test-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "92a356c4eaf2a468cf2d857195c68273677d6232530a092e2da7333c095ed3cd"
-    },
-    "no-unused-svelte-ignore/invalid/transform-test-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "92a356c4eaf2a468cf2d857195c68273677d6232530a092e2da7333c095ed3cd"
-    },
-    "no-unused-svelte-ignore/valid/element-ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/element-ignore01-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/has-error-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/html-comment-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/html-comment-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/ignore-js-input.js": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/kebab-ignore-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "no-unused-svelte-ignore/valid/reactive-component-input.svelte": {
       "version_skip": "3ad1267f8ee1684751d4590b03b7b2aaa44d9557ce39d506934133f95068af3c"
-    },
-    "no-unused-svelte-ignore/valid/script-comment-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "no-unused-svelte-ignore/valid/script-comment-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
@@ -222,63 +105,6 @@
     "no-unused-svelte-ignore/valid/style-lang06-input.svelte": {
       "version_skip": "86955217615fb1768b86e9406cf3e7f606c4fda8299176a3770e88a2e0428a02"
     },
-    "no-unused-svelte-ignore/valid/style-lang07-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore-comma-separated-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore-note-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore01-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore02-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore03-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore04-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore04-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore05-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore05-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore06-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore06-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore07-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/svelte-ignore07-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/ts-lang01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "require-event-dispatcher-types/invalid/import-alias01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
@@ -297,47 +123,17 @@
     "require-store-reactive-access/invalid/calc01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/invalid/a11y01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "f61e3daa789cbfbd831df2853c6f4f253298dc729d539a9ab82cd0d0f5e6f49c"
-    },
     "valid-compile/invalid/a11y01-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/invalid/custom_element_props_identifier-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "00153f6bc6036ed5c7813cec3e2aada437638696a69b7738610a7e084a5b0c59"
     },
     "valid-compile/invalid/dyamic-slot01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/invalid/experimental-async-disabled/top-level-await-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "0858a74152fbd4728e4ee0f754be984873ff885a1105128acdfa40749daa317a"
-    },
-    "valid-compile/invalid/invalid-svelte-ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "571c580c4481418fb4416639ea7a59c0c29cb8e598644bcc7bc53a2a650ce0a3"
-    },
     "valid-compile/invalid/invalid-svelte-ignore01-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/invalid/invalid-svelte-ignore02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "639236e62b7c1e35a528763364d540bc8e12e7ad5067396a53480e846177ab22",
-      "diagnostics": "571c580c4481418fb4416639ea7a59c0c29cb8e598644bcc7bc53a2a650ce0a3"
-    },
     "valid-compile/invalid/invalid-svelte-ignore02-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/invalid/invalid-svelte-ignore03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "d1487e8cc0d4155ffca386dd92f6c27909f907dc649ccdc069d74629db8dad77",
-      "diagnostics": "dbcff0e4634e31a0ff0f2d195aff0b19c516a7ddae5dc2ddc8d975dac3737e9c"
     },
     "valid-compile/invalid/invalid-svelte-ignore03-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
@@ -348,171 +144,50 @@
     "valid-compile/invalid/style-without-global-01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/invalid/style-without-global-02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "02d50a21567a5e9228b2b1a5054b5de7062319aebb2e9810632c24056ad68576"
-    },
-    "valid-compile/invalid/svelte-config-custom-warn/a11y-input.svelte": {
-      "executable_configuration": "bdad959d0ab0db86a5bb5ae8b0ff7c0920f48ead1b22b66ef77cfb4c627c92b6"
-    },
     "valid-compile/invalid/svelte-config-custom-warn/a11y-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/invalid/svelte-config-onwarn/a11y-input.svelte": {
-      "executable_configuration": "a7c5b72b60e8a2220c4c8bbe17ac9a0f7a3caf8ab63db974df6abe4292bb0dcb"
     },
     "valid-compile/invalid/svelte-config-onwarn/a11y-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/invalid/svelte-config-warning-filter/a11y-input.svelte": {
-      "executable_configuration": "ee371ab975fdecbda0f872dca0cfb30358e576e61c40ea21fe853c3f42220471"
-    },
-    "valid-compile/invalid/ts/enum01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "diagnostic_count": "9fb590ed48232516b8d2036df70279c44f9e264ed0da55d5812b58a7fcf86000",
-      "diagnostics": "7bf5fcae622e06daafae42ba1286c87a3d51a3524681865dd556715033626514"
-    },
     "valid-compile/invalid/ts/enum01-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/babel/babel-function-bind01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "parse_errors": "d3502a89fda29886988629071f13c59533ecc84618bc7c3ba59e210d46ffa2a0",
-      "parser_configuration": "b538abff24eadebf3876b1cba0f295d9b0b8f2f71f9625bfb4d8ba83a6789995"
-    },
-    "valid-compile/valid/babel/class01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531",
-      "parser_configuration": "b538abff24eadebf3876b1cba0f295d9b0b8f2f71f9625bfb4d8ba83a6789995"
-    },
-    "valid-compile/valid/global-style-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ignore-warnings/enum01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/ignore01-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/valid/ignore02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/ignore02-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/no-false-custom_element_props_identifier-warning-without-custom-element-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/script-comment-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/script-comment-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/valid/style-lang01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/style-lang02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/style-lang03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/svelte-config-experimental-async/top-level-await-input.svelte": {
-      "executable_configuration": "bb15808e8df35929c98ae8936aef7e5d4def2d05a6389e0ff432504b6a03af31"
-    },
-    "valid-compile/valid/svelte-config-onwarn/a11y-input.svelte": {
-      "executable_configuration": "ca58baef555cdc4f60b6ebadcf0b5717ca5c292d6f5b6ed8c8b4fd8beb10593d"
-    },
-    "valid-compile/valid/svelte-config-warning-filter/a11y-input.svelte": {
-      "executable_configuration": "5651d10930cb44e5c37d250a2d83088b00a1bb939c6e6edf78967882b6127aaa"
-    },
-    "valid-compile/valid/svelte-ignore01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/svelte-ignore01-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/svelte-ignore02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/svelte-ignore02-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/valid/svelte-ignore03-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/svelte-ignore03-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/svelte-ignore04-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/svelte-ignore04-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/valid/svelte-ignore05-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/svelte-ignore05-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/svelte-ignore06-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/svelte-ignore06-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     },
-    "valid-compile/valid/svelte-ignore07-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/svelte-ignore07-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/svelte-options-custom-element-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-compile/valid/svelte3-options-custom-element-input.svelte": {
       "version_skip": "65d8a4adc513b6eb5ab8babf06160e24af2f5dfd8cb878b2aefb38eac3dc524d"
     },
-    "valid-compile/valid/test01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/class01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/script-comment-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
     "valid-compile/valid/ts/script-comment-svelte4-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-compile/valid/ts/test01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/ts-lang01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/ts-unused-in-script-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/type-only-import01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/ts/type-only-import02-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/undef01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/unuse01-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "valid-compile/valid/valid-custom-element-with-props-identifier-input.svelte": {
-      "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
     "valid-prop-names-in-kit-pages/invalid/+page.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
