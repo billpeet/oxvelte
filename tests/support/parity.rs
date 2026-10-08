@@ -6,6 +6,58 @@ use std::path::Path;
 
 pub type Signatures = BTreeMap<String, BTreeMap<String, String>>;
 
+/// Keep matrix corpora and their regression records separate from the default suite.
+#[derive(Default, Debug)]
+pub struct RunnerArgs {
+    pub rule: Option<String>,
+    pub report: Option<std::path::PathBuf>,
+    pub corpus: Option<std::path::PathBuf>,
+    pub baseline: Option<std::path::PathBuf>,
+    pub no_baseline: bool,
+    pub update: bool,
+    pub strict: bool,
+}
+
+pub fn runner_arguments(args: impl IntoIterator<Item = String>) -> Result<RunnerArgs, String> {
+    let mut result = RunnerArgs::default();
+    let mut args = args.into_iter();
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--rule" => {
+                result.rule = Some(
+                    args.next()
+                        .ok_or("--rule needs a rule name")?
+                        .trim_start_matches("svelte/")
+                        .into(),
+                )
+            }
+            "--report" => result.report = Some(args.next().ok_or("--report needs a path")?.into()),
+            "--corpus" => result.corpus = Some(args.next().ok_or("--corpus needs a path")?.into()),
+            "--baseline" => {
+                result.baseline = Some(args.next().ok_or("--baseline needs a path")?.into())
+            }
+            "--no-baseline" => result.no_baseline = true,
+            "--update-baseline" => result.update = true,
+            "--strict" => result.strict = true,
+            "--nocapture" => {}
+            _ => return Err(format!("Unknown argument: {arg}")),
+        }
+    }
+    if result.update && (result.rule.is_some() || result.strict) {
+        return Err("Baseline updates require the entire suite without --strict".into());
+    }
+    if result.no_baseline && (!result.strict || result.baseline.is_some() || result.update) {
+        return Err(
+            "--no-baseline requires --strict and cannot be combined with a baseline path or update"
+                .into(),
+        );
+    }
+    if result.corpus.is_some() && result.baseline.is_none() && !result.no_baseline {
+        return Err("--corpus requires --baseline or --strict --no-baseline to protect the default baseline".into());
+    }
+    Ok(result)
+}
+
 /// The imported manifest contains per-case configuration. Type-aware suites also
 /// inherit RULES_PROJECT from their RuleTester, which points to this unchanged
 /// corpus tsconfig. Forward that default only for rules which query types.

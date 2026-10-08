@@ -6,6 +6,60 @@ use oxc::span::Span;
 use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion};
 use serde_json::json;
 
+fn runner_args(arguments: &[&str]) -> Result<parity::RunnerArgs, String> {
+    parity::runner_arguments(arguments.iter().map(|argument| argument.to_string()))
+}
+
+#[test]
+fn independent_matrix_runs_require_explicit_baseline_handling() {
+    let defaults = runner_args(&[]).unwrap();
+    assert!(defaults.corpus.is_none() && defaults.baseline.is_none());
+    assert!(!defaults.no_baseline && !defaults.strict && !defaults.update);
+    let strict = runner_args(&[
+        "--corpus",
+        "reports/svelte4/corpus",
+        "--strict",
+        "--no-baseline",
+        "--rule",
+        "svelte/valid-compile",
+    ])
+    .unwrap();
+    assert_eq!(strict.rule.as_deref(), Some("valid-compile"));
+    assert_eq!(
+        strict.corpus.unwrap(),
+        std::path::PathBuf::from("reports/svelte4/corpus")
+    );
+    assert!(strict.strict && strict.no_baseline);
+    let update = runner_args(&[
+        "--corpus",
+        "reports/svelte4/corpus",
+        "--baseline",
+        "reports/svelte4/baseline.json",
+        "--update-baseline",
+    ])
+    .unwrap();
+    assert!(update.update);
+    assert_eq!(
+        update.baseline.unwrap(),
+        std::path::PathBuf::from("reports/svelte4/baseline.json")
+    );
+    for arguments in [
+        vec!["--corpus", "reports/svelte4/corpus"],
+        vec!["--corpus", "reports/svelte4/corpus", "--update-baseline"],
+        vec!["--no-baseline"],
+        vec!["--strict", "--no-baseline", "--baseline", "other.json"],
+        vec!["--update-baseline", "--rule", "valid-compile"],
+        vec!["--update-baseline", "--strict"],
+        vec!["--corpus"],
+        vec!["--baseline"],
+    ] {
+        assert!(
+            runner_args(&arguments).is_err(),
+            "accepted unsafe arguments: {arguments:?}"
+        );
+    }
+}
+
 #[test]
 fn type_aware_fixture_configuration_uses_the_imported_suite_project() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))

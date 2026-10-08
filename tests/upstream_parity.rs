@@ -1,5 +1,6 @@
 //! Run with cargo test --test upstream_parity -- [--rule NAME] [--report PATH].
 //! --strict rejects every eligible gap; --update-baseline explicitly records current gaps.
+//! Independent environments use --corpus PATH with --baseline PATH or --strict --no-baseline.
 #[path = "support/parity.rs"]
 mod parity;
 
@@ -48,14 +49,6 @@ struct Case {
     output: Option<String>,
 }
 
-#[derive(Default)]
-struct Args {
-    rule: Option<String>,
-    report: Option<PathBuf>,
-    update: bool,
-    strict: bool,
-}
-
 type Issues = BTreeMap<String, Value>;
 use parity::Signatures;
 
@@ -64,33 +57,6 @@ fn main() {
         eprintln!("Upstream parity failed: {error}");
         std::process::exit(1);
     }
-}
-
-fn arguments() -> Result<Args, String> {
-    let mut result = Args::default();
-    let mut args = std::env::args().skip(1);
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            "--rule" => {
-                result.rule = Some(
-                    args.next()
-                        .ok_or("--rule needs a rule name")?
-                        .trim_start_matches("svelte/")
-                        .into(),
-                )
-            }
-            "--report" => result.report = Some(args.next().ok_or("--report needs a path")?.into()),
-            "--update-baseline" => result.update = true,
-            "--strict" => result.strict = true,
-            // Cargo test can pass this standard flag when requesting visible output.
-            "--nocapture" => {}
-            _ => return Err(format!("Unknown argument: {arg}")),
-        }
-    }
-    if result.update && (result.rule.is_some() || result.strict) {
-        return Err("Baseline updates require the entire suite without --strict".into());
-    }
-    Ok(result)
 }
 
 fn checked_path(root: &Path, name: &str) -> Result<PathBuf, String> {
@@ -404,17 +370,31 @@ fn evaluate(root: &Path, case: &Case) -> Result<Issues, String> {
 }
 
 fn run() -> Result<(), String> {
-    let args = arguments()?;
+    let args = parity::runner_arguments(std::env::args().skip(1))?;
     let repo = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let root = repo.join(CORPUS);
+    let root = repo.join(args.corpus.as_deref().unwrap_or(Path::new(CORPUS)));
+    let baseline_path = repo.join(args.baseline.as_deref().unwrap_or(Path::new(BASELINE)));
+    // Canonicalization catches explicit aliases of the tracked default baseline.
+    let default_baseline = repo.join(BASELINE);
+    if args.corpus.is_some()
+        && !args.no_baseline
+        && (baseline_path == default_baseline
+            || baseline_path
+                .canonicalize()
+                .ok()
+                .zip(default_baseline.canonicalize().ok())
+                .is_some_and(|(chosen, default)| chosen == default))
+    {
+        return Err("A custom corpus cannot use the default baseline; supply an independent --baseline path".into());
+    }
     let manifest_bytes = fs::read(root.join("manifest.json")).map_err(|e| e.to_string())?;
     let manifest: Manifest = serde_json::from_slice(&manifest_bytes).map_err(|e| e.to_string())?;
     verify_files(&root, &manifest)?;
     let manifest_hash = parity::hash(&manifest_bytes);
     let mut baseline: Signatures = BTreeMap::new();
-    if !args.update {
+    if !args.update && !args.no_baseline {
         let saved: Value = serde_json::from_slice(
-            &fs::read(repo.join(BASELINE)).map_err(|e| format!("Cannot read baseline: {e}"))?,
+            &fs::read(&baseline_path).map_err(|e| format!("Cannot read baseline: {e}"))?,
         )
         .map_err(|e| e.to_string())?;
         if saved["revision"] != REVISION || saved["manifestHash"] != manifest_hash {
@@ -429,6 +409,26 @@ fn run() -> Result<(), String> {
         .collect();
     if selected.is_empty() {
         return Err("No cases selected; check the rule name".into());
+    }
+    if args.corpus.is_some() {
+        if let Some(case) = selected.iter().find(|case| {
+            case.ineligible.is_empty()
+                && ["valid-compile", "no-unused-svelte-ignore"].contains(&case.rule.as_str())
+        }) {
+            let expected = manifest
+                .environment
+                .get("svelte")
+                .and_then(Value::as_str)
+                .ok_or("Matrix environment has no exact Svelte version")?;
+            let filename = checked_path(&root, &case.filename)?
+                .to_string_lossy()
+                .replace('\\', "/");
+            let runtime = oxvelte::compiler::compile("", Some(&filename), None)
+                .map_err(|error| format!("Cannot verify matrix Svelte runtime: {error}"))?;
+            if runtime.compiler_version != expected {
+                return Err(format!("Matrix Svelte runtime is {}, but the manifest requires {expected}. Set OXVELTE_COMPILER_RUNTIME to the matching installed environment.", runtime.compiler_version));
+            }
+        }
     }
     let mut signatures = Signatures::new();
     let mut results = Vec::new();
@@ -450,7 +450,11 @@ fn run() -> Result<(), String> {
         for (dimension, detail) in &issues {
             let signature = parity::hash(serde_json::to_string(detail).unwrap().as_bytes());
             if !args.update
-                && parity::is_regression(&baseline, &case.id, dimension, &signature, args.strict)
+                && if args.no_baseline {
+                    dimension != "version_skip"
+                } else {
+                    parity::is_regression(&baseline, &case.id, dimension, &signature, args.strict)
+                }
             {
                 regressions.push(format!("{}: {dimension}", case.id));
             }
@@ -490,14 +494,19 @@ fn run() -> Result<(), String> {
         let saved = json!({"schema":1, "revision": REVISION, "manifestHash": manifest_hash,
             "note":"Known gaps, not rewritten upstream expectations. Regenerate only after reviewing a full --report.",
             "cases": signatures});
+        if let Some(parent) = baseline_path.parent() {
+            fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+        }
         fs::write(
-            repo.join(BASELINE),
+            &baseline_path,
             serde_json::to_string_pretty(&saved).unwrap() + "\n",
         )
         .map_err(|e| e.to_string())?;
-        println!("Updated {BASELINE}");
+        println!("Updated {}", baseline_path.display());
     } else if !regressions.is_empty() {
         return Err(format!("{} new/changed gaps:\n{}\nUse --report for expected/actual details. Baseline updates require review.", regressions.len(), regressions.iter().take(30).cloned().collect::<Vec<_>>().join("\n")));
+    } else if args.no_baseline {
+        println!("Every eligible case passed; version skips are listed above.");
     } else {
         println!("No new gaps relative to the baseline. Existing gaps are listed above.");
     }
