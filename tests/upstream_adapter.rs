@@ -7,6 +7,57 @@ use oxvelte::linter::{Fix, LintContext, LintDiagnostic, Linter, Rule, Suggestion
 use serde_json::json;
 
 #[test]
+fn fixture_messages_normalize_only_the_evaluated_filename() {
+    let original = "tests/fixtures/rules/example/input.svelte";
+    for (absolute, cwd) in [
+        (
+            "/work/repo/corpus/tests/fixtures/rules/example/input.svelte",
+            "/work/repo",
+        ),
+        (
+            r"C:\work\repo\corpus\tests\fixtures\rules\example\input.svelte",
+            r"C:\work\repo",
+        ),
+    ] {
+        let portable = absolute.replace('\\', "/");
+        let relative = "corpus/tests/fixtures/rules/example/input.svelte";
+        for filename in [
+            absolute.to_string(),
+            portable.clone(),
+            relative.to_string(),
+            relative.replace('/', "\\"),
+        ] {
+            let message = format!("Error: \"{filename}:4:11: Unknown word red\"");
+            assert_eq!(
+                parity::fixture_message(&message, absolute, cwd, original),
+                format!("Error: \"{original}:4:11: Unknown word red\"")
+            );
+            for other in [
+                format!("{filename}.bak"),
+                format!("prefix/{filename}"),
+                filename.replace("input.svelte", "other.svelte"),
+            ] {
+                let message = format!("Error: \"{other}:4:11: Unknown word red\"");
+                assert_eq!(
+                    parity::fixture_message(&message, absolute, cwd, original),
+                    message
+                );
+            }
+        }
+    }
+    let message = "Unrelated path corpus/tests/fixtures/rules/example/input.svelte:4:11";
+    assert_eq!(
+        parity::fixture_message(
+            message,
+            "/work/repo/corpus/tests/fixtures/rules/example/input.svelte",
+            "/work/other",
+            original
+        ),
+        message
+    );
+}
+
+#[test]
 fn locations_use_utf16_and_javascript_line_breaks() {
     let source = "a😀b\r\nç\rX\u{2028}Y\u{2029}Z";
     assert_eq!(

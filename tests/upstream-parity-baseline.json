@@ -840,12 +840,6 @@
     },
     "valid-prop-names-in-kit-pages/valid/test004-2/+page.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
-    },
-    "valid-style-parse/invalid/invalid-css01-input.svelte": {
-      "diagnostics": "0cd3181b919afef6d25b3aeba29c6467575ad733e37333ca5dc32c62df8c32b4"
-    },
-    "valid-style-parse/invalid/invalid-scss01-input.svelte": {
-      "diagnostics": "704d2be22a32117ca3ba5f4757de76e5753cb7c1e17558f37dfdfffddffc58fe"
     }
   },
   "manifestHash": "85ef4366dc7164c1245e7536d673e20e0598adab48783c3986615f40136c34f2",

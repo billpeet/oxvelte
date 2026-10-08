@@ -302,7 +302,24 @@ fn evaluate(root: &Path, case: &Case) -> Result<Issues, String> {
     let source = fs::read_to_string(&source_path).map_err(|e| e.to_string())?;
     // Forward slashes give the same route/path behavior on Windows and Linux.
     let filename = source_path.to_string_lossy().replace('\\', "/");
-    let diags = lint_case(&lint, &source, &filename, config, &mut issues);
+    let mut diags = lint_case(&lint, &source, &filename, config, &mut issues);
+    let cwd = std::env::current_dir().map_err(|error| error.to_string())?;
+    for diagnostic in &mut diags {
+        diagnostic.message = parity::fixture_message(
+            &diagnostic.message,
+            &filename,
+            &cwd.to_string_lossy(),
+            &case.filename,
+        );
+        for suggestion in &mut diagnostic.suggestions {
+            suggestion.description = parity::fixture_message(
+                &suggestion.description,
+                &filename,
+                &cwd.to_string_lossy(),
+                &case.filename,
+            );
+        }
+    }
     let expected: Vec<_> = case
         .errors
         .iter()

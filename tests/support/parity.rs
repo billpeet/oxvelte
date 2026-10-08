@@ -24,6 +24,47 @@ pub fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
+/// The linter sees the real source file for project resolution. Messages compare
+/// using the original portable fixture filename, with every other byte intact.
+pub fn fixture_message(message: &str, filename: &str, cwd: &str, original: &str) -> String {
+    let absolute = filename.replace('\\', "/");
+    let cwd = cwd.replace('\\', "/");
+    let mut paths = vec![absolute.clone(), absolute.replace('/', "\\")];
+    if let Some(relative) = absolute.strip_prefix(&(cwd.trim_end_matches('/').to_string() + "/")) {
+        paths.push(relative.to_string());
+        paths.push(relative.replace('/', "\\"));
+    }
+    paths.sort_by_key(|path| std::cmp::Reverse(path.len()));
+    paths.dedup();
+    let mut result = message.to_string();
+    for path in paths {
+        if path.is_empty() {
+            continue;
+        }
+        let mut output = String::new();
+        let mut cursor = 0;
+        for (start, _) in result.match_indices(&path) {
+            let end = start + path.len();
+            let before = result[..start].chars().next_back();
+            let after = result[end..].chars().next();
+            let left = before.is_none_or(|ch| {
+                ch.is_whitespace() || matches!(ch, '\'' | '"' | '(' | '[' | ':' | '=')
+            });
+            let right = after.is_none_or(|ch| {
+                ch.is_whitespace() || matches!(ch, '\'' | '"' | ')' | ']' | ':' | ',')
+            });
+            if left && right {
+                output.push_str(&result[cursor..start]);
+                output.push_str(original);
+                cursor = end;
+            }
+        }
+        output.push_str(&result[cursor..]);
+        result = output;
+    }
+    result
+}
+
 /// ESLint counts columns in UTF-16 code units and recognizes all JS line breaks.
 pub fn location(source: &str, offset: u32) -> Result<(usize, usize), String> {
     let offset = offset as usize;
