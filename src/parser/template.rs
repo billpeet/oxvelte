@@ -1561,7 +1561,28 @@ impl<'a> TemplateParser<'a> {
 
     #[inline]
     fn looking_at(&self, prefix: &str) -> bool {
-        self.source[self.pos..].starts_with(prefix)
+        self.prefix_end(prefix).is_some()
+    }
+
+    /// Control tags permit whitespace between their opening brace and sigil.
+    /// Return the source position rather than a normalized length so all AST
+    /// and diagnostic spans continue to refer to the original source bytes.
+    fn prefix_end(&self, prefix: &str) -> Option<usize> {
+        if prefix.starts_with('{')
+            && prefix
+                .as_bytes()
+                .get(1)
+                .is_some_and(|b| matches!(b, b'#' | b':' | b'/' | b'@'))
+        {
+            let remaining = self.source[self.pos..].strip_prefix('{')?;
+            let body = remaining.trim_start();
+            body.starts_with(&prefix[1..])
+                .then_some(self.pos + 1 + remaining.len() - body.len() + prefix.len() - 1)
+        } else {
+            self.source[self.pos..]
+                .starts_with(prefix)
+                .then_some(self.pos + prefix.len())
+        }
     }
 
     #[inline]
@@ -1580,12 +1601,10 @@ impl<'a> TemplateParser<'a> {
     }
 
     fn looking_at_svelte_keyword(&self, prefix: &str, keyword: &str) -> bool {
-        self.looking_at(prefix)
-            && self.source[self.pos + prefix.len()..].starts_with(keyword)
-            && scanner::is_svelte_keyword_boundary(
-                self.source,
-                self.pos + prefix.len() + keyword.len(),
-            )
+        self.prefix_end(prefix).is_some_and(|end| {
+            self.source[end..].starts_with(keyword)
+                && scanner::is_svelte_keyword_boundary(self.source, end + keyword.len())
+        })
     }
 
     fn looking_at_svelte_keyword_missing_whitespace(
@@ -1593,13 +1612,13 @@ impl<'a> TemplateParser<'a> {
         prefix: &str,
         keywords: &[&str],
     ) -> bool {
-        if !self.looking_at(prefix) {
+        let Some(end) = self.prefix_end(prefix) else {
             return false;
-        }
+        };
 
         keywords.iter().any(|keyword| {
-            let after_keyword = self.pos + prefix.len() + keyword.len();
-            self.source[self.pos + prefix.len()..].starts_with(keyword)
+            let after_keyword = end + keyword.len();
+            self.source[end..].starts_with(keyword)
                 && self
                     .source
                     .as_bytes()
@@ -1612,7 +1631,7 @@ impl<'a> TemplateParser<'a> {
         if !self.looking_at_continuation("else") {
             return false;
         }
-        let mut pos = self.pos + "{:else".len();
+        let mut pos = self.prefix_end("{:else").unwrap();
         let bytes = self.source.as_bytes();
         while pos < self.source.len() && bytes[pos].is_ascii_whitespace() {
             pos += 1;
@@ -1622,8 +1641,8 @@ impl<'a> TemplateParser<'a> {
     }
 
     fn looking_at_invalid_elseif(&self) -> bool {
-        self.looking_at("{:elseif")
-            && scanner::is_svelte_keyword_boundary(self.source, self.pos + "{:elseif".len())
+        self.prefix_end("{:elseif")
+            .is_some_and(|end| scanner::is_svelte_keyword_boundary(self.source, end))
     }
 
     fn peek_block_continuation(&self) -> Option<BlockContinuation> {
@@ -1651,7 +1670,7 @@ impl<'a> TemplateParser<'a> {
             return String::new();
         }
 
-        let mut pos = self.pos + 2;
+        let mut pos = self.prefix_end("{/").unwrap();
         let bytes = self.source.as_bytes();
         while pos < self.source.len() && bytes[pos].is_ascii_whitespace() {
             pos += 1;
@@ -1682,8 +1701,8 @@ impl<'a> TemplateParser<'a> {
     }
 
     fn eat(&mut self, expected: &str) -> Result<(), OxcDiagnostic> {
-        if self.looking_at(expected) {
-            self.pos += expected.len();
+        if let Some(end) = self.prefix_end(expected) {
+            self.pos = end;
             Ok(())
         } else {
             Err(OxcDiagnostic::error(format!(
@@ -1890,12 +1909,10 @@ impl<'a> TemplateParser<'a> {
     }
 
     fn report_invalid_textarea_tag_placement(&mut self) {
-        let marker = self.source.as_bytes().get(self.pos + 1).copied();
-        let Some(marker) = marker else {
+        let Some(name_start) = self.prefix_end("{#").or_else(|| self.prefix_end("{@")) else {
             return;
         };
-
-        let name_start = self.pos + 2;
+        let marker = self.source.as_bytes()[name_start - 1];
         let mut name_end = name_start;
         while name_end < self.source.len() && self.source.as_bytes()[name_end].is_ascii_alphabetic()
         {
@@ -1921,7 +1938,7 @@ impl<'a> TemplateParser<'a> {
         if self.looking_at("{:else}") {
             return true;
         }
-        let after = &self.source[self.pos + 6..];
+        let after = &self.source[self.prefix_end("{:else").unwrap()..];
         after.trim_start().starts_with('}')
     }
 
@@ -4009,7 +4026,8 @@ impl<'a> TemplateParser<'a> {
                         if !block.elseif
                             && self.source
                                 [block.header_span.start as usize..block.header_span.end as usize]
-                                .starts_with("{:else")
+                                .strip_prefix('{')
+                                .is_some_and(|body| body.trim_start().starts_with(":else"))
                         {
                             return;
                         }
@@ -9923,6 +9941,77 @@ mod modern_const_tag_tests {
                     .any(|error| error.message.contains("immediate child")),
                 "legacy placement remains checked: {source}"
             );
+        }
+    }
+    #[test]
+    fn control_tags_retain_original_spans_when_brace_and_sigil_are_separated() {
+        let source =
+            "<!-- 😀 -->{\r\n #if ok}<p />{\n :else\n if other}<b />{\n :else}<i />{\n /if}";
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        let TemplateNode::IfBlock(block) = &parsed.ast.html.nodes[1] else {
+            panic!("{:?}", parsed.ast.html.nodes);
+        };
+        assert_eq!(
+            &source[block.header_span.start as usize..block.header_span.end as usize],
+            "{\r\n #if ok}"
+        );
+        assert_eq!(
+            &source[block.test_span.start as usize..block.test_span.end as usize],
+            "ok"
+        );
+        let TemplateNode::IfBlock(elseif) = block.alternate.as_deref().unwrap() else {
+            panic!();
+        };
+        assert!(elseif.elseif);
+        assert_eq!(
+            &source[elseif.test_span.start as usize..elseif.test_span.end as usize],
+            "other"
+        );
+        let TemplateNode::IfBlock(otherwise) = elseif.alternate.as_deref().unwrap() else {
+            panic!();
+        };
+        assert!(otherwise.test.is_empty());
+        assert_eq!(
+            &source[otherwise.header_span.start as usize..otherwise.header_span.end as usize],
+            "{\n :else}"
+        );
+        assert_eq!(parsed.ast.html.template_tag_spans.len(), 4);
+    }
+
+    #[test]
+    fn spaced_control_prefixes_dispatch_every_template_tag_kind() {
+        for (source, expected) in [
+            (
+                "{\n #each rows as row}{row}{\n :else}empty{\n /each}",
+                "each",
+            ),
+            (
+                "{\n #await promise}wait{\n :then value}{value}{\n :catch error}{error}{\n /await}",
+                "await",
+            ),
+            ("{\n #key value}text{\n /key}", "key"),
+            ("{\n #snippet child()}text{\n /snippet}", "snippet"),
+            ("{\n @debug value}", "debug"),
+            ("{\n @html value}", "html"),
+            ("{\n @render child()}", "render"),
+        ] {
+            let alloc = Allocator::default();
+            let parsed = parser::parse_for_lint(source, &alloc);
+            assert!(parsed.errors.is_empty(), "{source}: {:?}", parsed.errors);
+            let node = &parsed.ast.html.nodes[0];
+            let kind = match node {
+                TemplateNode::EachBlock(_) => "each",
+                TemplateNode::AwaitBlock(_) => "await",
+                TemplateNode::KeyBlock(_) => "key",
+                TemplateNode::SnippetBlock(_) => "snippet",
+                TemplateNode::DebugTag(_) => "debug",
+                TemplateNode::RawMustacheTag(_) => "html",
+                TemplateNode::RenderTag(_) => "render",
+                _ => "other",
+            };
+            assert_eq!(kind, expected, "{source}: {node:?}");
         }
     }
 }
