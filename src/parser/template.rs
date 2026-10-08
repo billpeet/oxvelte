@@ -1568,11 +1568,11 @@ impl<'a> TemplateParser<'a> {
     /// Return the source position rather than a normalized length so all AST
     /// and diagnostic spans continue to refer to the original source bytes.
     fn prefix_end(&self, prefix: &str) -> Option<usize> {
-        if prefix.starts_with('{')
+        if prefix.starts_with("{...") || (prefix.starts_with('{')
             && prefix
                 .as_bytes()
                 .get(1)
-                .is_some_and(|b| matches!(b, b'#' | b':' | b'/' | b'@'))
+                .is_some_and(|b| matches!(b, b'#' | b':' | b'/' | b'@')))
         {
             let remaining = self.source[self.pos..].strip_prefix('{')?;
             let body = remaining.trim_start();
@@ -10013,5 +10013,20 @@ mod modern_const_tag_tests {
             };
             assert_eq!(kind, expected, "{source}: {node:?}");
         }
+    }
+
+    #[test]
+    fn multiline_spread_attributes_exclude_ellipsis_from_expression_spans() {
+        let source = "<div\n{\r\n ...props\n}\n/>";
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source,&alloc);
+        assert!(parsed.errors.is_empty(),"{:?}",parsed.errors);
+        let TemplateNode::Element(element) = &parsed.ast.html.nodes[0] else { panic!(); };
+        assert!(matches!(element.attributes[0],crate::ast::Attribute::Spread {..}));
+        let meta = &element.attribute_meta[0];
+        let span = meta.expression_span.unwrap();
+        assert_eq!(&source[span.start as usize..span.end as usize],"props\n");
+        let span = meta.mustache_span.unwrap();
+        assert_eq!(&source[span.start as usize..span.end as usize],"{\r\n ...props\n}");
     }
 }
