@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const ts = require(require.resolve('typescript', { paths: [process.env.OXVELTE_COMPILER_RUNTIME || __dirname] }));
 const { analyze } = require('./typescript-conditions.cjs');
+const { createSession } = require('./typescript-service.cjs');
 
 // A real checker isolates the expression handlers from the Svelte transport.
 function run(source, options = {}, compilerOptions = {}) {
@@ -85,4 +86,23 @@ test('array predicates check inline returns and callable result signatures', () 
     'Unnecessary conditional, value is always falsy.',
     'This callback should return a conditional, but return is always truthy.',
   ]);
+});
+
+test('Svelte reactive exclusions preserve locals, immutable roots and ordinary narrowing', () => {
+  const script = 'let value: string | null = null; value ?? 1; $: value ?? 2; $: {let value: string | null = null; value ?? 3;} const fixed = null; $: fixed ?? 4;';
+  const source = `<script lang="ts">${script}</script>`;
+  const start = source.indexOf('>') + 1;
+  const diagnostics = analyze(createSession({ source, filename: path.resolve('__conditions__.svelte'), scripts: [{start, end:start + script.length}] }));
+  assert.deepEqual(diagnostics.map(item => source.slice(item.start, item.end)), ['value', 'value', 'fixed']);
+  assert.deepEqual(diagnostics.map(item => item.start), [source.indexOf('value ?? 1'), source.indexOf('value ?? 3'), source.indexOf('fixed ?? 4')]);
+});
+
+test('template expressions map operator fixes and distinguish mutable bindings', () => {
+  const script = 'let mutable = null; const fixed = null; const object = {x: 1};';
+  const source = `<script>${script}</script>😀{#if mutable}x{/if}{#if fixed}y{/if}{object?.x}`;
+  const templateStart = source.indexOf('</script>') + 9;
+  const expression = (text, kind) => { const start = source.indexOf(text, templateStart); return {start, end:start + text.length, kind}; };
+  const diagnostics = analyze(createSession({ source, filename: path.resolve('__conditions__.svelte'), scripts: [{start:8, end:8+script.length}], templates: [expression('mutable', 'condition'), expression('fixed', 'condition'), expression('object?.x', 'expression')] }));
+  assert.deepEqual(diagnostics.map(item => source.slice(item.start, item.end)), ['fixed', '?.']);
+  assert.deepEqual(diagnostics[1].fix, {start:source.indexOf('?.'), end:source.indexOf('?.')+2, text:'.'});
 });
