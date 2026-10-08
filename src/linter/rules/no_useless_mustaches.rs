@@ -1,24 +1,10 @@
 //! `svelte/no-useless-mustaches` — disallow unnecessary mustache interpolations.
 //! ⭐ Recommended, 🔧 Fixable
 //!
-//! Vendor reference: `vendor/eslint-plugin-svelte/.../src/rules/no-useless-mustaches.ts`.
-//! Its implementation is a ~10-line type guard over a pre-parsed
-//! `ESTree.Expression` (matching `Literal` with string value, or
-//! `TemplateLiteral` with zero interpolations), plus comment/escape gates
-//! driven by the `ignoreIncludesComment` and `ignoreStringEscape` options.
-//!
-//! Our `MustacheTag` now carries `expression_ast: Option<&Expression<'a>>`
-//! pre-parsed by the template parser into the shared allocator. This rule
-//! reads that AST directly for mustache-tag checks — no on-demand re-parse.
-//! Attribute-value expressions (`value={…}`, `style:key={…}`) still go
-//! through `parse_template_expression` for now; extending the AST to carry
-//! typed expressions on `AttributeValue::Expression` is a follow-on cycle.
-//!
-//! For `ignoreIncludesComment`, we still call `parse_template_expression`
-//! once per mustache to get `ParserReturn.program.comments` — oxc's
-//! `parse_expression` alone doesn't surface comment trivia.
-
-use crate::ast::{Attribute, AttributeValue, AttributeValuePart, DirectiveKind, TemplateNode};
+use crate::ast::{
+    Attribute, AttributeMeta, AttributeQuote, AttributeValue, AttributeValuePart, DirectiveKind,
+    TemplateNode,
+};
 use crate::linter::{walk_template_nodes, Fix, LintContext, Rule};
 use crate::parser::expression::{parse_template_expression, unwrap_template_expression};
 use oxc::allocator::Allocator;
@@ -60,25 +46,22 @@ impl Rule for NoUselessMustaches {
                 check_mustache_tag(tag, ctx, ignore_comment, ignore_escape);
             }
             if let TemplateNode::Element(el) = node {
-                for attr in &el.attributes {
+                for (attr, meta) in el.attributes.iter().zip(&el.attribute_meta) {
                     match attr {
-                        Attribute::NormalAttribute {
-                            value, span, name, ..
-                        } => {
+                        Attribute::NormalAttribute { value, name, .. } => {
                             // `this={…}` on a `<svelte:component>` / `<svelte:element>` /
                             // similar carries semantic meaning — don't suggest collapsing.
                             if name == "this" && el.kind().is_svelte_special() {
                                 continue;
                             }
-                            check_attribute_value(value, *span, ctx, ignore_comment, ignore_escape);
+                            check_attribute_value(value, meta, ctx, ignore_comment, ignore_escape);
                         }
                         Attribute::Directive {
                             kind: DirectiveKind::StyleDirective,
                             value,
-                            span,
                             ..
                         } => {
-                            check_attribute_value(value, *span, ctx, ignore_comment, ignore_escape);
+                            check_attribute_value(value, meta, ctx, ignore_comment, ignore_escape);
                         }
                         _ => {}
                     }
@@ -94,62 +77,35 @@ fn check_mustache_tag<'a>(
     ignore_comment: bool,
     ignore_escape: bool,
 ) {
-    // Typed AST path: read the pre-parsed Expression from the template AST.
-    let Some(expr) = tag.expression_ast else {
-        // Parser couldn't parse this expression — nothing to simplify.
-        return;
-    };
-    let raw = match trivial_string_raw(expr) {
-        Some(r) => r,
-        None => return,
-    };
-    // `{'{foo'}` / `` {`foo\nbar`} `` cases (vendor lines 83, 87).
-    if raw.contains('{') {
-        return;
-    }
-    if is_template_literal(expr) && raw.contains('\n') {
-        return;
-    }
-
-    // Comment detection needs a second parse (through the void(...) wrapper)
-    // because `parse_expression` alone doesn't surface comments.
-    if ignore_comment {
-        let alloc = Allocator::default();
-        let result = parse_template_expression(&tag.expression, &alloc);
-        if !result.program.comments.is_empty() {
-            return;
-        }
-    }
-
-    if ignore_escape && has_useful_escape(raw) {
-        return;
-    }
-
-    ctx.diagnostic_with_fix(
-        "Unexpected mustache interpolation with a string literal value.",
+    check_expression(
+        &tag.expression,
         tag.span,
-        Fix {
-            span: tag.span,
-            replacement: raw.to_string(),
-        },
+        None,
+        ctx,
+        ignore_comment,
+        ignore_escape,
     );
 }
 
 fn check_attribute_value(
     value: &AttributeValue,
-    span: Span,
+    meta: &AttributeMeta<'_>,
     ctx: &mut LintContext<'_>,
     ignore_comment: bool,
     ignore_escape: bool,
 ) {
     match value {
         AttributeValue::Expression(expr) => {
-            check_attribute_expression(expr, span, ctx, ignore_comment, ignore_escape)
+            if let Some(span) = meta.mustache_span {
+                check_expression(expr, span, Some(meta), ctx, ignore_comment, ignore_escape);
+            }
         }
         AttributeValue::Concat(parts) => {
-            for part in parts {
-                if let AttributeValuePart::Expression(expr) = part {
-                    check_attribute_expression(expr, span, ctx, ignore_comment, ignore_escape);
+            for (part, part_meta) in parts.iter().zip(&meta.parts) {
+                if let (AttributeValuePart::Expression(expr), Some(span)) =
+                    (part, part_meta.mustache_span)
+                {
+                    check_expression(expr, span, Some(meta), ctx, ignore_comment, ignore_escape);
                 }
             }
         }
@@ -157,12 +113,10 @@ fn check_attribute_value(
     }
 }
 
-/// Attribute-value path: re-parses the expression text through the shared
-/// wrapper helper. Will migrate to the typed AST once
-/// `AttributeValue::Expression` carries a pre-parsed `Expression<'a>`.
-fn check_attribute_expression(
+fn check_expression(
     expr_text: &str,
-    diag_span: Span,
+    span: Span,
+    attribute: Option<&AttributeMeta<'_>>,
     ctx: &mut LintContext<'_>,
     ignore_comment: bool,
     ignore_escape: bool,
@@ -175,32 +129,72 @@ fn check_attribute_expression(
     let Some(expr) = unwrap_template_expression(&result) else {
         return;
     };
-
-    if ignore_comment && !result.program.comments.is_empty() {
-        return;
-    }
-
     let Some(raw) = trivial_string_raw(expr) else {
         return;
     };
-    if raw.contains('{') {
+    let has_comment = !result.program.comments.is_empty();
+    let has_escape = has_useful_escape(raw);
+    if (ignore_comment && has_comment)
+        || (ignore_escape && has_escape)
+        || raw.contains('{')
+        || (is_template_literal(expr) && raw.contains(['\n', '\r']))
+    {
         return;
     }
-    if is_template_literal(expr) && raw.contains('\n') {
+    let message = "Unexpected mustache interpolation with a string literal value.";
+    if has_comment
+        || has_escape
+        || raw.contains('\n')
+        || raw.starts_with(char::is_whitespace)
+        || raw.ends_with(char::is_whitespace)
+    {
+        ctx.diagnostic(message, span);
         return;
     }
-    if ignore_escape && has_useful_escape(raw) {
-        return;
+    let mut chars = raw.chars();
+    let mut unescaped = String::new();
+    while let Some(ch) = chars.next() {
+        if ch == '\\' {
+            if let Some(next) = chars.next() {
+                unescaped.push(next);
+            }
+        } else {
+            unescaped.push(ch);
+        }
     }
-
-    ctx.diagnostic_with_fix(
-        "Unexpected mustache interpolation with a string literal value.",
-        diag_span,
+    let fix = if let Some(meta) = attribute {
+        match meta.quote {
+            Some(AttributeQuote::Double) => Fix {
+                span,
+                replacement: unescaped.replace('"', "&quot;"),
+            },
+            Some(AttributeQuote::Single) => Fix {
+                span,
+                replacement: unescaped.replace('\'', "&apos;"),
+            },
+            _ => {
+                // Normalize quote insertions and this replacement into one edit,
+                // preserving other value parts between them.
+                let full = meta.value_full_span.unwrap_or(span);
+                let replacement = format!(
+                    "\"{}{}{}\"",
+                    &ctx.source[full.start as usize..span.start as usize],
+                    unescaped.replace('"', "&quot;"),
+                    &ctx.source[span.end as usize..full.end as usize]
+                );
+                Fix {
+                    span: full,
+                    replacement,
+                }
+            }
+        }
+    } else {
         Fix {
-            span: diag_span,
-            replacement: raw.to_string(),
-        },
-    );
+            span,
+            replacement: unescaped.replace('<', "&lt;").replace('>', "&gt;"),
+        }
+    };
+    ctx.diagnostic_with_fix(message, span, fix);
 }
 
 /// Match vendor's type guard: return the between-quotes raw string when
@@ -249,4 +243,49 @@ fn has_useful_escape(raw: &str) -> bool {
         }
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        linter::{LintDiagnostic, Linter, RuleConfig},
+        parser,
+    };
+    use oxc::allocator::Allocator;
+
+    fn lint(source: &str, options: serde_json::Value) -> Vec<LintDiagnostic> {
+        let alloc = Allocator::default();
+        let parsed = parser::parse_for_lint(source, &alloc);
+        assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+        Linter::all()
+            .lint_with_config(
+                &parsed.ast,
+                source,
+                RuleConfig {
+                    options: Some(options),
+                    settings: None,
+                },
+            )
+            .into_iter()
+            .filter(|d| d.rule_name == "svelte/no-useless-mustaches")
+            .collect()
+    }
+
+    #[test]
+    fn parity_regression_preserves_source_boundaries() {
+        let source = "<!-- 😀 --><div title=\"prefix {'a'} {'b'}\" />{'<b>'}{ /* keep */ 'comment' }{'space '}";
+        let diagnostics = lint(source, serde_json::json!([]));
+        assert_eq!(diagnostics.len(), 5);
+        assert_eq!(diagnostics[0].fix.as_ref().unwrap().replacement, "a");
+        assert_eq!(
+            &source[diagnostics[0].span.start as usize..diagnostics[0].span.end as usize],
+            "{'a'}"
+        );
+        assert_eq!(
+            diagnostics[2].fix.as_ref().unwrap().replacement,
+            "&lt;b&gt;"
+        );
+        assert!(diagnostics[3].fix.is_none());
+        assert!(diagnostics[4].fix.is_none());
+    }
 }

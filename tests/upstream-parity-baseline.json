@@ -658,35 +658,6 @@
     "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
     },
-    "no-useless-mustaches/invalid/comments01-input.svelte": {
-      "diagnostics": "c50060134d4be06e247d3dedb027e37cecaebb6f902a32b297a5a45da13fe573",
-      "fix_output": "e481b26a6532f6733d9eef244d51fd1c5189c3b4fd443c4a85064873845a6c9b",
-      "unexpected_fix": "be488724fd4089e71bfa0726f9f0c6237a6c49428e0eec7b49bcf858d293f950"
-    },
-    "no-useless-mustaches/invalid/escape-test01-input.svelte": {
-      "diagnostics": "d0f0861360a518cbeb69b83b9ae80716c4f06a688d5fdf8d2b1a6af4cac88aed",
-      "fix_output": "61465a96aba2fbdccd913abfd62a716711fc3689bd73bbbc1fe91f47943de4fe"
-    },
-    "no-useless-mustaches/invalid/invalid-test01-input.svelte": {
-      "diagnostics": "9aa0048ce44ba5837563b50d4e7c646fb4a32c0f53f9f142b547e264414b6def",
-      "fix_output": "c3f9360759b8745aecd8ef0b90fac4a0a7f896e4b780078ea903602e8d5edafb",
-      "unexpected_fix": "be488724fd4089e71bfa0726f9f0c6237a6c49428e0eec7b49bcf858d293f950"
-    },
-    "no-useless-mustaches/invalid/quote-test01-input.svelte": {
-      "diagnostics": "778dbea1fc30755895ae23c2f4d4093d5bafa88adb115ecde0c0ed98af8e1163",
-      "fix_output": "04afc341930f3278f7b74966e568319d56b0ddbd10956aabdfc9b4ac9d0ca0e0"
-    },
-    "no-useless-mustaches/invalid/quote-test02-input.svelte": {
-      "diagnostics": "ab48d02dd9e9d7ebd6319b2308eeaffffda70601d66562d478591a15236de7d7",
-      "fix_output": "22f757a81b3135cfbecd810f2ca24497a901fe246042ed6c02427e5cbec63a89"
-    },
-    "no-useless-mustaches/invalid/spaces-test01-input.svelte": {
-      "diagnostics": "6fb0ee742277b1a846dc1367451a7c5b5227c0829251b57618d7217919ac648d",
-      "fix_output": "6bd29d0111d543b351af8b537c453c1bd6b16a45b777cc05fbfa16e75b5849e5"
-    },
-    "no-useless-mustaches/invalid/tag-test01-input.svelte": {
-      "fix_output": "02ca4f7f5f8dc8236eff1806bc9d532d524174ee1902dd8f822a906985c37c0f"
-    },
     "prefer-attribute-interpolation/invalid/template-literal-attribute-input.svelte": {
       "unsupported_rule": "a05101a0bfce1c07ed5a87b9472625a8607c47721ebcc0c11b31f981bd65ee59"
     },
