@@ -3,6 +3,11 @@
 const { createRequire } = require('node:module');
 const path = require('node:path');
 const readline = require('node:readline');
+// User configuration and preprocessors may log while compiling. Keep their
+// output off the line-delimited response channel, including direct stdout writes.
+const protocolWrite = process.stdout.write.bind(process.stdout);
+const diagnosticWrite = process.stderr.write.bind(process.stderr);
+process.stdout.write = (...args) => diagnosticWrite(...args);
 function resolver(filename) {
   const root = process.env.OXVELTE_COMPILER_RUNTIME;
   const anchor = root ? path.join(path.resolve(root), 'package.json') : path.resolve(filename || path.join(process.cwd(), '__oxvelte__.svelte'));
@@ -154,8 +159,8 @@ async function run(request) {
 }
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on('line', async line => {
-  try { const result = await run(JSON.parse(line)); process.stdout.write(JSON.stringify({ result }) + '\n'); }
-  catch (e) { process.stdout.write(JSON.stringify({ error: e.message }) + '\n'); }
+  try { const result = await run(JSON.parse(line)); protocolWrite(JSON.stringify({ result }) + '\n'); }
+  catch (e) { protocolWrite(JSON.stringify({ error: e.message }) + '\n'); }
 });
 
 

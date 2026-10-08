@@ -88,3 +88,22 @@ test('remaps transpiled scripts across CR and CRLF line endings', () => {
     assert.equal(result.warnings.find(w => w.code === 'a11y_missing_attribute').start, source.indexOf('<img'));
   }
 });
+test('configuration logs and callback stdout cannot corrupt response framing', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'oxvelte-compiler-log-'));
+  const configPath = join(directory, '_config.cjs');
+  try {
+    writeFileSync(configPath, `console.log('config loaded'); module.exports = {languageOptions:{parserOptions:{svelteConfig:{onwarn(warning, report) {console.log('warning callback'); process.stdout.write('direct output\\n'); report(warning)}}}}}`);
+    const child = spawnSync(process.execPath, [join(runtime, 'bridge.cjs')], {
+      input: JSON.stringify({ source:'<img src="x">', settings:{compiler:{executableConfigPath:configPath}} }) + '\n',
+      encoding:'utf8', env:{...process.env, OXVELTE_COMPILER_RUNTIME:runtime},
+    });
+    assert.equal(child.status, 0);
+    assert.equal(child.stdout.trim().split('\n').length, 1);
+    const response = JSON.parse(child.stdout);
+    assert.equal(response.result.warnings[0].code, 'a11y_missing_attribute');
+    assert.equal(response.result.warnings[0].report.code, 'a11y_missing_attribute');
+    assert.match(child.stderr, /config loaded/);
+    assert.match(child.stderr, /warning callback/);
+    assert.match(child.stderr, /direct output/);
+  } finally { rmSync(directory, {recursive:true, force:true}); }
+});
