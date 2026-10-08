@@ -7,12 +7,18 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import semver from 'semver';
+import ts from 'typescript';
+import { createRequire } from 'node:module';
+import { builtinRules } from 'eslint/use-at-your-own-risk';
 
 export const revision = '18339c886320151148568063c5801bf69cb51027';
 export const environment = {
   svelte: '5.49.2', eslint: '10.9.1', typescript: '6.0.3',
   '@typescript-eslint/parser': '8.70.0', 'svelte-eslint-parser': '1.8.1',
 };
+const require = createRequire(import.meta.url);
+if (require('eslint/package.json').version !== environment.eslint) throw new Error('Installed ESLint does not match the declared parity environment');
+if (ts.version !== environment.typescript) throw new Error('Installed TypeScript does not match the declared parity environment');
 const repository = 'https://github.com/sveltejs/eslint-plugin-svelte';
 const packagePrefix = 'packages/eslint-plugin-svelte/';
 const fixturesPrefix = `${packagePrefix}tests/fixtures/rules/`;
@@ -39,11 +45,83 @@ export function ineligible(requirements, versions = environment) {
   }).map(([name, range]) => `${name} ${versions[name]} does not satisfy ${range}`);
 }
 
+// Inspect the rule's actual metadata and statically provable runtime guards.
+// Never execute imported rule modules or infer capabilities from fixture names.
+export function ruleMetadata(source, versions = environment) {
+  const file = ts.createSourceFile('rule.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const declarations = new Map();
+  const coreLoaders = new Set();
+  const compilerVersions = new Set();
+  const semverNames = new Set();
+  for (const statement of file.statements) {
+    if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
+      const module = statement.moduleSpecifier.text;
+      const clause = statement.importClause;
+      if (module === 'semver' && clause?.name) semverNames.add(clause.name.text);
+      if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) {
+        for (const element of clause.namedBindings.elements) {
+          const imported = element.propertyName?.text ?? element.name.text;
+          if (module.endsWith('/eslint-core.js') && imported === 'getCoreRule') coreLoaders.add(element.name.text);
+          if (module === 'svelte/compiler' && imported === 'VERSION') compilerVersions.add(element.name.text);
+        }
+      }
+    }
+    if (ts.isVariableStatement(statement) && (statement.declarationList.flags & ts.NodeFlags.Const)) for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer) declarations.set(declaration.name.text, declaration.initializer);
+    }
+  }
+  let rule;
+  for (const statement of file.statements) {
+    if (ts.isExportAssignment(statement) && ts.isCallExpression(statement.expression)) {
+      const candidate = statement.expression.arguments[1];
+      if (candidate && ts.isObjectLiteralExpression(candidate)) rule = candidate;
+    }
+  }
+  if (!rule) return { fixable: false, ineligible: [] };
+  const named = (object, name) => object.properties.find((property) => property.name && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) && property.name.text === name);
+  const metadata = named(rule, 'meta');
+  let fixable = false;
+  if (metadata && ts.isPropertyAssignment(metadata) && ts.isObjectLiteralExpression(metadata.initializer)) {
+    for (const property of metadata.initializer.properties) {
+      if (ts.isSpreadAssignment(property) && ts.isPropertyAccessExpression(property.expression) && property.expression.name.text === 'meta' && ts.isIdentifier(property.expression.expression)) {
+        const call = declarations.get(property.expression.expression.text);
+        if (call && ts.isCallExpression(call) && ts.isIdentifier(call.expression) && coreLoaders.has(call.expression.text) && call.arguments.length === 1 && ts.isStringLiteral(call.arguments[0])) {
+          const coreRule = builtinRules.get(call.arguments[0].text);
+          if (!coreRule) throw new Error(`Unknown inherited ESLint core rule ${call.arguments[0].text}`);
+          fixable = ['code', 'whitespace'].includes(coreRule.meta?.fixable);
+        }
+      }
+      if (ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) && property.name.text === 'fixable') fixable = ts.isStringLiteral(property.initializer) && ['code', 'whitespace'].includes(property.initializer.text);
+    }
+  }
+  const blocked = [];
+  const create = named(rule, 'create');
+  if (create && ts.isMethodDeclaration(create) && create.body) {
+    for (const statement of create.body.statements) {
+      if (!ts.isIfStatement(statement) || !ts.isPrefixUnaryExpression(statement.expression) || statement.expression.operator !== ts.SyntaxKind.ExclamationToken || !ts.isIdentifier(statement.expression.operand)) continue;
+      const gateName = statement.expression.operand.text;
+      if (create.parameters.some((parameter) => ts.isIdentifier(parameter.name) && parameter.name.text === gateName)) continue;
+      if (create.body.statements.some((local) => ts.isVariableStatement(local) && local.declarationList.declarations.some((declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === gateName))) continue;
+      const gate = declarations.get(statement.expression.operand.text);
+      const branch = statement.thenStatement;
+      if (!ts.isBlock(branch) || branch.statements.length !== 1 || !ts.isReturnStatement(branch.statements[0])) continue;
+      const returned = branch.statements[0].expression;
+      if (!returned || !ts.isObjectLiteralExpression(returned) || returned.properties.length) continue;
+      if (!gate || !ts.isCallExpression(gate) || !ts.isPropertyAccessExpression(gate.expression) || gate.expression.name.text !== 'satisfies' || !ts.isIdentifier(gate.expression.expression) || !semverNames.has(gate.expression.expression.text)) continue;
+      const [version, range] = gate.arguments;
+      if (!version || !ts.isIdentifier(version) || !compilerVersions.has(version.text) || !range || !ts.isStringLiteral(range) || gate.arguments.length !== 2) continue;
+      blocked.push(...ineligible({ svelte: range.text }, versions).map((reason) => `Rule runtime gate: ${reason}`));
+    }
+  }
+  return { fixable, ineligible: blocked };
+}
+
 export function buildManifest(files) {
   const get = (name) => files.get(name)?.toString('utf8');
   const json = (name) => JSON.parse(get(name));
   const cases = [];
   const rules = new Set();
+  const ruleMetadataCache = new Map();
   for (const [fullPath, bytes] of files) {
     if (!fullPath.startsWith('tests/fixtures/rules/')) continue;
     const id = fullPath.slice('tests/fixtures/rules/'.length);
@@ -62,7 +140,9 @@ export function buildManifest(files) {
     const sourceFile = `src/rules/${rule}.ts`;
     // Only Svelte rules expose fixability here. The adapted TS integration rule
     // has no source module, and is reported as unsupported by the Rust runner.
-    const fixable = /\bfixable\s*:\s*['"](?:code|whitespace)['"]/u.test(get(sourceFile) ?? '');
+    if (!ruleMetadataCache.has(sourceFile)) ruleMetadataCache.set(sourceFile, ruleMetadata(get(sourceFile) ?? ''));
+    const metadata = ruleMetadataCache.get(sourceFile);
+    const fixable = metadata.fixable;
     const errorsFile = companion(fullPath, 'errors.yaml');
     const outputFile = companion(fullPath, `output${suffix(fullPath)}`);
     let errors = [];
@@ -79,7 +159,7 @@ export function buildManifest(files) {
       }
     }
     cases.push({ id, rule, kind: parts[kindIndex], filename: fullPath, configFile: configFile ?? null,
-      config, executableConfig: Boolean(executableConfig), requirements, ineligible: ineligible(requirements),
+      config, executableConfig: Boolean(executableConfig), requirements, ineligible: [...ineligible(requirements), ...metadata.ineligible],
       fixable, errors, output });
   }
   cases.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);

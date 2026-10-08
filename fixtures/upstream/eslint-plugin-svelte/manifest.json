@@ -29713,7 +29713,9 @@
       "requirements": {
         "svelte": ">=5.0.0"
       },
-      "ineligible": [],
+      "ineligible": [
+        "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
+      ],
       "fixable": true,
       "errors": [
         {
@@ -29736,7 +29738,9 @@
       "requirements": {
         "svelte": ">=5.0.0"
       },
-      "ineligible": [],
+      "ineligible": [
+        "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
+      ],
       "fixable": true,
       "errors": [],
       "output": null
@@ -29752,7 +29756,9 @@
       "requirements": {
         "svelte": ">=5.0.0"
       },
-      "ineligible": [],
+      "ineligible": [
+        "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
+      ],
       "fixable": true,
       "errors": [],
       "output": null
@@ -43263,7 +43269,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [
         {
           "message": "'prop1' is never reassigned. Use 'const' instead.",
@@ -43296,7 +43302,7 @@
           "suggestions": null
         }
       ],
-      "output": null
+      "output": "<script>\n\tconst { prop1, prop2 } = $props();\n\tconst zero = $state(0);\n\tconst derived = $derived(zero * 2);\n\tconst derivedBy = $derived.by(calc());\n</script>\n"
     },
     {
       "id": "prefer-const/invalid/option2/test01-input.svelte",
@@ -43316,7 +43322,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [
         {
           "message": "'prop1' is never reassigned. Use 'const' instead.",
@@ -43343,7 +43349,7 @@
           "suggestions": null
         }
       ],
-      "output": null
+      "output": "<script>\n\tconst { prop1, prop2 } = $props();\n\tlet zero = $state(0);\n\tconst derived = $derived(zero * 2);\n\tconst derivedBy = $derived.by(calc());\n</script>\n"
     },
     {
       "id": "prefer-const/invalid/test01-input.svelte",
@@ -43355,7 +43361,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [
         {
           "message": "'zero' is never reassigned. Use 'const' instead.",
@@ -43388,7 +43394,7 @@
           "suggestions": null
         }
       ],
-      "output": null
+      "output": "<script>\n\tlet { prop1, prop2 } = $props();\n\tconst zero = 0;\n\tconst state = $state(0);\n\tconst raw = $state.raw(0);\n\tconst doubled = state * 2;\n\tlet derived = $derived(state * 2);\n\tconst calculated = calc();\n\tlet derivedBy = $derived.by(calc());\n\tlet noInit;\n</script>\n"
     },
     {
       "id": "prefer-const/valid/1238/input.svelte",
@@ -43407,7 +43413,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [],
       "output": null
     },
@@ -43427,7 +43433,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [],
       "output": null
     },
@@ -43451,7 +43457,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [],
       "output": null
     },
@@ -43465,7 +43471,7 @@
       "executableConfig": false,
       "requirements": {},
       "ineligible": [],
-      "fixable": false,
+      "fixable": true,
       "errors": [],
       "output": null
     },

@@ -1,6 +1,6 @@
 {
   "revision": "18339c886320151148568063c5801bf69cb51027",
-  "manifestHash": "85ef4366dc7164c1245e7536d673e20e0598adab48783c3986615f40136c34f2",
+  "manifestHash": "9cb1a959dc6557aa9c76c2b4059d049f9e478722e16b2e9c47e6f0f973213206",
   "environment": {
     "@typescript-eslint/parser": "8.70.0",
     "eslint": "10.9.1",
@@ -9,16 +9,16 @@
     "typescript": "6.0.3"
   },
   "totals": {
-    "pass": 1041,
-    "gaps": 194,
-    "versionSkip": 64
+    "pass": 1044,
+    "gaps": 188,
+    "versionSkip": 67
   },
   "method": "Each gap is assigned to its first blocker. Dimensions retain all overlapping issues. Category labels describe observed differences, not proven root causes.",
   "categories": [
     {
       "id": "missing-rule",
       "label": "Missing rule implementations",
-      "count": 101,
+      "count": 98,
       "rules": {
         "@typescript-eslint/no-unnecessary-condition": [
           {
@@ -607,26 +607,6 @@
           },
           {
             "id": "indent/valid/ts/ts-import-type01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          }
-        ],
-        "no-at-const-tags": [
-          {
-            "id": "no-at-const-tags/invalid/const01-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "no-at-const-tags/valid/declaration-tag-input.svelte",
-            "dimensions": [
-              "unsupported_rule"
-            ]
-          },
-          {
-            "id": "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte",
             "dimensions": [
               "unsupported_rule"
             ]
@@ -1248,42 +1228,14 @@
           }
         ]
       }
-    },
-    {
-      "id": "fix",
-      "label": "Fix output or unexpected automatic fixes",
-      "count": 3,
-      "rules": {
-        "prefer-const": [
-          {
-            "id": "prefer-const/invalid/option1/test01-input.svelte",
-            "dimensions": [
-              "unexpected_fix"
-            ]
-          },
-          {
-            "id": "prefer-const/invalid/option2/test01-input.svelte",
-            "dimensions": [
-              "unexpected_fix"
-            ]
-          },
-          {
-            "id": "prefer-const/invalid/test01-input.svelte",
-            "dimensions": [
-              "unexpected_fix"
-            ]
-          }
-        ]
-      }
     }
   ],
   "dimensions": {
     "unsupported_rule": {
-      "count": 101,
+      "count": 98,
       "rules": {
         "@typescript-eslint/no-unnecessary-condition": 7,
-        "indent": 91,
-        "no-at-const-tags": 3
+        "indent": 91
       }
     },
     "compiler_capability": {
@@ -1305,12 +1257,6 @@
       "rules": {
         "no-unused-svelte-ignore": 18,
         "valid-compile": 8
-      }
-    },
-    "unexpected_fix": {
-      "count": 3,
-      "rules": {
-        "prefer-const": 3
       }
     },
     "executable_configuration": {
@@ -1408,6 +1354,26 @@
         "id": "mustache-spacing/invalid/declaration-tag-input.svelte",
         "reasons": [
           "svelte 5.49.2 does not satisfy >=5.55.9"
+        ]
+      }
+    ],
+    "no-at-const-tags": [
+      {
+        "id": "no-at-const-tags/invalid/const01-input.svelte",
+        "reasons": [
+          "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
+        ]
+      },
+      {
+        "id": "no-at-const-tags/valid/declaration-tag-input.svelte",
+        "reasons": [
+          "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
+        ]
+      },
+      {
+        "id": "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte",
+        "reasons": [
+          "Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0"
         ]
       }
     ],

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildManifest, companion, configCandidates, ineligible, isInput } from './import.mjs';
+import { buildManifest, companion, configCandidates, ineligible, isInput, ruleMetadata } from './import.mjs';
 
 test('upstream discovery includes route and rune modules, excluding helper files', () => {
   for (const name of ['test-input.svelte', 'test-input.svelte.js', 'test-input.svelte.ts', '+page.svelte', '+page.server.ts']) assert.ok(isInput(name));
@@ -21,8 +21,33 @@ test('import fails on absent expectations and preserves exact YAML diagnostics',
   assert.throws(() => buildManifest(files), /Missing expected diagnostics/);
   files.set('tests/fixtures/rules/r/invalid/test-errors.yaml', Buffer.from('- message: bad\n  line: 1\n  column: 2\n  suggestions: null\n'));
   assert.deepEqual(buildManifest(files).cases[0].errors, [{ message: 'bad', line: 1, column: 2, suggestions: null }]);
-  files.set('src/rules/r.ts', Buffer.from("fixable: 'code'"));
+  files.set('src/rules/r.ts', Buffer.from("export default createRule('r', { meta: { fixable: 'code' } });"));
   assert.throws(() => buildManifest(files), /Missing expected fix output/);
   files.set('tests/fixtures/rules/r/invalid/test-output.svelte', Buffer.from('<div />'));
   assert.equal(buildManifest(files).cases[0].output, null);
+});
+
+test('inherited metadata comes from the declared ESLint core rule and respects overrides', () => {
+  const source = `import { getCoreRule as load } from '../utils/eslint-core.js';
+  const parent = load('prefer-const');
+  export default createRule('wrapper', { meta: { ...parent.meta }, create(context) {} });`;
+  assert.equal(ruleMetadata(source).fixable, true);
+  assert.equal(ruleMetadata(source.replace('...parent.meta', '...parent.meta, fixable: null')).fixable, false);
+  assert.equal(ruleMetadata(source.replace('...parent.meta', "...parent.meta, 'fixable': null")).fixable, false);
+  assert.equal(ruleMetadata("export default createRule('r', { meta: { 'fixable': 'code' } });").fixable, true);
+  assert.equal(ruleMetadata(source.replace('prefer-const', 'no-inner-declarations')).fixable, false);
+  assert.throws(() => ruleMetadata(source.replace('prefer-const', 'unknown-core-rule')), /Unknown inherited ESLint core rule unknown-core-rule/);
+  assert.equal(ruleMetadata(`// fixable: 'code'\nexport default createRule('r', { meta: {} });`).fixable, false);
+});
+
+test('only a proven module compiler-version gate returning no listeners makes cases ineligible', () => {
+  const source = `import { VERSION as version } from 'svelte/compiler'; import semver from 'semver';
+  const enabled = semver.satisfies(version, '>=5.56.0');
+  export default createRule('r', { meta: {}, create(context) { if (!enabled) { return {}; } return { listener() {} }; } });`;
+  assert.deepEqual(ruleMetadata(source).ineligible, ['Rule runtime gate: svelte 5.49.2 does not satisfy >=5.56.0']);
+  assert.deepEqual(ruleMetadata(source, {svelte: '5.56.0'}).ineligible, []);
+  assert.deepEqual(ruleMetadata(source.replace('return {};', 'return { listener() {} };')).ineligible, []);
+  assert.deepEqual(ruleMetadata(source.replace("'svelte/compiler'", "'other'")).ineligible, []);
+  assert.deepEqual(ruleMetadata(source.replace('const enabled', 'let enabled')).ineligible, []);
+  assert.deepEqual(ruleMetadata(source.replace('create(context)', 'create(enabled)')).ineligible, []);
 });

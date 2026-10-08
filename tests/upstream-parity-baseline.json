@@ -331,13 +331,13 @@
       "version_skip": "cf663011ac1149132681647835e8e7d4e8f247c148480d12a1042bad537ca39c"
     },
     "no-at-const-tags/invalid/const01-input.svelte": {
-      "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
     },
     "no-at-const-tags/valid/declaration-tag-input.svelte": {
-      "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
     },
     "no-at-const-tags/valid/legacy-at-const-non-runes-input.svelte": {
-      "unsupported_rule": "403bfc6688bd47df6aac7dab80ce7cebf1a9beaac69e37fc06e8e54375979c7b"
+      "version_skip": "8378c42b5caa307d2c6ca62c096b358f223b78f6d2a1358738b5dd017dad0125"
     },
     "no-inner-declarations/invalid/both/test01-input.svelte": {
       "version_skip": "edec042090e4d00a141c35225b9afd97af186396adb3b222ea1ebdac55d880c2"
@@ -551,15 +551,6 @@
     },
     "no-unused-svelte-ignore/valid/ts-lang01-svelte4-input.svelte": {
       "compiler_capability": "50826f9f8f255afb4f2c507dc3935e02c840d0549c5fcf2bdb386aceb6c78531"
-    },
-    "prefer-const/invalid/option1/test01-input.svelte": {
-      "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
-    },
-    "prefer-const/invalid/option2/test01-input.svelte": {
-      "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
-    },
-    "prefer-const/invalid/test01-input.svelte": {
-      "unexpected_fix": "65180684f16216d3b1acf250da74e1ef30c8b8c3495dbfb868bfefdaff6330e6"
     },
     "require-event-dispatcher-types/invalid/import-alias01-input.svelte": {
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
@@ -830,7 +821,7 @@
       "version_skip": "5ec66186b48e3b633b325f6d7123f64602f223451c4b7b7bd7dca0e9a59f4716"
     }
   },
-  "manifestHash": "85ef4366dc7164c1245e7536d673e20e0598adab48783c3986615f40136c34f2",
+  "manifestHash": "9cb1a959dc6557aa9c76c2b4059d049f9e478722e16b2e9c47e6f0f973213206",
   "note": "Known gaps, not rewritten upstream expectations. Regenerate only after reviewing a full --report.",
   "revision": "18339c886320151148568063c5801bf69cb51027",
   "schema": 1
