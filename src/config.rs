@@ -123,6 +123,11 @@ impl OxvelteConfig {
         self.rules.get(rule_name).is_some_and(|e| e.is_off())
     }
 
+    /// Check if a rule is explicitly enabled, at any severity other than off.
+    pub fn is_rule_on(&self, rule_name: &str) -> bool {
+        self.rules.get(rule_name).is_some_and(|e| !e.is_off())
+    }
+
     /// Convert from an ESLint-style config (flat or legacy).
     pub fn from_eslint(json_str: &str) -> Result<Self, String> {
         let value: Value =

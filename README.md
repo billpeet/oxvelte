@@ -49,7 +49,24 @@ That's it. Both tools work out of the box with zero config and sensible defaults
 
 Compiler diagnostics and unused `svelte-ignore` checks use Node.js and the project's installed Svelte compiler. `svelte/valid-compile` is opt-in; the recommended unused-ignore rule starts the compiler when it needs to check warning codes. TypeScript, Babel and stylesheet transformations use the project's corresponding packages. The compiler process is reused, and compiler results are shared between rules within each lint run. See [compiler setup and parity testing](docs/upstream-parity.md) for the pinned test runtime.
 
-The opt-in `@typescript-eslint/no-unnecessary-condition` rule uses the project's TypeScript checker to report redundant conditions and optional chains while respecting Svelte reactive variables. It runs with `--all-rules`; `settings.typescript.project` can select one tsconfig path relative to the component. See the [seventh-wave report](docs/research/upstream-parity-seventh-wave.md) for template scope limits and current test coverage.
+The opt-in `@typescript-eslint/no-unnecessary-condition` rule uses the project's TypeScript checker to report redundant conditions and optional chains while respecting Svelte reactive variables. It runs when the config sets it to `warn` or `error`, or with `--all-rules`; `settings.typescript.project` can select one tsconfig path relative to the component. See the [seventh-wave report](docs/research/upstream-parity-seventh-wave.md) for template scope limits and current test coverage.
+
+The opt-in `@typescript-eslint/no-unused-vars` rule reports unused imports, variables, functions, parameters and caught errors in a component's `<script>` blocks. Script-only linters such as oxlint skip this check in `.svelte` files, because they cannot see whether the template uses a name. This rule counts template usage, `$store` subscriptions, `$bindable()` props and names shared between the module and instance scripts. Switch it on in `oxvelte.config.json`, with the same options typescript-eslint takes:
+
+```json
+{
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }
+    ]
+  }
+}
+```
+
+It reports at the same position and with the same message as typescript-eslint. It stays quiet when it cannot prove a name is unused: template usage is matched by name without regard to shadowing, and a function that only calls itself counts as used. It does not yet check names declared in the template (`{#each}` indexes, snippet parameters, parameters of inline arrow functions) or type parameters in the `generics` attribute. On two production apps it matched 593 of typescript-eslint's 624 findings in `.svelte` files exactly and reported nothing else.
+
+A rule outside the recommended set runs when the config sets it to `warn` or `error`. `--all-rules` is no longer needed to opt in to one rule.
 
 ### Agent-assisted migration
 

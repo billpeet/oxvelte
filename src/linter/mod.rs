@@ -314,6 +314,18 @@ impl Linter {
         self
     }
 
+    /// Add rules the config switches on that are not in the set already. Without this a
+    /// rule outside the recommended set could only run with `--all-rules`.
+    pub fn add_enabled_rules(&mut self, config: &crate::config::OxvelteConfig) {
+        for rule in rules::all_rules() {
+            let name = rule.name();
+            if config.is_rule_on(name) && !self.rules.iter().any(|r| r.name() == name) {
+                self.rules.push(rule);
+            }
+        }
+        self.has_script_rules = self.rules.iter().any(|r| r.applies_to_scripts());
+    }
+
     /// Remove rules that are set to "off" in the config.
     pub fn remove_disabled_rules(&mut self, config: &crate::config::OxvelteConfig) {
         self.rules.retain(|r| !config.is_rule_off(r.name()));

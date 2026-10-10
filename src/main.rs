@@ -183,7 +183,8 @@ fn cmd_lint(
         linter::Linter::recommended()
     };
 
-    // Drop rules disabled in config.
+    // Add rules the config switches on, then drop the ones it switches off.
+    lint.add_enabled_rules(&config);
     lint.remove_disabled_rules(&config);
 
     // Load custom JS rules when the feature is enabled.
