@@ -63,6 +63,10 @@ impl Rule for NoUnusedProps {
             ),
             _ => (HashSet::new(), false, false),
         };
+        // Read the props type from the parsed annotation. Scanning the script text for it
+        // miscounts braces inside earlier strings and regex literals.
+        let annotation = props_annotation(content, binding);
+        let type_name = annotation.and_then(|(_, text)| annotated_type_name(text));
         let decl_start = [before_props.rfind("let "), before_props.rfind("const ")]
             .into_iter()
             .flatten()
@@ -81,7 +85,6 @@ impl Rule for NoUnusedProps {
         };
 
         if !uses_destructuring {
-            let type_name = extract_type_name(before_props);
             let all_props = if let Some(ref tn) = &type_name {
                 extract_type_properties_with_file(content, tn, resolve_path_early)
             } else {
@@ -140,7 +143,6 @@ impl Rule for NoUnusedProps {
             return;
         }
 
-        let type_name = extract_type_name(before_props);
         let ignore_patterns =
             extract_option_patterns(&ctx.config.options, "ignorePropertyPatterns");
         let ignore_type_patterns =
@@ -156,7 +158,7 @@ impl Rule for NoUnusedProps {
         let all_props = if let Some(ref tn) = type_name {
             extract_type_properties_with_file(content, tn, resolve_path)
         } else {
-            extract_inline_type_properties(before_props)
+            inline_type_properties(content, annotation)
         };
 
         if all_props.is_empty() {
@@ -425,29 +427,26 @@ fn split_at_depth0(s: &str, sep: char) -> Vec<&str> {
     parts
 }
 
-fn extract_type_name(before_props: &str) -> Option<String> {
-    let before_eq = before_props.trim_end().strip_suffix('=')?.trim_end();
-    let mut depth = 0i32;
-    let mut last_colon = None;
-    for (i, c) in before_eq.char_indices() {
-        match c {
-            '{' | '(' => depth += 1,
-            '}' | ')' => {
-                depth -= 1;
-                if depth < 0 {
-                    depth = 0;
-                }
-            }
-            ':' if depth == 0 => last_colon = Some(i),
-            _ => {}
-        }
-    }
-    let colon_pos = last_colon?;
-    let after_colon = before_eq[colon_pos + 1..].trim();
-    if after_colon.starts_with('{') {
+/// The `$props()` declarator's annotated type: its start offset in `content` and its text.
+fn props_annotation<'c>(
+    content: &'c str,
+    decl: &oxc::ast::ast::VariableDeclarator<'_>,
+) -> Option<(usize, &'c str)> {
+    let span = decl.type_annotation.as_ref()?.type_annotation.span();
+    let start = span.start as usize;
+    content
+        .get(start..span.end as usize)
+        .map(|text| (start, text))
+}
+
+/// The leading type name of an annotation such as `Props`, `Props & Extra` or `Props<T>`.
+/// An inline object type has no name.
+fn annotated_type_name(annotation: &str) -> Option<String> {
+    let annotation = annotation.trim();
+    if annotation.starts_with('{') {
         return None;
     }
-    let name = after_colon
+    let name = annotation
         .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
         .next()?;
     if name.is_empty() {
@@ -599,33 +598,15 @@ fn resolve_imported_type_properties(
     Vec::new()
 }
 
-fn extract_inline_type_properties(before_props: &str) -> Vec<(String, usize)> {
+/// Properties of an inline object type annotation, `let { a }: { a: string } = $props()`.
+fn inline_type_properties(
+    content: &str,
+    annotation: Option<(usize, &str)>,
+) -> Vec<(String, usize)> {
     let mut props = Vec::new();
-    let before_eq = match before_props.trim_end().strip_suffix('=') {
-        Some(s) => s.trim_end(),
-        None => return props,
-    };
-    if let Some(close) = before_eq.rfind('}') {
-        let mut depth = 0;
-        let mut open = None;
-        for i in (0..=close).rev() {
-            match before_eq.as_bytes()[i] {
-                b'}' => depth += 1,
-                b'{' => {
-                    depth -= 1;
-                    if depth == 0 {
-                        open = Some(i);
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        }
-        if let Some(brace_pos) = open {
-            let before_brace = before_eq[..brace_pos].trim_end();
-            if before_brace.ends_with(':') {
-                extract_props_from_block(before_eq, brace_pos, &mut props);
-            }
+    if let Some((start, text)) = annotation {
+        if text.starts_with('{') {
+            extract_props_from_block(content, start, &mut props);
         }
     }
     props
@@ -904,5 +885,64 @@ mod tests {
                 "{ used }: Props"
             );
         }
+    }
+
+    // A regex or string with an unmatched brace earlier in the script used to leave the
+    // type-name scan stuck at a nested depth, so it took an unrelated return type for the
+    // props type and reported that type's members.
+    #[test]
+    fn unbalanced_braces_before_props_do_not_change_the_props_type() {
+        let source = r#"<script lang="ts">
+    export type Issue = { expression: string; line: number };
+    function validate(content: string): Issue[] {
+        const eachOpen = /{{#eachs+(w+)/g;
+        const open = '{';
+        return eachOpen.test(content + open) ? [] : [];
+    }
+    interface Props {
+        used: string;
+        unused: number;
+    }
+    let { used }: Props = $props();
+    console.log(used, validate(used));
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags
+                .iter()
+                .map(|diag| diag.message.as_str())
+                .collect::<Vec<_>>(),
+            ["'unused' is an unused Props property."]
+        );
+    }
+
+    #[test]
+    fn unbalanced_braces_before_props_do_not_hide_an_inline_props_type() {
+        let source = r#"<script lang="ts">
+    const close = '}';
+    let { used }: { used: string; unused: number } = $props();
+    console.log(used, close);
+</script>"#;
+        let diags = lint(source);
+        assert_eq!(
+            diags
+                .iter()
+                .map(|diag| diag.message.as_str())
+                .collect::<Vec<_>>(),
+            ["'unused' is an unused Props property."]
+        );
+    }
+
+    #[test]
+    fn an_unannotated_props_binding_takes_no_type_from_earlier_code() {
+        let source = r#"<script lang="ts">
+    interface Issue { expression: string }
+    function validate(content: string): Issue[] {
+        return content ? [] : [];
+    }
+    let { used } = $props();
+    console.log(used, validate(used));
+</script>"#;
+        assert!(lint(source).is_empty());
     }
 }
