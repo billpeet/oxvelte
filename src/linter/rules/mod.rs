@@ -45,6 +45,7 @@ mod no_unnecessary_condition;
 mod no_unnecessary_state_wrap;
 mod no_unused_props;
 mod no_unused_svelte_ignore;
+mod no_unused_vars;
 mod no_useless_children_snippet;
 mod no_useless_mustaches;
 mod prefer_attribute_interpolation;
@@ -267,6 +268,7 @@ pub fn all_rules() -> Vec<Box<dyn Rule>> {
         Box::new(require_store_reactive_access::RequireStoreReactiveAccess),
         Box::new(valid_compile::ValidCompile),
         Box::new(no_unnecessary_condition::NoUnnecessaryCondition),
+        Box::new(no_unused_vars::NoUnusedVars),
         Box::new(valid_style_parse::ValidStyleParse),
         Box::new(no_unused_class_name::NoUnusedClassName),
         Box::new(prefer_const::PreferConst),
