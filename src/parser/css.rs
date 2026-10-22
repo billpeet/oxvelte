@@ -594,7 +594,11 @@ impl<'a> CssParser<'a> {
                 in_url = false;
             } else if quote_mark.is_none() && (ch == '"' || ch == '\'') {
                 quote_mark = Some(ch);
-            } else if ch == '(' && value.ends_with("url") {
+            } else if ch == '('
+                && value
+                    .get(value.len().saturating_sub(3)..)
+                    .is_some_and(|tail| tail.eq_ignore_ascii_case("url"))
+            {
                 in_url = true;
             } else if (ch == ';' || ch == '{' || ch == '}') && !in_url && quote_mark.is_none() {
                 return Some(value.trim().to_string());
@@ -730,7 +734,10 @@ impl<'a> CssParser<'a> {
             self.bump_char();
         }
 
-        char::from_u32(code)
+        // CSS Syntax: an escaped code point that is zero, a surrogate, or
+        // above U+10FFFF decodes to U+FFFD (char::from_u32 returns None for
+        // surrogates and out-of-range values).
+        Some(char::from_u32(code).filter(|c| *c != '\0').unwrap_or('\u{FFFD}'))
     }
 
     fn read_until_whitespace_or_colon(&mut self) -> String {
@@ -1263,6 +1270,38 @@ mod tests {
         let selector = &children[1]["prelude"]["children"][0]["children"][0];
         assert_eq!(selector["type"], "PlaceholderSelector");
         assert_eq!(selector["name"], "button");
+    }
+
+    #[test]
+    fn surrogate_escape_decodes_to_replacement_char() {
+        // `\D800` is a surrogate code point: per CSS Syntax it decodes to
+        // U+FFFD, and the hex digits must not be dropped from the identifier
+        // (which previously also mangled the following character).
+        let children = parse_css_children(".\\D800 foo { color: red; }", 0);
+        let selector = &children[0]["prelude"]["children"][0]["children"][0];
+        assert_eq!(selector["type"], "ClassSelector");
+        // The escape consumes its trailing whitespace, so the identifier is
+        // the replacement char directly followed by "foo".
+        assert_eq!(selector["name"], "\u{FFFD}foo");
+    }
+
+    #[test]
+    fn uppercase_url_function_does_not_end_value_early() {
+        // CSS function names are case-insensitive: the `;` inside `URL(...)`
+        // must not terminate the declaration value.
+        let children = parse_css_children(
+            ".a { background: URL(data:image/png;base64,AAA); color: red; }",
+            0,
+        );
+        let declarations: Vec<_> = children[0]["block"]["children"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|c| c["type"] == "Declaration")
+            .collect();
+        assert_eq!(declarations.len(), 2);
+        assert_eq!(declarations[0]["property"], "background");
+        assert_eq!(declarations[1]["property"], "color");
     }
 
     #[test]

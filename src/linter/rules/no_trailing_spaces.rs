@@ -40,14 +40,17 @@ impl Rule for NoTrailingSpaces {
 
         collect_ignored_lines(source, ignore_comments, &mut ignored_lines);
 
-        let mut offset = 0usize;
-        for (line_idx, line) in source.lines().enumerate() {
+        let mut line_start = 0usize;
+        for (line_idx, raw_line) in source.split_inclusive('\n').enumerate() {
             let line_num = line_idx + 1; // 1-indexed
-            let line_start = offset;
-            let line_end = offset + line.len();
+            // split_inclusive keeps the terminator in the raw slice, so byte
+            // offsets stay exact on CRLF files; strip the terminator to get
+            // the logical line content.
+            let line = raw_line.trim_end_matches(['\r', '\n']);
+            let line_end = line_start + line.len();
 
             if skip_blank_lines && line.trim().is_empty() {
-                offset = line_end + 1;
+                line_start += raw_line.len();
                 continue;
             }
 
@@ -66,7 +69,7 @@ impl Rule for NoTrailingSpaces {
                 }
             }
 
-            offset = line_end + 1; // +1 for newline
+            line_start += raw_line.len();
         }
     }
 }
@@ -188,5 +191,26 @@ fn line_number_at(line_starts: &[usize], offset: usize) -> usize {
     match line_starts.binary_search(&offset) {
         Ok(idx) => idx + 1,
         Err(idx) => idx, // idx is the insertion point; line is idx (1-indexed = idx)
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn crlf_spans_stay_on_the_trailing_space() {
+        // On CRLF files every span after line 1 used to drift one byte per
+        // preceding line. Line 2's trailing spaces are at bytes 21..23.
+        let source = "<p>a</p>   \r\n<p>b</p>  \r\n";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let diagnostics =
+            crate::linter::Linter::all().lint_with_config(&parsed.ast, source, Default::default());
+        let spans: Vec<_> = diagnostics
+            .iter()
+            .filter(|d| d.rule_name == "svelte/no-trailing-spaces")
+            .map(|d| (d.span.start, d.span.end))
+            .collect();
+        assert_eq!(spans, vec![(8, 11), (21, 23)], "diagnostics: {diagnostics:?}");
     }
 }

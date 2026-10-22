@@ -698,12 +698,17 @@ impl Linter {
             ctx.config = config.for_rule(rule.name());
             rule.run(&mut ctx);
         }
-        filter_suppressed(
+        let mut diagnostics = filter_suppressed(
             ctx.into_diagnostics(),
             source,
             report_unused_svelte_ignore,
             &active_rule_names,
-        )
+        );
+        // ESLint sorts messages by position before reporting; rules that emit
+        // out of source order (multi-pass rules like mustache-spacing or
+        // infinite-reactive-loop) must still produce sorted output.
+        diagnostics.sort_by_key(|d| (d.span.start, d.span.end));
+        diagnostics
     }
 }
 
@@ -724,10 +729,11 @@ fn is_ts_like_path(file_path: &str) -> bool {
 
 /// Byte offset in the original source where a `<script ...>` block's content starts
 /// (i.e. just after the open tag's `>`).
-fn script_content_offset(script: &Script, source: &str) -> u32 {
-    let tag_text = &source[script.span.start as usize..script.span.end as usize];
-    let gt = tag_text.find('>').unwrap_or(0);
-    script.span.start + gt as u32 + 1
+fn script_content_offset(script: &Script, _source: &str) -> u32 {
+    // The scanner records the open tag's end quote-aware, so a `>` inside a
+    // quoted attribute value (e.g. `generics="T extends (x: string) => void"`)
+    // is not mistaken for the tag end.
+    script.content_span.start
 }
 
 /// Svelte 5 runes. A file is runes-mode iff it contains a call expression whose
@@ -1069,7 +1075,14 @@ fn parse_directives(source: &str) -> Vec<Directive> {
     let mut directives = Vec::new();
     let mut line_start = 0usize;
 
-    for (line_idx, line) in source.lines().enumerate() {
+    for (line_idx, raw_line) in source.split_inclusive('\n').enumerate() {
+        // Match `str::lines()` semantics (one trailing `\n`, then one `\r`,
+        // stripped) while keeping the terminator in `raw_line`, so byte
+        // offsets stay exact on CRLF files.
+        let line = match raw_line.strip_suffix('\n') {
+            Some(l) => l.strip_suffix('\r').unwrap_or(l),
+            None => raw_line,
+        };
         let trimmed = line.trim();
         let trimmed_start = line.len() - line.trim_start().len();
         let trimmed_abs_start = line_start + trimmed_start;
@@ -1091,7 +1104,7 @@ fn parse_directives(source: &str) -> Vec<Directive> {
                         svelte_ignore: true,
                     });
                 }
-                line_start += line.len() + 1;
+                line_start += raw_line.len();
                 continue;
             }
 
@@ -1143,7 +1156,7 @@ fn parse_directives(source: &str) -> Vec<Directive> {
                     }
                 }
             }
-            line_start += line.len() + 1;
+            line_start += raw_line.len();
             continue;
         }
 
@@ -1162,7 +1175,7 @@ fn parse_directives(source: &str) -> Vec<Directive> {
                         svelte_ignore: true,
                     });
                 }
-                line_start += line.len() + 1;
+                line_start += raw_line.len();
                 continue;
             }
 
@@ -1219,7 +1232,7 @@ fn parse_directives(source: &str) -> Vec<Directive> {
                 }
             }
         }
-        line_start += line.len() + 1;
+        line_start += raw_line.len();
     }
 
     directives
@@ -1232,12 +1245,39 @@ fn extract_html_comment(s: &str) -> Option<&str> {
     Some(s)
 }
 
-/// Extract content from `// ...` (the first `//` in the line).
+/// Extract content from `// ...` (the first `//` in the line that is not
+/// inside a string or template literal).
 fn extract_js_line_comment(line: &str, line_start: usize) -> Option<(&str, Span)> {
-    // Find // that's not inside a string — simplified: just find the first //
-    let pos = line.find("//")?;
-    let span = Span::new((line_start + pos) as u32, (line_start + line.len()) as u32);
-    Some((&line[pos + 2..], span))
+    // Scan for the first // outside quotes; a "//" inside a string literal
+    // (e.g. `let s = "x // eslint-disable-next-line"`) is not a comment, and
+    // treating it as one manufactures phantom directives that suppress
+    // genuine diagnostics. (Regex literals are not tracked — a // inside a
+    // regex on a directive-shaped line is a pathological case this simple
+    // scanner accepts.)
+    let bytes = line.as_bytes();
+    let mut i = 0;
+    let mut quote: Option<u8> = None;
+    while i < bytes.len() {
+        match quote {
+            Some(q) => {
+                if bytes[i] == b'\\' {
+                    i += 1; // skip the escaped character
+                } else if bytes[i] == q {
+                    quote = None;
+                }
+            }
+            None => match bytes[i] {
+                b'\'' | b'"' | b'`' => quote = Some(bytes[i]),
+                b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
+                    let span = Span::new((line_start + i) as u32, (line_start + line.len()) as u32);
+                    return Some((&line[i + 2..], span));
+                }
+                _ => {}
+            },
+        }
+        i += 1;
+    }
+    None
 }
 
 /// Extract content from `/* ... */`.
@@ -1298,10 +1338,16 @@ fn rule_matches(rule_name: &str, directive_rules: &[String]) -> bool {
     if directive_rules.is_empty() {
         return true;
     } // empty = all rules
+    let normalized_name = rule_name.replace('_', "-");
     directive_rules.iter().any(|r| {
-        r == rule_name
-            || rule_name.ends_with(r.as_str()) // "no-console" matches "svelte/no-console"
-            || r.replace('_', "-") == rule_name.replace('_', "-") // normalize
+        let normalized_r = r.replace('_', "-");
+        // Exact match, or a suffix match at a `/` boundary only:
+        // "no-console" matches "svelte/no-console", but a directive naming
+        // "console" must NOT match "svelte/no-console".
+        normalized_r == normalized_name
+            || normalized_name
+                .strip_suffix(normalized_r.as_str())
+                .is_some_and(|prefix| prefix.ends_with('/'))
     })
 }
 
@@ -1361,7 +1407,12 @@ fn filter_suppressed(
                 }
                 Directive::DisableBlock { line, rules, .. } => {
                     if diag_line >= *line && rule_matches(diag.rule_name, rules) {
-                        // Check if re-enabled before this diagnostic
+                        // Check if re-enabled before this diagnostic. ESLint
+                        // semantics are per-rule: an `eslint-enable` with no
+                        // rules re-enables everything (empty list matches all
+                        // via rule_matches); an `eslint-enable rule-a`
+                        // re-enables exactly rule-a and leaves every other
+                        // disabled rule suppressed.
                         let re_enabled = directives.iter().any(|d| {
                             if let Directive::EnableBlock {
                                 line: enable_line,
@@ -1370,8 +1421,7 @@ fn filter_suppressed(
                             {
                                 *enable_line > *line
                                     && *enable_line <= diag_line
-                                    && (enable_rules.is_empty()
-                                        || rules.iter().all(|r| enable_rules.contains(r)))
+                                    && rule_matches(diag.rule_name, enable_rules)
                             } else {
                                 false
                             }
@@ -1537,5 +1587,158 @@ mod minimum_release_tests {
             );
         }
         assert!(!super::SvelteVersionInfo::default().guarantees_minimum_release((5, 56, 0)));
+    }
+}
+
+
+#[cfg(test)]
+mod suppression_tests {
+    use super::*;
+
+    fn diag_at(rule_name: &'static str, offset: u32) -> LintDiagnostic {
+        LintDiagnostic {
+            rule_name,
+            message: format!("{rule_name} fired"),
+            span: Span::new(offset, offset + 1),
+            fix: None,
+            suggestions: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn rule_matches_suffix_only_at_slash_boundary() {
+        let bare = vec!["no-console".to_string()];
+        assert!(rule_matches("svelte/no-console", &bare));
+        let partial = vec!["console".to_string()];
+        assert!(!rule_matches("svelte/no-console", &partial));
+        let exact = vec!["svelte/no-console".to_string()];
+        assert!(rule_matches("svelte/no-console", &exact));
+        // Underscore/hyphen normalization keeps working at the boundary.
+        let underscored = vec!["no_at_html_tags".to_string()];
+        assert!(rule_matches("svelte/no-at-html-tags", &underscored));
+        // Empty list matches all rules.
+        assert!(rule_matches("svelte/anything", &[]));
+    }
+
+    #[test]
+    fn enable_named_rule_does_not_reenable_everything() {
+        // eslint-disable (all) + eslint-enable of one rule: every other rule
+        // stays suppressed; only the named rule fires again.
+        let source = "<!-- eslint-disable -->\n{@debug a}\n<!-- eslint-enable svelte/no-at-debug-tags -->\n{@html x}\n";
+        let html_offset = source.find("{@html x}").unwrap() as u32;
+        let diagnostics = vec![diag_at("svelte/no-at-html-tags", html_offset)];
+        let kept = filter_suppressed(diagnostics, source, false, &[]);
+        assert!(
+            kept.is_empty(),
+            "no-at-html-tags must stay suppressed when only no-at-debug-tags is re-enabled: {kept:?}"
+        );
+    }
+
+    #[test]
+    fn enable_named_rule_reenables_exactly_that_rule() {
+        // eslint-disable two rules + eslint-enable one of them: the named
+        // rule fires again, the other stays suppressed.
+        let source = "<!-- eslint-disable svelte/no-at-html-tags, svelte/no-at-debug-tags -->\n<!-- eslint-enable svelte/no-at-html-tags -->\n{@html x}\n{@debug a}\n";
+        let html_offset = source.find("{@html x}").unwrap() as u32;
+        let debug_offset = source.find("{@debug a}").unwrap() as u32;
+        let diagnostics = vec![
+            diag_at("svelte/no-at-html-tags", html_offset),
+            diag_at("svelte/no-at-debug-tags", debug_offset),
+        ];
+        let kept = filter_suppressed(diagnostics, source, false, &[]);
+        assert_eq!(kept.len(), 1, "exactly one diagnostic must survive: {kept:?}");
+        assert_eq!(kept[0].rule_name, "svelte/no-at-html-tags");
+    }
+
+    #[test]
+    fn enable_without_rules_reenables_everything() {
+        let source = "<!-- eslint-disable -->\n{@html x}\n<!-- eslint-enable -->\n{@html x}\n";
+        let second_offset = source.rfind("{@html x}").unwrap() as u32;
+        let diagnostics = vec![diag_at("svelte/no-at-html-tags", second_offset)];
+        let kept = filter_suppressed(diagnostics, source, false, &[]);
+        assert_eq!(kept.len(), 1, "bare eslint-enable must re-enable all rules");
+    }
+
+    #[test]
+    fn enable_uses_directive_alias_normalization() {
+        // An enable directive naming the rule without the `svelte/` prefix
+        // still re-enables the prefixed rule (and, per the boundary fix, a
+        // partial name that is not a path segment does not).
+        let source = "<!-- eslint-disable -->\n<!-- eslint-enable no-at-html-tags -->\n{@html x}\n";
+        let offset = source.find("{@html x}").unwrap() as u32;
+        let diagnostics = vec![diag_at("svelte/no-at-html-tags", offset)];
+        let kept = filter_suppressed(diagnostics, source, false, &[]);
+        assert_eq!(kept.len(), 1, "unprefixed enable must re-enable the rule");
+    }
+
+    #[test]
+    fn line_comment_inside_string_is_not_a_directive() {
+        let source = "<script>let s = \"x // eslint-disable-next-line\";\nlet t = 1;</script>\n";
+        assert!(
+            parse_directives(source).is_empty(),
+            "a directive-shaped string must not produce a directive"
+        );
+        // A real comment after code is still found.
+        let real = "<script>let t = 1; // eslint-disable-next-line\nlet u = 2;</script>\n";
+        assert_eq!(
+            parse_directives(real).len(),
+            1,
+            "a genuine trailing directive must still be extracted"
+        );
+        // Escaped quotes do not end the string early.
+        let escaped = "<script>let s = \"a \\\" b // eslint-disable-next-line\";\nlet t = 1;</script>\n";
+        assert!(parse_directives(escaped).is_empty());
+    }
+
+    #[test]
+    fn crlf_directive_spans_stay_on_the_comment() {
+        // Two CRLF lines before the directive: with `\n`-only arithmetic the
+        // span would start two bytes early.
+        let source = "<a></a>\r\n<b></b>\r\n<!-- svelte-ignore some-rule -->\r\n{@html x}\r\n";
+        let directives = parse_directives(source);
+        let Directive::DisableNextLine { span, .. } = &directives[0] else {
+            panic!("expected a DisableNextLine directive, got {directives:?}");
+        };
+        let comment = "<!-- svelte-ignore some-rule -->";
+        assert_eq!(
+            &source[span.start as usize..span.end as usize],
+            comment,
+            "directive span must cover exactly the comment on CRLF sources"
+        );
+        assert_eq!(span.start as usize, source.find(comment).unwrap());
+    }
+
+    #[test]
+    fn script_content_offset_ignores_quoted_gt_in_attributes() {
+        // The `>` inside the quoted `=>` must not be mistaken for the end of
+        // the open tag.
+        let source = "<script lang=\"ts\" generics=\"T extends (x: string) => void\">\nlet x = 1;\n</script>";
+        let alloc = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &alloc);
+        let script = parsed.ast.instance.as_ref().unwrap();
+        let offset = script_content_offset(script, source) as usize;
+        assert_eq!(offset, source.find('\n').unwrap());
+    }
+
+    struct DummyCustomRule;
+    impl Rule for DummyCustomRule {
+        fn name(&self) -> &'static str {
+            "custom/dummy"
+        }
+        fn run(&self, _ctx: &mut LintContext<'_>) {}
+    }
+
+    #[test]
+    fn remove_disabled_rules_also_drops_custom_rules() {
+        let mut lint = Linter::recommended();
+        lint = lint.with_custom_rules(vec![Box::new(DummyCustomRule)]);
+        assert!(lint.rules().iter().any(|r| r.name() == "custom/dummy"));
+        let config =
+            crate::config::OxvelteConfig::parse("{\"rules\":{\"custom/dummy\":\"off\"}}").unwrap();
+        lint.remove_disabled_rules(&config);
+        assert!(
+            !lint.rules().iter().any(|r| r.name() == "custom/dummy"),
+            "a custom rule set to off in the config must be removed"
+        );
     }
 }

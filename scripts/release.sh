@@ -25,6 +25,12 @@ esac
 echo "New version: ${NEW}"
 echo ""
 
+# Make sure the local dependencies the build and tests need are installed —
+# the compiler fixture tests below fail without the Svelte compiler packages
+# under scripts/compiler-runtime/node_modules.
+"$(dirname "$0")/dev-setup.sh"
+echo ""
+
 # Update Cargo.toml
 sed -i.bak "s/^version = \"${CURRENT}\"/version = \"${NEW}\"/" Cargo.toml
 rm -f Cargo.toml.bak
@@ -34,14 +40,14 @@ rm -f Cargo.toml.bak
 
 # Verify build (this also updates the version recorded in Cargo.lock)
 echo "Building..."
-cargo build --release
+cargo build --release --color always
 
 echo "Running tests..."
-cargo test --lib
-
+cargo test --lib --color always
+  
 # Commit and tag
 git add Cargo.toml Cargo.lock
-git commit -m "release: v${NEW}"
+git commit -m "release: v${NEW}" || true
 git tag -a "v${NEW}" -m "v${NEW}"
 
 echo ""

@@ -29,7 +29,7 @@
 use crate::ast::TemplateNode;
 use crate::linter::{LintContext, Rule};
 use oxc::ast::ast::{
-    Argument, Declaration, Expression, IdentifierReference, ImportDeclarationSpecifier,
+    Expression, ImportDeclarationSpecifier,
     ModuleExportName, Statement,
 };
 use oxc::ast::AstKind;
@@ -741,44 +741,38 @@ fn check_template_nodes(nodes: &[TemplateNode], ctx: &mut LintContext<'_>, in_br
                 }
             }
             TemplateNode::IfBlock(block) => {
-                let cond = block.test.trim();
+                // Walk the whole {:else if} chain iteratively: any link's
+                // alternate may hold another link or the final {:else}, at
+                // any depth — stopping after two levels silently skips the
+                // rest of the chain.
+                let mut link = block;
+                let mut link_browser = in_browser_ctx;
+                loop {
+                    let cond = link.test.trim();
 
-                let is_browser_guard = cond.contains("browser")
-                    || cond.contains("BROWSER")
-                    || cond.starts_with("typeof window")
-                    || cond.starts_with("typeof document")
-                    || cond.starts_with("globalThis.");
-                let is_negated = cond.starts_with('!');
+                    let is_browser_guard = cond.contains("browser")
+                        || cond.contains("BROWSER")
+                        || cond.starts_with("typeof window")
+                        || cond.starts_with("typeof document")
+                        || cond.starts_with("globalThis.");
+                    let is_negated = cond.starts_with('!');
 
-                let cons_browser = in_browser_ctx || (is_browser_guard && !is_negated);
-                let cons_server = is_browser_guard && is_negated;
-                check_template_nodes(
-                    &block.consequent.nodes,
-                    ctx,
-                    cons_browser || (!cons_server && in_browser_ctx),
-                );
+                    let cons_browser = link_browser || (is_browser_guard && !is_negated);
+                    let cons_server = is_browser_guard && is_negated;
+                    check_template_nodes(
+                        &link.consequent.nodes,
+                        ctx,
+                        cons_browser || (!cons_server && link_browser),
+                    );
 
-                if let Some(alt) = &block.alternate {
-                    let alt_browser = in_browser_ctx || (is_browser_guard && is_negated);
-                    if let TemplateNode::IfBlock(else_if) = alt.as_ref() {
-                        let else_test = else_if.test.trim();
-                        if else_test.is_empty() {
-                            check_template_nodes(&else_if.consequent.nodes, ctx, alt_browser);
-                        } else {
-                            let ebc = else_test == "browser"
-                                || else_test == "BROWSER"
-                                || else_test.contains("globalThis.");
-                            let eng = else_test.starts_with('!');
-                            let eb = alt_browser || (ebc && !eng);
-                            check_template_nodes(&else_if.consequent.nodes, ctx, eb);
-                            if let Some(a2) = &else_if.alternate {
-                                let eb2 = alt_browser || (ebc && eng);
-                                if let TemplateNode::IfBlock(a2if) = a2.as_ref() {
-                                    check_template_nodes(&a2if.consequent.nodes, ctx, eb2);
-                                }
-                            }
-                        }
-                    }
+                    let Some(alt) = &link.alternate else {
+                        break;
+                    };
+                    let TemplateNode::IfBlock(next) = alt.as_ref() else {
+                        break;
+                    };
+                    link_browser = link_browser || (is_browser_guard && is_negated);
+                    link = next;
                 }
             }
             TemplateNode::Element(el) => {
@@ -846,6 +840,23 @@ mod tests {
         assert_eq!(
             reads,
             ["location", "location", "globalThis.location", "location"]
+        );
+    }
+
+    #[test]
+    fn deep_else_if_chain_trailing_else_is_still_checked() {
+        // The template walk used to stop after two chain links, so a browser
+        // global in the final {:else} of a longer chain was never seen.
+        let source = "<script>import { browser } from '$app/environment';</script>{#if browser}a{:else if browser}b{:else if browser}c{:else}{location.href}{/if}";
+        let allocator = oxc::allocator::Allocator::default();
+        let parsed = crate::parser::parse_for_lint(source, &allocator);
+        let diagnostics =
+            crate::linter::Linter::all().lint_with_config(&parsed.ast, source, Default::default());
+        assert!(
+            diagnostics
+                .iter()
+                .any(|d| d.rule_name == "svelte/no-top-level-browser-globals"),
+            "the trailing {{:else}} of a deep chain must be checked: {diagnostics:?}"
         );
     }
 }

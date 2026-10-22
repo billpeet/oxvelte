@@ -125,84 +125,85 @@ fn populate_attribute_expression_asts<'a>(
         Some(allocator.alloc(expr.clone_in(allocator)))
     }
 
-    fn walk<'a>(nodes: &mut [TemplateNode<'a>], allocator: &'a oxc::allocator::Allocator) {
-        for node in nodes {
-            match node {
-                TemplateNode::Element(el) => {
-                    for (idx, attr) in el.attributes.iter().enumerate() {
-                        let Some(meta) = el.attribute_meta.get_mut(idx) else {
-                            continue;
-                        };
-                        let expr_text = match attr {
-                            Attribute::NormalAttribute {
-                                value: AttributeValue::Expression(s),
-                                ..
-                            } => Some(s.as_str()),
-                            Attribute::Directive {
-                                value: AttributeValue::Expression(s),
-                                ..
-                            } => Some(s.as_str()),
-                            _ => None,
-                        };
-                        if let Some(text) = expr_text {
-                            meta.expression_ast = parse_text(text, allocator);
-                        }
-                        // Concat parts.
-                        let concat_parts = match attr {
-                            Attribute::NormalAttribute {
-                                value: AttributeValue::Concat(parts),
-                                ..
-                            } => Some(parts),
-                            Attribute::Directive {
-                                value: AttributeValue::Concat(parts),
-                                ..
-                            } => Some(parts),
-                            _ => None,
-                        };
-                        if let Some(parts) = concat_parts {
-                            for (part_idx, part) in parts.iter().enumerate() {
-                                let Some(part_meta) = meta.parts.get_mut(part_idx) else {
-                                    continue;
-                                };
-                                if let AttributeValuePart::Expression(s) = part {
-                                    part_meta.expression_ast = parse_text(s, allocator);
-                                }
+    // Explicit-stack traversal — deeply nested templates must not overflow
+    // the call stack. (Visit order is irrelevant: each node's update is
+    // independent of every other node's.)
+    let mut stack: Vec<&mut TemplateNode<'a>> = Vec::new();
+    stack.extend(fragment.nodes.iter_mut());
+    while let Some(node) = stack.pop() {
+        match node {
+            TemplateNode::Element(el) => {
+                for (idx, attr) in el.attributes.iter().enumerate() {
+                    let Some(meta) = el.attribute_meta.get_mut(idx) else {
+                        continue;
+                    };
+                    let expr_text = match attr {
+                        Attribute::NormalAttribute {
+                            value: AttributeValue::Expression(s),
+                            ..
+                        } => Some(s.as_str()),
+                        Attribute::Directive {
+                            value: AttributeValue::Expression(s),
+                            ..
+                        } => Some(s.as_str()),
+                        _ => None,
+                    };
+                    if let Some(text) = expr_text {
+                        meta.expression_ast = parse_text(text, allocator);
+                    }
+                    // Concat parts.
+                    let concat_parts = match attr {
+                        Attribute::NormalAttribute {
+                            value: AttributeValue::Concat(parts),
+                            ..
+                        } => Some(parts),
+                        Attribute::Directive {
+                            value: AttributeValue::Concat(parts),
+                            ..
+                        } => Some(parts),
+                        _ => None,
+                    };
+                    if let Some(parts) = concat_parts {
+                        for (part_idx, part) in parts.iter().enumerate() {
+                            let Some(part_meta) = meta.parts.get_mut(part_idx) else {
+                                continue;
+                            };
+                            if let AttributeValuePart::Expression(s) = part {
+                                part_meta.expression_ast = parse_text(s, allocator);
                             }
                         }
                     }
-                    walk(&mut el.children, allocator);
                 }
-                TemplateNode::IfBlock(b) => {
-                    walk(&mut b.consequent.nodes, allocator);
-                    if let Some(alt) = &mut b.alternate {
-                        walk(std::slice::from_mut(alt.as_mut()), allocator);
-                    }
-                }
-                TemplateNode::EachBlock(b) => {
-                    walk(&mut b.body.nodes, allocator);
-                    if let Some(fb) = &mut b.fallback {
-                        walk(&mut fb.nodes, allocator);
-                    }
-                }
-                TemplateNode::AwaitBlock(b) => {
-                    if let Some(p) = &mut b.pending {
-                        walk(&mut p.nodes, allocator);
-                    }
-                    if let Some(t) = &mut b.then {
-                        walk(&mut t.nodes, allocator);
-                    }
-                    if let Some(c) = &mut b.catch {
-                        walk(&mut c.nodes, allocator);
-                    }
-                }
-                TemplateNode::KeyBlock(b) => walk(&mut b.body.nodes, allocator),
-                TemplateNode::SnippetBlock(b) => walk(&mut b.body.nodes, allocator),
-                _ => {}
+                stack.extend(el.children.iter_mut());
             }
+            TemplateNode::IfBlock(b) => {
+                stack.extend(b.consequent.nodes.iter_mut());
+                if let Some(alt) = &mut b.alternate {
+                    stack.push(alt.as_mut());
+                }
+            }
+            TemplateNode::EachBlock(b) => {
+                stack.extend(b.body.nodes.iter_mut());
+                if let Some(fb) = &mut b.fallback {
+                    stack.extend(fb.nodes.iter_mut());
+                }
+            }
+            TemplateNode::AwaitBlock(b) => {
+                if let Some(p) = &mut b.pending {
+                    stack.extend(p.nodes.iter_mut());
+                }
+                if let Some(t) = &mut b.then {
+                    stack.extend(t.nodes.iter_mut());
+                }
+                if let Some(c) = &mut b.catch {
+                    stack.extend(c.nodes.iter_mut());
+                }
+            }
+            TemplateNode::KeyBlock(b) => stack.extend(b.body.nodes.iter_mut()),
+            TemplateNode::SnippetBlock(b) => stack.extend(b.body.nodes.iter_mut()),
+            _ => {}
         }
     }
-
-    walk(&mut fragment.nodes, allocator);
 }
 
 // ─── Region extraction ─────────────────────────────────────────────────────

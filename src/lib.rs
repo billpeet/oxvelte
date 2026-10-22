@@ -161,6 +161,126 @@ mod linter_fixture_tests {
         }
     }
 
+    /// One expected diagnostic from a fixture's `-errors.yaml` (upstream
+    /// ESLint convention: 1-based line, 1-based UTF-16 column).
+    #[derive(serde::Deserialize)]
+    struct FixtureExpectedError {
+        message: String,
+        line: usize,
+        column: usize,
+    }
+
+    /// Load the exact expectations for an invalid fixture, if it has them:
+    /// `<name>-input.svelte` pairs with `<name>-errors.yaml`, and SvelteKit
+    /// route scripts like `+page.ts` pair with a plain `errors.yaml`.
+    fn expected_errors_for(input_path: &std::path::Path) -> Option<Vec<FixtureExpectedError>> {
+        let fname = input_path.file_name()?.to_str()?;
+        let yaml = if let Some((base, _)) = fname.split_once("-input.") {
+            input_path.parent()?.join(format!("{base}-errors.yaml"))
+        } else if is_sveltekit_route_script(fname) {
+            input_path.parent()?.join("errors.yaml")
+        } else {
+            return None;
+        };
+        let text = std::fs::read_to_string(yaml).ok()?;
+        serde_yaml::from_str(&text).ok()
+    }
+
+    /// 1-based line and 1-based UTF-16 column of a byte offset, matching the
+    /// positions recorded in the `-errors.yaml` files.
+    fn fixture_line_col(source: &str, offset: usize) -> (usize, usize) {
+        let mut line = 1usize;
+        let mut col = 1usize;
+        for (i, ch) in source.char_indices() {
+            if i >= offset {
+                break;
+            }
+            if ch == '\n' {
+                line += 1;
+                col = 1;
+            } else {
+                col += ch.len_utf16();
+            }
+        }
+        (line, col)
+    }
+
+    /// Assert a rule's diagnostics on an invalid fixture. When the fixture
+    /// ships a `-errors.yaml`, compare exactly (count, order, message, line,
+    /// column); otherwise fall back to requiring at least one diagnostic.
+    fn assert_invalid_fixture(
+        rule_name: &str,
+        path: &std::path::Path,
+        source: &str,
+        rule_diags: &[&LintDiagnostic],
+    ) {
+        // Test-only maintenance aid: `OXVELTE_DUMP_FIXTURE=1 cargo test --lib`
+        // prints each invalid fixture's actual diagnostics as YAML, for
+        // reviewing or regenerating `-errors.yaml` expectations.
+        if std::env::var_os("OXVELTE_DUMP_FIXTURE").is_some() {
+            eprintln!("--- {} (rule {rule_name})", path.display());
+            for d in rule_diags {
+                let (line, col) = fixture_line_col(source, d.span.start as usize);
+                eprintln!(
+                    "- message: {:?}\n  line: {line}\n  column: {col}\n  suggestions: null",
+                    d.message
+                );
+            }
+        }
+        let Some(expected) = expected_errors_for(path) else {
+            assert!(
+                !rule_diags.is_empty(),
+                "Rule {} should fire on invalid file {}",
+                rule_name,
+                path.display()
+            );
+            return;
+        };
+        for (i, exp) in expected.iter().enumerate() {
+            let Some(diag) = rule_diags.get(i) else {
+                panic!(
+                    "Rule {rule_name} fixture {} produced only {} diagnostic(s); missing:\n\
+                        expected fixture error: {} at {}:{}",
+                    path.display(),
+                    rule_diags.len(),
+                    exp.message,
+                    exp.line,
+                    exp.column
+                );
+            };
+            let (line, col) = fixture_line_col(source, diag.span.start as usize);
+            if exp.message != diag.message || exp.line != line || exp.column != col {
+                panic!(
+                    "Rule {rule_name} fixture {} diagnostic #{} mismatch:\n\
+                        expected fixture error: {} at {}:{}\n\
+                        our actual fixture error: {} at {}:{}",
+                    path.display(),
+                    i + 1,
+                    exp.message,
+                    exp.line,
+                    exp.column,
+                    diag.message,
+                    line,
+                    col
+                );
+            }
+        }
+        if rule_diags.len() > expected.len() {
+            let extra = rule_diags[expected.len()];
+            let (line, col) = fixture_line_col(source, extra.span.start as usize);
+            panic!(
+                "Rule {rule_name} fixture {} produced {} diagnostic(s) but {} were \
+                    expected; first extra:\nour actual fixture error: {} at {}:{}",
+                path.display(),
+                rule_diags.len(),
+                expected.len(),
+                extra.message,
+                line,
+                col
+            );
+        }
+    }
+
     fn run_linter_valid(rule_name: &str) {
         let valid_dir = format!("fixtures/linter/{}/valid", rule_name);
         let lint = Linter::all();
@@ -207,12 +327,7 @@ mod linter_fixture_tests {
                 .iter()
                 .filter(|d| d.rule_name == format!("svelte/{}", rule_name))
                 .collect();
-            assert!(
-                !rule_diags.is_empty(),
-                "Rule {} should fire on invalid file {}",
-                rule_name,
-                path.display()
-            );
+            assert_invalid_fixture(rule_name, &path, &source, &rule_diags);
         }
     }
 
@@ -235,12 +350,7 @@ mod linter_fixture_tests {
             .iter()
             .filter(|d| d.rule_name == format!("svelte/{}", rule_name))
             .collect();
-        assert!(
-            !rule_diags.is_empty(),
-            "Rule {} should fire on invalid file {}",
-            rule_name,
-            path
-        );
+        assert_invalid_fixture(rule_name, std::path::Path::new(path), &source, &rule_diags);
     }
 
     // Older local copies retain fixtures for Svelte 3/4. Compiler behavior

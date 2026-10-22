@@ -53,7 +53,7 @@ Required keys:
 - **`name`** — string. Prefix with `custom/` to avoid colliding with built-in rule names. Used when looking up severity / options in config.
 - **`run(ctx)`** — function. Called once per linted file. Inspect `ctx.ast` and call `ctx.diagnostic(...)` for each finding.
 
-Other keys (e.g. `meta`, `schema`) are ignored — you can include them for documentation but oxvelte won't read them.
+Other keys (e.g. `schema`) are ignored — you can include them for documentation but oxvelte won't read them. One exception: `meta.fixable` is read at load time and controls whether the rule is listed as fixable in `oxvelte rules` output, matching ESLint's convention of declaring `meta: { fixable: "code" }` on rules that offer auto-fixes.
 
 ## The `ctx` object
 

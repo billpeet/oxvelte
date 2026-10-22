@@ -71,16 +71,16 @@ fn main() -> ExitCode {
             paths,
             config,
             all_rules,
-            fix: _,
+            fix,
             json,
             quiet,
-        } => cmd_lint(&paths, config.as_ref(), all_rules, json, quiet),
+        } => cmd_lint(&paths, config.as_ref(), all_rules, fix, json, quiet),
         Command::Parse {
             file,
             pretty,
             format,
         } => cmd_parse(&file, pretty, &format),
-        Command::Check { paths } => cmd_lint(&paths, None, false, false, false),
+        Command::Check { paths } => cmd_lint(&paths, None, false, false, false, false),
         Command::Rules => cmd_rules(),
         Command::Migrate { file, write } => cmd_convert_config(&file, write),
     }
@@ -140,16 +140,47 @@ fn load_lint_config(
         return Ok((config, config_dir));
     }
 
-    Ok((
-        oxvelte::config::OxvelteConfig::load(search_dir),
-        search_dir.to_path_buf(),
-    ))
+    // Auto-discovery: the directory the config was found in is the base for
+    // relative paths inside it (e.g. customRules globs), and an unreadable or
+    // invalid discovered config is a hard error, same as --config.
+    oxvelte::config::OxvelteConfig::load_with_dir(search_dir)
+}
+
+/// Maximum autofix passes over a single file, matching ESLint's cap — fixes
+/// from one pass can unlock new fixable diagnostics in the next.
+const MAX_FIX_PASSES: usize = 10;
+
+/// Apply auto-fixes to `source`, ESLint-style: fixes are applied in span
+/// order, and any fix that is malformed, out of bounds, not on a UTF-8
+/// boundary, or overlaps an already-applied fix is skipped — whatever caused
+/// it is reported again after the fix pass.
+fn apply_fixes(source: &str, fixes: &[&linter::Fix]) -> String {
+    let mut ordered = fixes.to_vec();
+    ordered.sort_by_key(|fix| (fix.span.start, fix.span.end));
+    let mut out = String::with_capacity(source.len());
+    let mut cursor = 0usize;
+    for fix in ordered {
+        let start = fix.span.start as usize;
+        let end = fix.span.end as usize;
+        if start < cursor || start > end || end > source.len() {
+            continue;
+        }
+        if !source.is_char_boundary(start) || !source.is_char_boundary(end) {
+            continue;
+        }
+        out.push_str(&source[cursor..start]);
+        out.push_str(&fix.replacement);
+        cursor = end;
+    }
+    out.push_str(&source[cursor..]);
+    out
 }
 
 fn cmd_lint(
     paths: &[PathBuf],
     config_path: Option<&PathBuf>,
     all_rules: bool,
+    fix: bool,
     json_output: bool,
     quiet: bool,
 ) -> ExitCode {
@@ -183,9 +214,10 @@ fn cmd_lint(
         linter::Linter::recommended()
     };
 
-    // Add rules the config switches on, then drop the ones it switches off.
+    // Add rules the config switches on, then load custom JS rules (when the
+    // feature is enabled), and only then drop the rules the config switches
+    // off — a "custom/foo": "off" entry must apply to custom rules too.
     lint.add_enabled_rules(&config);
-    lint.remove_disabled_rules(&config);
 
     // Load custom JS rules when the feature is enabled.
     #[cfg(feature = "custom-rules")]
@@ -197,6 +229,8 @@ fn cmd_lint(
         }
     }
 
+    lint.remove_disabled_rules(&config);
+
     let files = collect_lint_files(paths);
     let file_count = files.len();
     let use_color = !json_output && atty::is(atty::Stream::Stderr);
@@ -205,40 +239,134 @@ fn cmd_lint(
     let mut file_results: Vec<FileResult> = files
         .par_iter()
         .filter_map(|path| {
-            let source = std::fs::read_to_string(path).ok()?;
+            let mut source = match std::fs::read_to_string(path) {
+                Ok(source) => source,
+                // A file that vanished between collection and linting was
+                // moved, renamed, or deleted mid-run — skip it quietly.
+                // Anything else (permissions, invalid UTF-8, …) means a real
+                // file went unlinted, which is worth surfacing.
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => return None,
+                Err(e) => {
+                    eprintln!("oxvelte: could not read {}: {e}", path.display());
+                    return None;
+                }
+            };
             let path_str = path.to_string_lossy();
             let is_svelte = path.extension().is_some_and(|e| e == "svelte");
             let is_svelte_module =
                 path_str.ends_with(".svelte.js") || path_str.ends_with(".svelte.ts");
             let file_path_owned = path_str.to_string();
-            let diags = if is_svelte {
-                match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    let alloc = oxc::allocator::Allocator::default();
-                    let result = parser::parse_for_lint(&source, &alloc);
-                    lint.lint_with_project_config_and_path(
-                        &result.ast,
-                        &source,
-                        &config,
-                        &file_path_owned,
-                    )
-                })) {
-                    Ok(d) => d,
-                    Err(_) => {
-                        eprintln!("oxvelte: internal error parsing {}", path.display());
-                        return None;
+            // None means an internal panic — the file is skipped entirely.
+            let run_lint = |source: &str| -> Option<Vec<linter::LintDiagnostic>> {
+                if is_svelte {
+                    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        let alloc = oxc::allocator::Allocator::default();
+                        let result = parser::parse_for_lint(source, &alloc);
+                        // Surface template parse errors as error-severity
+                        // diagnostics — a malformed file must never lint clean.
+                        let mut diags: Vec<linter::LintDiagnostic> = result
+                            .errors
+                            .iter()
+                            .map(|error| {
+                                let span = error
+                                    .labels
+                                    .as_ref()
+                                    .and_then(|labels| labels.first())
+                                    .map(|label| {
+                                        oxc::span::Span::new(
+                                            label.offset() as u32,
+                                            (label.offset() + label.len()) as u32,
+                                        )
+                                    })
+                                    .unwrap_or_else(|| oxc::span::Span::new(0, 0));
+                                linter::LintDiagnostic {
+                                    rule_name: "oxvelte/parse-error",
+                                    message: error.to_string(),
+                                    span,
+                                    fix: None,
+                                    suggestions: Vec::new(),
+                                }
+                            })
+                            .collect();
+                        diags.extend(lint.lint_with_project_config_and_path(
+                            &result.ast,
+                            source,
+                            &config,
+                            &file_path_owned,
+                        ));
+                        diags
+                    })) {
+                        Ok(d) => Some(d),
+                        Err(_) => {
+                            eprintln!("oxvelte: internal error parsing {}", path.display());
+                            None
+                        }
+                    }
+                } else if is_svelte_module {
+                    let is_ts = path_str.ends_with(".ts");
+                    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        lint.lint_svelte_script_with_project_config_and_path(
+                            source,
+                            is_ts,
+                            &config,
+                            &file_path_owned,
+                        )
+                    })) {
+                        Ok(d) => Some(d),
+                        Err(_) => {
+                            eprintln!("oxvelte: internal error linting {}", path.display());
+                            None
+                        }
+                    }
+                } else {
+                    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        lint.lint_script_with_project_config_and_path(
+                            source,
+                            &config,
+                            &file_path_owned,
+                        )
+                    })) {
+                        Ok(d) => Some(d),
+                        Err(_) => {
+                            eprintln!("oxvelte: internal error linting {}", path.display());
+                            None
+                        }
                     }
                 }
-            } else if is_svelte_module {
-                let is_ts = path_str.ends_with(".ts");
-                lint.lint_svelte_script_with_project_config_and_path(
-                    &source,
-                    is_ts,
-                    &config,
-                    &file_path_owned,
-                )
-            } else {
-                lint.lint_script_with_project_config_and_path(&source, &config, &file_path_owned)
             };
+            let mut diags = run_lint(&source)?;
+            if fix {
+                // ESLint-style autofix: apply each rule's top-level fix in
+                // span order (skipping overlaps), then re-lint, up to a pass
+                // cap. Suggestions are never auto-applied, and suppressed
+                // diagnostics carry no fix here, so they are left untouched.
+                let original = source.clone();
+                let mut changed = false;
+                for _ in 0..MAX_FIX_PASSES {
+                    let fixes: Vec<&linter::Fix> =
+                        diags.iter().filter_map(|d| d.fix.as_ref()).collect();
+                    if fixes.is_empty() {
+                        break;
+                    }
+                    let fixed_source = apply_fixes(&source, &fixes);
+                    if fixed_source == source {
+                        break;
+                    }
+                    source = fixed_source;
+                    changed = true;
+                    diags = run_lint(&source)?;
+                }
+                if changed {
+                    if let Err(e) = std::fs::write(path, &source) {
+                        eprintln!(
+                            "oxvelte: could not write fixes to {}: {e}",
+                            path.display()
+                        );
+                        source = original;
+                        diags = run_lint(&source)?;
+                    }
+                }
+            }
             if diags.is_empty() {
                 return None;
             }
@@ -289,7 +417,7 @@ fn cmd_lint(
             serde_json::to_string_pretty(&json_results).unwrap_or_default()
         );
     } else if !quiet {
-        print_diagnostics(&file_results, use_color);
+        print_diagnostics(&file_results, use_color, false);
 
         if total_diags > 0 {
             print_summary(
@@ -302,6 +430,11 @@ fn cmd_lint(
         }
     }
     if quiet {
+        // Text mode: --quiet suppresses warnings but errors are still shown,
+        // matching the CLI help text and the JSON path's filtering.
+        if !json_output {
+            print_diagnostics(&file_results, use_color, true);
+        }
         let elapsed = start.elapsed();
         if use_color {
             if error_count > 0 {
@@ -327,6 +460,11 @@ fn diagnostic_severity(
     config: &oxvelte::config::OxvelteConfig,
     rule_name: &str,
 ) -> DiagnosticSeverity {
+    // Template parse errors are always errors (like ESLint's fatal parse
+    // failures); they are not configurable.
+    if rule_name == "oxvelte/parse-error" {
+        return DiagnosticSeverity::Error;
+    }
     let Some(entry) = config.rules.get(rule_name) else {
         return DiagnosticSeverity::Warning;
     };
@@ -356,8 +494,16 @@ fn visible_file_diagnostics<'a>(
         .collect()
 }
 
-fn print_diagnostics(file_results: &[FileResult], use_color: bool) {
+fn print_diagnostics(file_results: &[FileResult], use_color: bool, errors_only: bool) {
     for file_result in file_results {
+        let visible: Vec<&FileDiagnostic> = file_result
+            .diagnostics
+            .iter()
+            .filter(|d| !errors_only || d.severity == DiagnosticSeverity::Error)
+            .collect();
+        if visible.is_empty() {
+            continue;
+        }
         // File header — underlined, clickable in VS Code
         if use_color {
             eprintln!("\n\x1b[4m{}\x1b[0m", file_result.path);
@@ -366,14 +512,13 @@ fn print_diagnostics(file_results: &[FileResult], use_color: bool) {
         }
 
         // Find max widths for alignment
-        let max_loc_width = file_result
-            .diagnostics
+        let max_loc_width = visible
             .iter()
             .map(|d| format!("{}:{}", d.line, d.col).len())
             .max()
             .unwrap_or(0);
 
-        for d in &file_result.diagnostics {
+        for d in &visible {
             let loc = format!("{}:{}", d.line, d.col);
             if use_color {
                 let color = match d.severity {
@@ -780,6 +925,66 @@ mod tests {
             "fix":{"range":[1,2],"text":"text"}}]);
         assert_eq!(diagnostic_json("test.svelte", &diagnostic), expected);
     }
+
+    fn fix(start: u32, end: u32, replacement: &str) -> linter::Fix {
+        linter::Fix {
+            span: oxc::span::Span::new(start, end),
+            replacement: replacement.into(),
+        }
+    }
+
+    #[test]
+    fn apply_fixes_replaces_inserts_and_deletes() {
+        let source = "let  a = 1;\nfoo  \n";
+        let fixes = [
+            fix(4, 5, ""),     // collapse double space
+            fix(15, 17, ""),   // strip trailing spaces
+            fix(0, 0, "// "),  // insertion at the start
+        ];
+        let refs: Vec<&linter::Fix> = fixes.iter().collect();
+        assert_eq!(apply_fixes(source, &refs), "// let a = 1;\nfoo\n");
+    }
+
+    #[test]
+    fn apply_fixes_skips_overlapping_and_keeps_first() {
+        let source = "abcdef";
+        let fixes = [fix(1, 4, "X"), fix(2, 3, "Y"), fix(4, 6, "Z")];
+        let refs: Vec<&linter::Fix> = fixes.iter().collect();
+        // The inner Y fix overlaps the already-applied X fix and is skipped;
+        // Z starts exactly at X's end and still applies.
+        assert_eq!(apply_fixes(source, &refs), "aXZ");
+    }
+
+    #[test]
+    fn apply_fixes_skips_out_of_bounds_and_inverted_spans() {
+        let source = "abc";
+        let fixes = [fix(2, 99, "X"), fix(2, 1, "Y"), fix(1, 2, "Z")];
+        let refs: Vec<&linter::Fix> = fixes.iter().collect();
+        assert_eq!(apply_fixes(source, &refs), "aZc");
+    }
+
+    #[test]
+    fn apply_fixes_skips_spans_off_utf8_boundaries() {
+        let source = "aéb"; // é is two bytes: offsets 1..3
+        let fixes = [fix(1, 2, "X"), fix(3, 4, "Z")];
+        let refs: Vec<&linter::Fix> = fixes.iter().collect();
+        // 1..2 splits the é, so only the boundary-safe fix applies.
+        assert_eq!(apply_fixes(source, &refs), "aéZ");
+    }
+
+    #[test]
+    fn collect_lint_files_dedupes_overlapping_inputs() {
+        let dir = std::env::temp_dir().join(format!("oxvelte-dedup-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join("App.svelte");
+        std::fs::write(&file, "<div></div>").unwrap();
+        // A directory and a file inside it must not lint the file twice...
+        assert_eq!(collect_lint_files(&[dir.clone(), file.clone()]).len(), 1);
+        // ...and neither must two different spellings of the same file.
+        let spelled = dir.join("./App.svelte");
+        assert_eq!(collect_lint_files(&[file, spelled]).len(), 1);
+        std::fs::remove_dir_all(&dir).ok();
+    }
 }
 
 fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {
@@ -801,13 +1006,19 @@ fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {
 
 fn collect_lint_files(paths: &[PathBuf]) -> Vec<PathBuf> {
     let mut files = Vec::new();
+    let mut seen = std::collections::HashSet::new();
     let extensions = ["svelte", "js", "ts", "mjs", "mts"];
     let mut stack: Vec<PathBuf> = paths.to_vec();
     while let Some(path) = stack.pop() {
         if path.is_file() {
             if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
                 if extensions.contains(&ext) {
-                    files.push(path);
+                    // Overlapping inputs (`lint src src/App.svelte`, or the
+                    // same file spelled differently) must not lint twice.
+                    let key = std::fs::canonicalize(&path).unwrap_or_else(|_| path.clone());
+                    if seen.insert(key) {
+                        files.push(path);
+                    }
                 }
             }
         } else if path.is_dir() {

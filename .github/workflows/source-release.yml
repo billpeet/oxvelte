@@ -1,0 +1,188 @@
+name: source release
+
+# Builds the source tarball and its checksum from a version tag and publishes
+# them as a GitHub release. The tarball holds just what is needed to compile
+# oxvelte from source — the paths in .github/release-files.txt, including
+# Cargo.toml and the committed Cargo.lock that `cargo build --locked` requires.
+# (The "Release" workflow alongside this one publishes the precompiled
+# binaries from the same tag.)
+#
+#   ./scripts/release.sh patch    # bumps the version, commits, and tags
+#   git push origin main --tags   # pushing the tag triggers this workflow
+#
+# or run this workflow by hand and pick the tag in "Use workflow from". A tag
+# below 1.0.0, or with a suffix such as -rc1, is published as a pre-release.
+#
+# Assets:  oxvelte-<version>.tar.gz          (one top-level directory of the same
+#                                             name; the build-from-source set)
+#          oxvelte-<version>.tar.gz.sha256   (sha256sum format)
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # to create the release and attach the assets; nothing else
+
+    env:
+      TAG: ${{ github.ref_name }}
+      DEFAULT_BRANCH: main
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0   # the tag has to be compared with the history of the default branch
+
+      - name: Check the tag
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            echo "::error::Run this workflow from a tag (Use workflow from > Tags)."
+            exit 1
+          fi
+          if ! [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::The tag '$TAG' is not of the form v<major>.<minor>.<patch>[-<suffix>]."
+            exit 1
+          fi
+          major="${BASH_REMATCH[1]}"
+          suffix="${BASH_REMATCH[4]}"
+          prerelease=false
+          if [ "$major" = "0" ] || [ -n "$suffix" ]; then
+            prerelease=true
+          fi
+
+          # A release is only made from what is on the default branch.
+          git fetch --no-tags origin "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"
+          commit="$(git rev-parse "${TAG}^{commit}")"
+          if ! git merge-base --is-ancestor "$commit" "origin/${DEFAULT_BRANCH}"; then
+            echo "::error::Tag $TAG ($commit) is not on ${DEFAULT_BRANCH}."
+            exit 1
+          fi
+
+          # Never replace the assets of a release that has already been published.
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::A release for $TAG already exists. Delete it first if it must be redone."
+            exit 1
+          fi
+
+          {
+            echo "VERSION=${TAG#v}"
+            echo "PRERELEASE=$prerelease"
+          } >> "$GITHUB_ENV"
+
+      - name: Build the tarball
+        run: |
+          set -euo pipefail
+          name="oxvelte-${VERSION}"
+          mapfile -t paths < <(grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' .github/release-files.txt)
+          stage="${RUNNER_TEMP}/stage"
+          rm -rf "$stage"
+          mkdir -p "$stage"
+
+          # Only the paths named in .github/release-files.txt, taken straight
+          # from the tagged commit (not the working tree), so nothing
+          # untracked can get in.
+          git archive --format=tar --prefix="${name}/" "$TAG" -- "${paths[@]}" | tar -x -C "$stage"
+          tar -czf "${name}.tar.gz" -C "$stage" "${name}"
+
+          # The manifest, the committed lockfile, the pinned toolchain, the
+          # crate entry points and the compiler-runtime scripts that
+          # src/compiler.rs embeds with include_str! are non-negotiable.
+          tar -tzf "${name}.tar.gz" | sed "s|^${name}/||" | grep -v -e '/$' -e '^$' | sort > shipped.txt
+          for path in Cargo.toml Cargo.lock rust-toolchain.toml src/main.rs src/lib.rs \
+            scripts/compiler-runtime/bridge.cjs \
+            scripts/compiler-runtime/typescript-conditions.cjs \
+            scripts/compiler-runtime/typescript-service.cjs \
+            scripts/compiler-runtime/vendor/sourcemap-codec.cjs; do
+            if ! grep -q "^${path}$" shipped.txt; then
+              echo "::error::${path} is not in the tarball."
+              exit 1
+            fi
+          done
+
+          # Informational only: how much of the repository stays out of the
+          # tarball. The smoke test below — not this list — decides whether
+          # the tarball is complete.
+          git ls-tree -r --name-only "$TAG" | sort > tracked.txt
+          echo "Shipping $(wc -l < shipped.txt) of $(wc -l < tracked.txt) tracked files (see .github/release-files.txt)."
+
+          echo "NAME=${name}" >> "$GITHUB_ENV"
+          ls -l "${name}.tar.gz"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable   # same action as ci.yml
+
+      - name: Smoke-test the tarball
+        run: |
+          set -euo pipefail
+          work="${RUNNER_TEMP}/smoke"
+          rm -rf "$work"
+          mkdir -p "$work"
+          tar -xzf "${NAME}.tar.gz" -C "$work"
+          cd "$work/${NAME}"
+
+          # Compile from the tarball alone, with the shipped lockfile enforced —
+          # proves the release can be built from source as published.
+          cargo build --release --locked
+
+      - name: Checksum
+        run: |
+          set -euo pipefail
+          sha256sum "${NAME}.tar.gz" > "${NAME}.tar.gz.sha256"
+          sha256sum -c "${NAME}.tar.gz.sha256"
+          cat "${NAME}.tar.gz.sha256"
+
+      - name: Publish the release
+        run: |
+          set -euo pipefail
+          sum="$(cut -d' ' -f1 "${NAME}.tar.gz.sha256")"
+          {
+            echo "oxvelte: a fast Svelte linter written in Rust — a drop-in replacement"
+            echo "for eslint-plugin-svelte."
+            echo
+            echo "${NAME}.tar.gz is the source release: just what is needed to build"
+            echo "from source (see .github/release-files.txt), including Cargo.toml and the"
+            echo "committed Cargo.lock, so \`cargo build --release --locked\` works out of the"
+            echo "box. The Node.js compiler-runtime scripts under scripts/compiler-runtime are"
+            echo "part of the build: src/compiler.rs embeds them at compile time. CI compiled"
+            echo "this exact tarball before publishing it. The test fixtures stay in the"
+            echo "repository; they are only needed to run the test suite."
+            echo
+            echo "SHA-256 of ${NAME}.tar.gz:"
+            echo
+            echo "    ${sum}"
+            echo
+            echo "To check a download, put ${NAME}.tar.gz.sha256 next to the tarball and run:"
+            echo
+            echo "    sha256sum -c ${NAME}.tar.gz.sha256"
+            echo
+            echo "Prefer this tarball over GitHub's automatic \"Source code\" archives of the"
+            echo "tag: the automatic archives can be regenerated with different bytes, which"
+            echo "breaks pinned SHA-256 checks on downloads."
+          } > notes.md
+
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then
+            flags+=(--prerelease)
+          fi
+          gh release create "$TAG" \
+            "${NAME}.tar.gz" "${NAME}.tar.gz.sha256" \
+            --verify-tag \
+            --title "oxvelte ${VERSION}" \
+            --notes-file notes.md \
+            "${flags[@]}"

@@ -34,6 +34,7 @@ use std::path::{Path, PathBuf};
 pub struct ScriptRule {
     name: &'static str,
     source: String,
+    fixable: bool,
 }
 
 unsafe impl Send for ScriptRule {}
@@ -44,7 +45,7 @@ impl Rule for ScriptRule {
         self.name
     }
     fn is_fixable(&self) -> bool {
-        true
+        self.fixable
     }
 
     fn run(&self, ctx: &mut LintContext) {
@@ -230,17 +231,20 @@ fn load_rule_file(path: &Path) -> Result<ScriptRule, String> {
         );
     };
 
-    let name = extract_rule_name(&transformed)?;
+    let (name, fixable) = extract_rule_meta(&transformed)?;
     let leaked: &'static str = Box::leak(name.into_boxed_str());
 
     Ok(ScriptRule {
         name: leaked,
         source: transformed,
+        fixable,
     })
 }
 
-/// Evaluate the rule source just enough to read its `name` property.
-fn extract_rule_name(source: &str) -> Result<String, String> {
+/// Evaluate the rule source just enough to read its `name` property and its
+/// ESLint-style `meta.fixable` declaration (which drives the fixable marker
+/// in `oxvelte rules` output).
+fn extract_rule_meta(source: &str) -> Result<(String, bool), String> {
     let mut ctx = Context::default();
     let script = format!("{}\nString(__rule.name)", source);
     let result = ctx
@@ -254,7 +258,18 @@ fn extract_rule_name(source: &str) -> Result<String, String> {
     if name.is_empty() || name == "undefined" {
         return Err("Rule must have a `name` property".into());
     }
-    Ok(name)
+
+    let fixable = ctx
+        .eval(Source::from_bytes(
+            "String(!!(__rule.meta && __rule.meta.fixable))".as_bytes(),
+        ))
+        .map_err(|e| format!("parse error: {}", e))?
+        .to_string(&mut ctx)
+        .map_err(|e| format!("{}", e))?
+        .to_std_string_escaped()
+        == "true";
+
+    Ok((name, fixable))
 }
 
 /// Resolve glob patterns like `"./rules/*.js"` into concrete file paths.
@@ -283,4 +298,24 @@ fn resolve_paths(patterns: &[String], config_dir: &Path) -> Vec<PathBuf> {
     }
     paths.sort();
     paths
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extract_rule_meta_reads_name_and_fixable_declaration() {
+        let (name, fixable) =
+            extract_rule_meta("var __rule = { name: \"custom/plain\", run(ctx) {} };").unwrap();
+        assert_eq!(name, "custom/plain");
+        assert!(!fixable, "no meta.fixable means not fixable");
+
+        let (name, fixable) = extract_rule_meta(
+            "var __rule = { name: \"custom/fixer\", meta: { fixable: \"code\" }, run(ctx) {} };",
+        )
+        .unwrap();
+        assert_eq!(name, "custom/fixer");
+        assert!(fixable, "meta.fixable must mark the rule fixable");
+    }
 }

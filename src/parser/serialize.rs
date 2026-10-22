@@ -7,6 +7,65 @@
 use crate::ast::*;
 use serde_json::{json, Value};
 
+/// Maximum template-node nesting depth the serializers recurse into.
+/// Beyond this, [`max_depth_placeholder`] is emitted instead of recursing,
+/// so pathological input degrades gracefully instead of overflowing the
+/// stack. The parser caps nesting at its own `MAX_OPEN_NODE_DEPTH` (1000),
+/// so this limit is a backstop for ASTs that didn't come from the parser.
+const MAX_SERIALIZE_DEPTH: usize = 1024;
+
+/// Stack size for the dedicated serializer thread. Debug builds of the
+/// recursive serializer use tens of KiB of stack per nesting level, which
+/// overflows the default 8 MiB main-thread stack well below
+/// [`MAX_SERIALIZE_DEPTH`]; 64 MiB covers the cap with ample headroom.
+const SERIALIZE_THREAD_STACK_SIZE: usize = 64 * 1024 * 1024;
+
+/// Placeholder emitted where serialization would exceed
+/// [`MAX_SERIALIZE_DEPTH`]. Mirrors the unsupported-expression fallback's
+/// `UnknownExpression` shape.
+fn max_depth_placeholder() -> Value {
+    json!({
+        "type": "UnknownExpression",
+        "raw": "max-depth-exceeded"
+    })
+}
+
+/// Run `f` on a short-lived thread with a large stack, so the recursive
+/// serializers survive deeply nested input up to [`MAX_SERIALIZE_DEPTH`]
+/// even in debug builds. Panics propagate to the calling thread.
+fn run_on_serializer_thread<F>(f: F) -> Value
+where
+    F: FnOnce() -> Value,
+{
+    struct AssertSend<F>(F);
+    // SAFETY: the closure runs to completion on the spawned thread and the
+    // handle is joined before this function returns, so the references it
+    // captures are never accessed concurrently. The oxc AST types are
+    // !Send/!Sync only because they hold `NonNull` pointers into a bump
+    // allocator; read-only access from a single other thread while the
+    // owning thread is parked in `join` cannot race.
+    unsafe impl<F> Send for AssertSend<F> {}
+    impl<F: FnOnce() -> Value> AssertSend<F> {
+        fn run(self) -> Value {
+            (self.0)()
+        }
+    }
+    let wrapped = AssertSend(f);
+    std::thread::scope(|scope| {
+        let spawned = std::thread::Builder::new()
+            .name("oxvelte-serialize".to_string())
+            .stack_size(SERIALIZE_THREAD_STACK_SIZE)
+            .spawn_scoped(scope, move || wrapped.run());
+        match spawned {
+            Ok(handle) => match handle.join() {
+                Ok(value) => value,
+                Err(payload) => std::panic::resume_unwind(payload),
+            },
+            Err(err) => panic!("failed to spawn serializer thread: {err}"),
+        }
+    })
+}
+
 /// Convert a byte offset to a UTF-16 code unit offset (JavaScript string position).
 fn byte_to_char_offset(source: &str, byte_offset: usize) -> usize {
     let mut utf16_offset = 0;
@@ -81,6 +140,103 @@ fn offset_to_loc(source: &str, offset: usize) -> (usize, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn deep_ast_serializes_with_placeholder_instead_of_overflow() {
+        // The hand-built tree and the serialized Value are both
+        // ~MAX_SERIALIZE_DEPTH levels deep; dropping them is recursive, so
+        // run the whole body on a thread with a large stack (the test
+        // harness's default 2 MiB threads overflow on the recursive drop).
+        std::thread::Builder::new()
+            .stack_size(SERIALIZE_THREAD_STACK_SIZE)
+            .spawn(deep_ast_serializes_with_placeholder_instead_of_overflow_body)
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
+    fn deep_ast_serializes_with_placeholder_instead_of_overflow_body() {
+        // Hand-build an AST deeper than MAX_SERIALIZE_DEPTH. The parser caps
+        // nesting below this limit, so only a hand-built tree exercises the
+        // serializer backstop.
+        const DEPTH: usize = MAX_SERIALIZE_DEPTH + 500;
+        let mut children: Vec<TemplateNode> = Vec::new();
+        for _ in 0..DEPTH {
+            children = vec![TemplateNode::Element(Element {
+                name: "div".to_string(),
+                name_span: oxc::span::Span::new(0, 0),
+                attributes: Vec::new(),
+                attribute_meta: Vec::new(),
+                children,
+                self_closing: false,
+                span: oxc::span::Span::new(0, 1),
+                start_tag_end: 0,
+                end_tag_span: None,
+                unclosed_at_eof_outer: false,
+            })];
+        }
+        let ast = SvelteAst {
+            html: Fragment {
+                nodes: children,
+                span: oxc::span::Span::new(0, 1),
+                template_tag_spans: Vec::new(),
+                _phantom: std::marker::PhantomData,
+            },
+            instance: None,
+            module: None,
+            css: None,
+            _phantom: std::marker::PhantomData,
+        };
+        let value = to_modern_json(&ast, "<div></div>");
+        // Iterative search: the serialized Value is ~MAX_SERIALIZE_DEPTH
+        // levels deep, so a recursive search could itself overflow the
+        // test-thread stack.
+        let mut found_placeholder = false;
+        let mut stack = vec![&value];
+        while let Some(v) = stack.pop() {
+            match v {
+                Value::Object(map) => {
+                    if map.get("raw").and_then(Value::as_str) == Some("max-depth-exceeded") {
+                        found_placeholder = true;
+                        break;
+                    }
+                    stack.extend(map.values());
+                }
+                Value::Array(arr) => stack.extend(arr.iter()),
+                _ => {}
+            }
+        }
+        assert!(
+            found_placeholder,
+            "expected a max-depth-exceeded placeholder in the serialized output"
+        );
+    }
+
+    #[test]
+    fn ts_as_expression_serializes_as_ts_node() {
+        let source = "<script lang=\"ts\">let x: unknown = \"\";</script>{x as string}";
+        let alloc = oxc::allocator::Allocator::default();
+        let result = crate::parser::parse(source, &alloc);
+        let modern = to_modern_json(&result.ast, source);
+        let expr = &modern["fragment"]["nodes"][0]["expression"];
+        assert_eq!(expr["type"], "TSAsExpression", "{expr:?}");
+        assert_eq!(expr["expression"]["type"], "Identifier");
+        assert_eq!(expr["expression"]["name"], "x");
+        assert_eq!(expr["typeAnnotation"]["type"], "TSStringKeyword");
+    }
+
+    #[test]
+    fn partial_expression_parse_falls_back_instead_of_dropping_trailing_input() {
+        // `{foo bar}` must not serialize as Identifier(foo) with ` bar`
+        // silently dropped; it takes the invalid-expression fallback instead.
+        let source = "{foo bar}";
+        let alloc = oxc::allocator::Allocator::default();
+        let result = crate::parser::parse(source, &alloc);
+        let legacy = to_legacy_json(&result.ast, source);
+        let expr = &legacy["html"]["children"][0]["expression"];
+        assert_eq!(expr["type"], "Identifier", "{expr:?}");
+        assert_eq!(expr["name"], "", "{expr:?}");
+    }
 
     #[test]
     fn top_level_script_braced_attribute_value_stays_static_text() {
@@ -302,6 +458,7 @@ fn loc_json_with_char(source: &str, start: u32, end: u32) -> Value {
 fn expression_to_estree(source: &str, expr_str: &str, expr_start: u32) -> Value {
     use oxc::allocator::Allocator;
     use oxc::parser::Parser;
+    use oxc::span::GetSpan;
     use oxc::span::SourceType;
 
     let has_comments = expr_str.contains("//") || expr_str.contains("/*");
@@ -350,7 +507,10 @@ fn expression_to_estree(source: &str, expr_str: &str, expr_start: u32) -> Value 
     let js_result = Parser::new(&alloc, expr_str, SourceType::mjs()).parse_expression();
 
     if let Ok(expr) = &js_result {
-        if !expr_str.ends_with('.') {
+        // parse_expression stops after one expression; trailing input means
+        // the expression text was only partially consumed (e.g. `{foo bar}`)
+        // and serializing it would silently drop the remainder.
+        if !expr_str.ends_with('.') && only_trailing_trivia(&expr_str[expr.span().end as usize..]) {
             let mut result = estree_expr(expr, source, expr_start);
             if has_comments {
                 add_leading_comment_from_text(&mut result, expr_str, expr_start);
@@ -364,7 +524,10 @@ fn expression_to_estree(source: &str, expr_str: &str, expr_start: u32) -> Value 
     let ts_result = Parser::new(&alloc_ts, expr_str, SourceType::ts()).parse_expression();
 
     match ts_result {
-        Ok(expr) if !expr_str.ends_with('.') => {
+        Ok(expr)
+            if !expr_str.ends_with('.')
+                && only_trailing_trivia(&expr_str[expr.span().end as usize..]) =>
+        {
             return estree_expr(&expr, source, expr_start);
         }
         _ => {}
@@ -378,6 +541,28 @@ fn expression_to_estree(source: &str, expr_str: &str, expr_start: u32) -> Value 
         "end": expr_end,
         "name": ""
     })
+}
+
+/// True when `text` holds nothing but whitespace and comments — used to
+/// detect partial expression parses (`{foo bar}` parses as `foo` and stops).
+fn only_trailing_trivia(text: &str) -> bool {
+    let mut rest = text.trim_start();
+    loop {
+        if rest.is_empty() {
+            return true;
+        }
+        if rest.starts_with("//") {
+            return true; // a line comment runs to the end of the text
+        }
+        if let Some(after) = rest.strip_prefix("/*") {
+            match after.find("*/") {
+                Some(end) => rest = after[end + 2..].trim_start(),
+                None => return false, // unterminated block comment
+            }
+            continue;
+        }
+        return false;
+    }
 }
 
 /// Add leading comment from expression text (for the fallback path).
@@ -1034,6 +1219,67 @@ fn estree_expr(expr: &oxc::ast::ast::Expression<'_>, source: &str, offset: u32) 
                 }
             })
         }
+        // TypeScript wrapper expressions — the ordinary shapes TS Svelte
+        // components produce (`as`, `satisfies`, `!`, `<T>x`, `f<T>()`).
+        Expression::TSAsExpression(e) => {
+            let start = offset + e.span.start;
+            let end = offset + e.span.end;
+            json!({
+                "type": "TSAsExpression",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "expression": estree_expr(&e.expression, source, offset),
+                "typeAnnotation": estree_ts_type(&e.type_annotation, source, offset)
+            })
+        }
+        Expression::TSSatisfiesExpression(e) => {
+            let start = offset + e.span.start;
+            let end = offset + e.span.end;
+            json!({
+                "type": "TSSatisfiesExpression",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "expression": estree_expr(&e.expression, source, offset),
+                "typeAnnotation": estree_ts_type(&e.type_annotation, source, offset)
+            })
+        }
+        Expression::TSNonNullExpression(e) => {
+            let start = offset + e.span.start;
+            let end = offset + e.span.end;
+            json!({
+                "type": "TSNonNullExpression",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "expression": estree_expr(&e.expression, source, offset)
+            })
+        }
+        Expression::TSTypeAssertion(e) => {
+            let start = offset + e.span.start;
+            let end = offset + e.span.end;
+            json!({
+                "type": "TSTypeAssertion",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "expression": estree_expr(&e.expression, source, offset),
+                "typeAnnotation": estree_ts_type(&e.type_annotation, source, offset)
+            })
+        }
+        Expression::TSInstantiationExpression(e) => {
+            let start = offset + e.span.start;
+            let end = offset + e.span.end;
+            json!({
+                "type": "TSInstantiationExpression",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "expression": estree_expr(&e.expression, source, offset),
+                "typeArguments": estree_ts_type_arguments(&e.type_arguments, source, offset)
+            })
+        }
         // Fallback for unsupported expression types
         _ => {
             json!({
@@ -1041,6 +1287,217 @@ fn estree_expr(expr: &oxc::ast::ast::Expression<'_>, source: &str, offset: u32) 
                 "raw": "unsupported"
             })
         }
+    }
+}
+
+/// Serialize an oxc `TSType` to the acorn-typescript-flavored JSON shape the
+/// Svelte compiler emits for type annotations (e.g. `TSStringKeyword`,
+/// `TSTypeReference`). Unsupported type nodes use the same `UnknownExpression`
+/// fallback shape as unsupported expressions.
+fn estree_ts_type(ty: &oxc::ast::ast::TSType<'_>, source: &str, offset: u32) -> Value {
+    use oxc::ast::ast::TSType;
+    use oxc::span::GetSpan;
+
+    let start = offset + ty.span().start;
+    let end = offset + ty.span().end;
+    let loc = loc_json(source, start, end);
+
+    // Simple keyword types carry nothing but their span.
+    let keyword = match ty {
+        TSType::TSAnyKeyword(_) => Some("TSAnyKeyword"),
+        TSType::TSBigIntKeyword(_) => Some("TSBigIntKeyword"),
+        TSType::TSBooleanKeyword(_) => Some("TSBooleanKeyword"),
+        TSType::TSNeverKeyword(_) => Some("TSNeverKeyword"),
+        TSType::TSNullKeyword(_) => Some("TSNullKeyword"),
+        TSType::TSNumberKeyword(_) => Some("TSNumberKeyword"),
+        TSType::TSObjectKeyword(_) => Some("TSObjectKeyword"),
+        TSType::TSStringKeyword(_) => Some("TSStringKeyword"),
+        TSType::TSSymbolKeyword(_) => Some("TSSymbolKeyword"),
+        TSType::TSUndefinedKeyword(_) => Some("TSUndefinedKeyword"),
+        TSType::TSUnknownKeyword(_) => Some("TSUnknownKeyword"),
+        TSType::TSVoidKeyword(_) => Some("TSVoidKeyword"),
+        _ => None,
+    };
+    if let Some(keyword) = keyword {
+        return json!({
+            "type": keyword,
+            "start": start,
+            "end": end,
+            "loc": loc
+        });
+    }
+
+    match ty {
+        TSType::TSTypeReference(reference) => json!({
+            "type": "TSTypeReference",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "typeName": estree_ts_type_name(&reference.type_name, source, offset),
+            "typeArguments": reference
+                .type_arguments
+                .as_ref()
+                .map(|args| estree_ts_type_arguments(args, source, offset))
+                .unwrap_or(Value::Null)
+        }),
+        TSType::TSArrayType(array) => json!({
+            "type": "TSArrayType",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "elementType": estree_ts_type(&array.element_type, source, offset)
+        }),
+        TSType::TSUnionType(union) => json!({
+            "type": "TSUnionType",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "types": union.types.iter().map(|t| estree_ts_type(t, source, offset)).collect::<Vec<_>>()
+        }),
+        TSType::TSIntersectionType(intersection) => json!({
+            "type": "TSIntersectionType",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "types": intersection.types.iter().map(|t| estree_ts_type(t, source, offset)).collect::<Vec<_>>()
+        }),
+        TSType::TSParenthesizedType(paren) => json!({
+            "type": "TSParenthesizedType",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "typeAnnotation": estree_ts_type(&paren.type_annotation, source, offset)
+        }),
+        TSType::TSLiteralType(literal) => json!({
+            "type": "TSLiteralType",
+            "start": start,
+            "end": end,
+            "loc": loc,
+            "literal": estree_ts_literal(&literal.literal, source, offset)
+        }),
+        _ => json!({
+            "type": "UnknownExpression",
+            "raw": "unsupported"
+        }),
+    }
+}
+
+fn estree_ts_type_arguments(
+    args: &oxc::ast::ast::TSTypeParameterInstantiation<'_>,
+    source: &str,
+    offset: u32,
+) -> Value {
+    let start = offset + args.span.start;
+    let end = offset + args.span.end;
+    json!({
+        "type": "TSTypeParameterInstantiation",
+        "start": start,
+        "end": end,
+        "loc": loc_json(source, start, end),
+        "params": args.params.iter().map(|p| estree_ts_type(p, source, offset)).collect::<Vec<_>>()
+    })
+}
+
+fn estree_ts_type_name(
+    name: &oxc::ast::ast::TSTypeName<'_>,
+    source: &str,
+    offset: u32,
+) -> Value {
+    use oxc::ast::ast::TSTypeName;
+    use oxc::span::GetSpan;
+    match name {
+        TSTypeName::IdentifierReference(ident) => {
+            let start = offset + ident.span.start;
+            let end = offset + ident.span.end;
+            json!({
+                "type": "Identifier",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "name": ident.name.as_str()
+            })
+        }
+        TSTypeName::QualifiedName(qualified) => {
+            let start = offset + qualified.span.start;
+            let end = offset + qualified.span.end;
+            let right_start = offset + qualified.right.span.start;
+            let right_end = offset + qualified.right.span.end;
+            json!({
+                "type": "TSQualifiedName",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "left": estree_ts_type_name(&qualified.left, source, offset),
+                "right": {
+                    "type": "Identifier",
+                    "start": right_start,
+                    "end": right_end,
+                    "loc": loc_json(source, right_start, right_end),
+                    "name": qualified.right.name.as_str()
+                }
+            })
+        }
+        other => {
+            let start = offset + other.span().start;
+            let end = offset + other.span().end;
+            json!({
+                "type": "Identifier",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "name": &source[start as usize..end as usize]
+            })
+        }
+    }
+}
+
+fn estree_ts_literal(
+    literal: &oxc::ast::ast::TSLiteral<'_>,
+    source: &str,
+    offset: u32,
+) -> Value {
+    use oxc::ast::ast::TSLiteral;
+    match literal {
+        TSLiteral::StringLiteral(lit) => {
+            let start = offset + lit.span.start;
+            let end = offset + lit.span.end;
+            json!({
+                "type": "Literal",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "value": lit.value.as_str(),
+                "raw": &source[start as usize..end as usize]
+            })
+        }
+        TSLiteral::NumericLiteral(lit) => {
+            let start = offset + lit.span.start;
+            let end = offset + lit.span.end;
+            json!({
+                "type": "Literal",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "value": lit.value,
+                "raw": &source[start as usize..end as usize]
+            })
+        }
+        TSLiteral::BooleanLiteral(lit) => {
+            let start = offset + lit.span.start;
+            let end = offset + lit.span.end;
+            json!({
+                "type": "Literal",
+                "start": start,
+                "end": end,
+                "loc": loc_json(source, start, end),
+                "value": lit.value,
+                "raw": if lit.value { "true" } else { "false" }
+            })
+        }
+        _ => json!({
+            "type": "UnknownExpression",
+            "raw": "unsupported"
+        }),
     }
 }
 
@@ -1564,11 +2021,12 @@ fn serialize_filtered_children_ctx(
     source: &str,
     default_end: u32,
     in_svelte_head: bool,
+    depth: usize,
 ) -> (Vec<Value>, u32) {
     let filtered = filter_whitespace_nodes(nodes);
     let children: Vec<Value> = filtered
         .iter()
-        .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head))
+        .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head, depth + 1))
         .collect();
     let end = filtered
         .last()
@@ -2284,6 +2742,10 @@ fn convert_byte_to_char_offsets(value: &mut Value, source: &str) {
 /// Serialize a `SvelteAst` to the legacy Svelte JSON format.
 /// Serialize a `SvelteAst` to the modern Svelte 5 JSON format.
 pub fn to_modern_json(ast: &SvelteAst, source: &str) -> Value {
+    run_on_serializer_thread(|| to_modern_json_inner(ast, source))
+}
+
+fn to_modern_json_inner(ast: &SvelteAst, source: &str) -> Value {
     let mut fragment = serialize_fragment_modern(&ast.html, source);
 
     // Extract <svelte:options> from fragment and put in root.options
@@ -2527,7 +2989,7 @@ pub fn to_modern_json(ast: &SvelteAst, source: &str) -> Value {
 }
 
 fn serialize_fragment_modern(fragment: &Fragment, source: &str) -> Value {
-    serialize_fragment_modern_ctx(fragment, source, false, false)
+    serialize_fragment_modern_ctx(fragment, source, false, false, 0)
 }
 
 fn serialize_fragment_modern_ctx(
@@ -2535,6 +2997,7 @@ fn serialize_fragment_modern_ctx(
     source: &str,
     in_shadow_root: bool,
     in_svelte_head: bool,
+    depth: usize,
 ) -> Value {
     let nodes: Vec<Value> = fragment
         .nodes
@@ -2549,7 +3012,7 @@ fn serialize_fragment_modern_ctx(
             }
             true
         })
-        .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head))
+        .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head, depth + 1))
         .collect();
     json!({
         "type": "Fragment",
@@ -2559,7 +3022,7 @@ fn serialize_fragment_modern_ctx(
 
 #[allow(dead_code)]
 fn serialize_node_modern(node: &TemplateNode, source: &str) -> Value {
-    serialize_node_modern_ctx(node, source, false, false)
+    serialize_node_modern_ctx(node, source, false, false, 0)
 }
 
 /// Translate a span end to the JSON value the modern + legacy serializers
@@ -2589,10 +3052,19 @@ fn serialize_ifblock_modern_with_chain_end(
     in_svelte_head: bool,
     chain_root_end: u32,
     is_chain_link: bool,
+    depth: usize,
 ) -> Value {
+    if depth > MAX_SERIALIZE_DEPTH {
+        return max_depth_placeholder();
+    }
     let expr_start = trimmed_span_start(block.test_span, &block.test);
-    let consequent =
-        serialize_fragment_modern_ctx(&block.consequent, source, in_shadow_root, in_svelte_head);
+    let consequent = serialize_fragment_modern_ctx(
+        &block.consequent,
+        source,
+        in_shadow_root,
+        in_svelte_head,
+        depth,
+    );
     let alternate = block.alternate.as_ref().map(|alt| {
         if let TemplateNode::IfBlock(alt_block) = alt.as_ref() {
             if alt_block.test.is_empty() && !alt_block.elseif {
@@ -2603,6 +3075,7 @@ fn serialize_ifblock_modern_with_chain_end(
                     source,
                     in_shadow_root,
                     in_svelte_head,
+                    depth + 1,
                 )
             } else {
                 // Nested `{:else if}` — recurse with the same chain root end
@@ -2614,6 +3087,7 @@ fn serialize_ifblock_modern_with_chain_end(
                     in_svelte_head,
                     chain_root_end,
                     true,
+                    depth + 1,
                 );
                 json!({
                     "type": "Fragment",
@@ -2651,7 +3125,11 @@ fn serialize_node_modern_ctx(
     source: &str,
     in_shadow_root: bool,
     in_svelte_head: bool,
+    depth: usize,
 ) -> Value {
+    if depth > MAX_SERIALIZE_DEPTH {
+        return max_depth_placeholder();
+    }
     match node {
         TemplateNode::Text(t) => {
             json!({
@@ -2680,7 +3158,7 @@ fn serialize_node_modern_ctx(
             let children: Vec<Value> = el
                 .children
                 .iter()
-                .map(|n| serialize_node_modern_ctx(n, source, child_shadow, child_in_svelte_head))
+                .map(|n| serialize_node_modern_ctx(n, source, child_shadow, child_in_svelte_head, depth + 1))
                 .collect();
             let attributes: Vec<Value> = el
                 .attributes
@@ -2755,12 +3233,13 @@ fn serialize_node_modern_ctx(
                 in_svelte_head,
                 block.span.end,
                 false,
+                depth,
             )
         }
         TemplateNode::EachBlock(block) => {
             let expr_start = trimmed_span_start(block.expression_span, &block.expression);
             let body =
-                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head);
+                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head, depth);
             let ctx_start = block.context_span.start;
             let context_str = &block.context;
             let ctx_end = block.context_span.end;
@@ -2824,7 +3303,7 @@ fn serialize_node_modern_ctx(
             }
             if let Some(fallback) = &block.fallback {
                 obj["fallback"] =
-                    serialize_fragment_modern_ctx(fallback, source, in_shadow_root, in_svelte_head);
+                    serialize_fragment_modern_ctx(fallback, source, in_shadow_root, in_svelte_head, depth);
             }
             obj
         }
@@ -2841,7 +3320,7 @@ fn serialize_node_modern_ctx(
                 let nodes: Vec<Value> = pending
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head))
+                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head, depth + 1))
                     .collect();
                 json!({ "type": "Fragment", "nodes": nodes })
             } else {
@@ -2851,7 +3330,7 @@ fn serialize_node_modern_ctx(
                 let nodes: Vec<Value> = then
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head))
+                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head, depth + 1))
                     .collect();
                 json!({ "type": "Fragment", "nodes": nodes })
             } else {
@@ -2861,7 +3340,7 @@ fn serialize_node_modern_ctx(
                 let nodes: Vec<Value> = catch
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head))
+                    .map(|n| serialize_node_modern_ctx(n, source, in_shadow_root, in_svelte_head, depth + 1))
                     .collect();
                 json!({ "type": "Fragment", "nodes": nodes })
             } else {
@@ -2895,7 +3374,7 @@ fn serialize_node_modern_ctx(
         TemplateNode::KeyBlock(block) => {
             let expr_start = trimmed_span_start(block.expression_span, &block.expression);
             let body =
-                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head);
+                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head, depth);
             json!({
                 "type": "KeyBlock",
                 "start": block.span.start,
@@ -2906,7 +3385,7 @@ fn serialize_node_modern_ctx(
         }
         TemplateNode::SnippetBlock(block) => {
             let body =
-                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head);
+                serialize_fragment_modern_ctx(&block.body, source, in_shadow_root, in_svelte_head, depth);
             let (name_start, name_end) = if block.name.is_empty() {
                 (block.name_span.start, block.name_span.start)
             } else {
@@ -2995,6 +3474,10 @@ fn serialize_node_modern_ctx(
 
 /// Serialize a `SvelteAst` to the legacy Svelte JSON format.
 pub fn to_legacy_json(ast: &SvelteAst, source: &str) -> Value {
+    run_on_serializer_thread(|| to_legacy_json_inner(ast, source))
+}
+
+fn to_legacy_json_inner(ast: &SvelteAst, source: &str) -> Value {
     let has_blocks = ast.css.is_some() || ast.instance.is_some() || ast.module.is_some();
     // Find the end of the last script/style block for filtering trailing whitespace
     let last_block_end = [
@@ -3915,10 +4398,18 @@ fn serialize_fragment_legacy(fragment: &Fragment, source: &str) -> Value {
 }
 
 fn serialize_node_legacy(node: &TemplateNode, source: &str) -> Value {
-    serialize_node_legacy_ctx(node, source, false)
+    serialize_node_legacy_ctx(node, source, false, 0)
 }
 
-fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: bool) -> Value {
+fn serialize_node_legacy_ctx(
+    node: &TemplateNode,
+    source: &str,
+    in_svelte_head: bool,
+    depth: usize,
+) -> Value {
+    if depth > MAX_SERIALIZE_DEPTH {
+        return max_depth_placeholder();
+    }
     match node {
         TemplateNode::Text(t) => serialize_text_legacy(t, true),
         TemplateNode::Comment(c) => {
@@ -3956,7 +4447,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                             return serialize_text_legacy(text, false);
                         }
                     }
-                    serialize_node_legacy_ctx(n, source, child_in_svelte_head)
+                    serialize_node_legacy_ctx(n, source, child_in_svelte_head, depth + 1)
                 })
                 .collect();
             // For svelte:component, extract the `this` attribute as `expression`
@@ -4117,6 +4608,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 source,
                 block.span.end,
                 in_svelte_head,
+                depth,
             );
             let expr_start = trimmed_span_start(block.test_span, &block.test);
             let mut obj = json!({
@@ -4156,6 +4648,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                                 source,
                                 alt_block.span.end,
                                 in_svelte_head,
+                                depth,
                             );
                             let else_start = alt_block
                                 .consequent
@@ -4176,6 +4669,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                                 source,
                                 block.span.end,
                                 in_svelte_head,
+                                depth,
                             );
                             let else_start = alt_block
                                 .consequent
@@ -4202,6 +4696,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 source,
                 block.span.end,
                 in_svelte_head,
+                depth,
             );
             let expr_start = trimmed_span_start(block.expression_span, &block.expression);
             let context_str = &block.context;
@@ -4269,7 +4764,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
 
             if let Some(fb) = &block.fallback {
                 let (else_children, _) =
-                    serialize_filtered_children_ctx(&fb.nodes, source, fb.span.end, in_svelte_head);
+                    serialize_filtered_children_ctx(&fb.nodes, source, fb.span.end, in_svelte_head, depth);
                 obj["else"] = json!({
                     "type": "ElseBlock",
                     "start": fb.span.start,
@@ -4333,7 +4828,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 let children: Vec<Value> = pending
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head))
+                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head, depth + 1))
                     .collect();
                 let pending_start = pending
                     .nodes
@@ -4368,7 +4863,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 let children: Vec<Value> = then
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head))
+                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head, depth + 1))
                     .collect();
                 let then_start = pending_end
                     .or_else(|| then.nodes.first().map(node_span_start))
@@ -4402,7 +4897,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 let children: Vec<Value> = catch
                     .nodes
                     .iter()
-                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head))
+                    .map(|n| serialize_node_legacy_ctx(n, source, in_svelte_head, depth + 1))
                     .collect();
                 let catch_start = then_end
                     .or(pending_end)
@@ -4439,6 +4934,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 source,
                 block.span.end,
                 in_svelte_head,
+                depth,
             );
             let expr_start = trimmed_span_start(block.expression_span, &block.expression);
             json!({
@@ -4455,6 +4951,7 @@ fn serialize_node_legacy_ctx(node: &TemplateNode, source: &str, in_svelte_head: 
                 source,
                 block.span.end,
                 in_svelte_head,
+                depth,
             );
 
             let (name_start, name_end) = if block.name.is_empty() {
@@ -4641,12 +5138,17 @@ fn serialize_elseif_block(
     source: &str,
     outer_end: u32,
     in_svelte_head: bool,
+    depth: usize,
 ) -> Value {
+    if depth > MAX_SERIALIZE_DEPTH {
+        return max_depth_placeholder();
+    }
     let (children, _) = serialize_filtered_children_ctx(
         &block.consequent.nodes,
         source,
         block.span.end,
         in_svelte_head,
+        depth,
     );
     let expr_start = trimmed_span_start(block.test_span, &block.test);
 
@@ -4687,6 +5189,7 @@ fn serialize_elseif_block(
                     source,
                     alt_block.span.end,
                     in_svelte_head,
+                    depth,
                 );
                 obj["else"] = json!({
                     "type": "ElseBlock",
@@ -4696,7 +5199,8 @@ fn serialize_elseif_block(
                 });
             } else {
                 // Nested {:else if ...}
-                let inner = serialize_elseif_block(alt_block, source, outer_end, in_svelte_head);
+                let inner =
+                    serialize_elseif_block(alt_block, source, outer_end, in_svelte_head, depth + 1);
                 obj["else"] = json!({
                     "type": "ElseBlock",
                     "start": else_start,

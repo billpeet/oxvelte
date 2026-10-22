@@ -1,8 +1,8 @@
-- message: Duplicate on directive 'on:click'.
+- message: This `on:click` directive is the same and duplicate directives in L5.
   line: 5
   column: 9
   suggestions: null
-- message: Duplicate on directive 'on:click'.
+- message: This `on:click` directive is the same and duplicate directives in L5.
   line: 5
   column: 24
   suggestions: null

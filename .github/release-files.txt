@@ -1,0 +1,22 @@
+# Paths from the tagged commit that go into the release tarball: only what is
+# needed to build oxvelte from source (plus the readme and licenses). Test
+# fixtures, examples, and development tooling stay in the repository.
+#
+# The release workflow smoke-tests that a tarball built from exactly these
+# paths compiles with `cargo build --release --locked`, so this list can stay
+# minimal — but anything a build needs MUST be named here.
+#
+# src/compiler.rs embeds the Node.js compiler-runtime scripts below with
+# include_str!, so they are part of the build, not development tooling.
+Cargo.toml
+Cargo.lock
+README.md
+LICENSE
+THIRD_PARTY_NOTICES
+rust-toolchain.toml
+docs/
+src/
+scripts/compiler-runtime/bridge.cjs
+scripts/compiler-runtime/typescript-conditions.cjs
+scripts/compiler-runtime/typescript-service.cjs
+scripts/compiler-runtime/vendor/sourcemap-codec.cjs

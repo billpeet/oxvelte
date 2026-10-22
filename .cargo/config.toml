@@ -1,0 +1,11 @@
+# Project-local cargo configuration.
+
+# Point the compiler bridge (scripts/compiler-runtime/bridge.cjs) at the
+# runtime directory that dev-setup.sh installs, so the compiler fixture tests
+# can resolve svelte/compiler no matter which fixture directory a test file
+# lives in — the same thing ci.yml sets explicitly for its test job. An
+# OXVELTE_COMPILER_RUNTIME already present in the environment takes
+# precedence over this value (cargo does not override existing variables
+# unless `force` is set), so CI and ad-hoc overrides still win.
+[env]
+OXVELTE_COMPILER_RUNTIME = { value = "scripts/compiler-runtime", relative = true }
